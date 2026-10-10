@@ -6,6 +6,7 @@ Browser-based speech games: see a picture, say the answer into the microphone, g
 |-----|--------|
 | Dog Breeds | `dog-breeds/` |
 | Dinosaurs | `dinosaurs/` |
+| Kitchen Appliances | `kitchen-appliances/` |
 
 ## Adding a new app
 1. Create a new folder with an `index.html`.
