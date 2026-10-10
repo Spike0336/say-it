@@ -9,6 +9,7 @@ Browser-based speech games: see a picture, say the answer into the microphone, g
 | Kitchen Appliances | `kitchen-appliances/` |
 | Vehicles | `vehicles/` |
 | Flowers | `flowers/` |
+| Cartoon Characters | `cartoon-characters/` |
 
 ## Adding a new app
 1. Create a new folder with an `index.html`.
