@@ -10,6 +10,7 @@ Browser-based speech games: see a picture, say the answer into the microphone, g
 | Vehicles | `vehicles/` |
 | Flowers | `flowers/` |
 | Cartoon Characters | `cartoon-characters/` |
+| Fairytale Characters | `fairytale-characters/` |
 
 ## Adding a new app
 1. Create a new folder with an `index.html`.
