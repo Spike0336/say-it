@@ -44,9 +44,13 @@ button:active{transform:scale(.95)}#streak{font-size:1rem}
 .playing #learn{display:none}
 #learn{background:#ff9f1c;color:#fff;font-size:1.2rem;padding:16px 26px}
 #ltest{background:var(--accent);color:#fff}
+.homenav{width:100%;max-width:560px}
+a.home{display:inline-block;background:#fffc;color:#1b5e45;text-decoration:none;font-weight:700;padding:8px 16px;border-radius:30px;box-shadow:0 2px 6px #0002;margin-bottom:4px}
+@media(prefers-color-scheme:dark){a.home{background:#ffffff22;color:#cfeee0}}
 </style>
 </head>
 <body>
+<nav class="homenav"><a class="home" href="../">🏠 All games</a></nav>
 <header><h1>🚗 Say It! Vehicles</h1><div><span id="stars">⭐ 0</span> <span id="streak"></span></div></header>
 <div class="card">
   <div id="cover"><svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cartoon bus, car, plane and hot air balloon">
@@ -367,4 +371,3 @@ $('ltest').onclick=()=>{stopLearn();$('mic').click()};
 </script>
 </body>
 </html>
-
