@@ -184,47 +184,46 @@ function confetti(){
 
 // ---- Photos from Wikipedia (loaded live, so needs internet) ----
 function loadImg(u){return new Promise(r=>{const i=new Image();i.onload=()=>r(true);i.onerror=()=>r(false);i.src=u})}
-// Only accept life-like pictures (artist restorations / models), never skeletons or fossils
-const BAD=/skelet|skull|fossil|bone|\bcast\b|\bmount(ed)?\b|cladogram|diagram|\bsize|comparison|\bmap\b|tooth|teeth|footprint|\btrack|claw|\beggs?\b|specimen|holotype|vertebra|chart|timeline|\bscales?\b|silhouette|phylogen|stamp|\btoy|lego|cranium|\bjaw|femur|quarry|museum|exhibit/i;
-const POS=/restor|reconstruct|\blife|illustr|paleoart|palaeoart|artwork|render|paint|drawing|\bmodel|\bart\b|sketch/i;
+// Only ever use life-like pictures (artist restorations / models). Never skeletons or fossils.
+const BAD=/skelet|skull|fossil|bone|\bcast\b|\bmount(ed)?\b|cladogram|diagram|\bsize|comparison|\bmap\b|tooth|teeth|footprint|\btrack|claw|\beggs?\b|specimen|holotype|vertebra|chart|timeline|\bscales?\b|silhouette|phylogen|stamp|\btoy|lego|cranium|\bjaw|femur|quarry|museum|exhibit|sophie|\bnhm\b/i;
+const POS=/restor|reconstruct|\blife|illustr|paleoart|palaeoart|artwork|render|paint|drawing|\bmodel|\bart\b|sketch|\bcgi\b|digital/i;
+const IMG=/\.(jpe?g|png|webp)$/i;
+const goodName=t=>IMG.test(t)&&POS.test(t)&&!BAD.test(t);
+const hasName=(b,t)=>b.acc.some(a=>norm(t).includes(a));
+async function getJSON(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()}
+async function firstThatLoads(urls){for(const u of urls.slice(0,4)){if(await loadImg(u))return u}return null}
 async function getPhoto(b){
   if(b.url!==undefined)return b.url;
   b.url=null;
-  let lead=null,leadName='';
+  // 1. Pictures used in the Wikipedia article itself
+  let loose=[];
   try{
-    const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+b.wiki);
-    const j=await r.json();
-    if(j.thumbnail&&j.originalimage){
-      leadName=decodeURIComponent(j.originalimage.source.split('/').pop()).replace(/_/g,' ');
-      lead={thumb:j.thumbnail.source,w:j.originalimage.width};
-    }
+    const j=await getJSON('https://en.wikipedia.org/api/rest_v1/page/media-list/'+b.wiki);
+    const items=(j.items||[]).filter(it=>it.type==='image'&&it.srcset&&it.srcset.length).map(it=>{
+      const t=decodeURIComponent((it.title||'').replace(/^File:/,'')).replace(/_/g,' ');
+      let u=it.srcset[it.srcset.length-1].src;if(u.startsWith('//'))u='https:'+u;
+      return{t,u};
+    }).filter(x=>goodName(x.t));
+    const strict=items.filter(x=>hasName(b,x.t)).map(x=>x.u);
+    loose=items.map(x=>x.u);
+    const u=await firstThatLoads(strict);if(u){b.url=u;return u}
   }catch(e){}
-  const leadUrl=async()=>{
-    if(!lead)return null;
-    const t=lead.thumb,big=t.replace(/\/\d+px-/,'/500px-');
-    if(lead.w>=500&&await loadImg(big))return big;
-    return (await loadImg(t))?t:null;
-  };
-  // 1. The article's main picture, if it is clearly a life restoration
-  if(lead&&POS.test(leadName)&&!BAD.test(leadName)){const u=await leadUrl();if(u){b.url=u;return u}}
-  // 2. Search Wikimedia Commons for a life restoration
-  try{
-    const q=encodeURIComponent(b.name+' (restoration OR reconstruction OR illustration OR "life restoration") -skeleton -skull -fossil');
-    const r=await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=15&gsrsearch='+q+'&prop=imageinfo&iiprop=url|mime&iiurlwidth=500');
-    const j=await r.json();
-    const pages=Object.values((j.query&&j.query.pages)||{}).sort((a,c)=>a.index-c.index);
-    const cands=pages.filter(p=>{
-      const t=p.title.replace(/^File:/,''),ii=p.imageinfo&&p.imageinfo[0];
-      return ii&&/jpe?g|png|webp/.test(ii.mime)&&!BAD.test(t)&&b.acc.some(a=>norm(t).includes(a));
-    }).sort((x,y)=>POS.test(y.title)-POS.test(x.title));
-    for(const p of cands.slice(0,3)){
-      const u=p.imageinfo[0].thumburl||p.imageinfo[0].url;
-      if(await loadImg(u)){b.url=u;return u}
-    }
-  }catch(e){}
-  // 3. Main picture as long as it is not obviously a skeleton or fossil
-  if(lead&&!BAD.test(leadName)){const u=await leadUrl();if(u){b.url=u;return u}}
-  return null;
+  // 2. Search Wikimedia Commons for life restorations
+  for(const term of ['life restoration','reconstruction','illustration']){
+    try{
+      const q=encodeURIComponent(b.name+' '+term);
+      const j=await getJSON('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=20&gsrsearch='+q+'&prop=imageinfo&iiprop=url|mime&iiurlwidth=500');
+      const pages=Object.values((j.query&&j.query.pages)||{}).sort((a,c)=>a.index-c.index);
+      const urls=pages.filter(p=>{
+        const t=p.title.replace(/^File:/,''),ii=p.imageinfo&&p.imageinfo[0];
+        return ii&&goodName(t)&&hasName(b,t);
+      }).map(p=>p.imageinfo[0].thumburl||p.imageinfo[0].url);
+      const u=await firstThatLoads(urls);if(u){b.url=u;return u}
+    }catch(e){}
+  }
+  // 3. Any other restoration picture from the article
+  try{const u=await firstThatLoads(loose);if(u){b.url=u;return u}}catch(e){}
+  return null;   // no life-like picture found: never fall back to a skeleton
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
