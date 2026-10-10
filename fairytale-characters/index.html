@@ -47,6 +47,7 @@ button:active{transform:scale(.95)}#streak{font-size:1rem}
 .homenav{width:100%;max-width:560px}
 a.home{display:inline-block;background:#fffc;color:#1b5e45;text-decoration:none;font-weight:700;padding:8px 16px;border-radius:30px;box-shadow:0 2px 6px #0002;margin-bottom:4px}
 @media(prefers-color-scheme:dark){a.home{background:#ffffff22;color:#cfeee0}}
+#photo{object-fit:contain;background:#fff}
 </style>
 </head>
 <body>
@@ -106,7 +107,7 @@ Ugly Duckling|ugly_duckling|duckling
 Troll|troll|
 Dwarf|dwarf|dwarfs,dwarves
 Prince|prince|prince charming
-Evil Queen|evil_queen|wicked queen`.split('\n').map(l=>{const[n,w,a]=l.split('|');return{name:n,wiki:w,url:svgUri(CHARS[w]),acc:[n,...(a?a.split(','):[])].map(norm)}});
+Evil Queen|evil_queen|wicked queen`.split('\n').map(l=>{const[n,w,a]=l.split('|');return{name:n,wiki:w,art:svgUri(CHARS[w]),acc:[n,...(a?a.split(','):[])].map(norm)}});
 
 function norm(s){return s.toLowerCase().replace(/[^a-z ]/g,' ').replace(/\s+/g,' ').trim()}
 function lev(a,b){const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return d[b.length]}
@@ -147,7 +148,30 @@ function confetti(){
 }
 
 // ---- Photos from Wikipedia (loaded live, so needs internet) ----
-async function getPhoto(b){return b.url}
+function loadImg(u){return new Promise(r=>{const i=new Image();i.onload=()=>r(true);i.onerror=()=>r(false);i.src=u})}
+const SEARCH={"cinderella":["Cinderella fairy tale",["cinderella"]],"snow_white":["Snow White fairy tale",["snow white","schneewittchen","sneewittchen"]],"red_riding_hood":["Little Red Riding Hood",["red riding hood","rotkappchen","rotkäppchen","little red"]],"wolf":["wolf Little Red Riding Hood illustration",["wolf"]],"goldilocks":["Goldilocks and the Three Bears",["goldilocks","three bears"]],"three_pigs":["Three Little Pigs",["three little pigs","three pigs","little pigs"]],"gingerbread":["gingerbread man",["gingerbread"]],"frog_prince":["Frog Prince fairy tale",["frog prince","frog king","froschkonig","froschkönig"]],"rapunzel":["Rapunzel fairy tale",["rapunzel"]],"sleeping_beauty":["Sleeping Beauty fairy tale",["sleeping beauty","briar rose","dornroschen","dornröschen"]],"pinocchio":["Pinocchio",["pinocchio"]],"rumpelstiltskin":["Rumpelstiltskin",["rumpelstiltskin"]],"giant":["Jack and the Beanstalk giant",["giant","beanstalk"]],"puss":["Puss in Boots",["puss in boots","puss"]],"hansel_gretel":["Hansel and Gretel",["hansel","gretel"]],"fairy_godmother":["Cinderella fairy godmother",["godmother"]],"ugly_duckling":["Ugly Duckling Andersen",["ugly duckling"]],"troll":["Billy Goats Gruff troll",["troll"]],"dwarf":["Snow White seven dwarfs",["dwarf","dwarfs","dwarves","zwerge"]],"prince":["Prince Charming fairy tale",["prince"]],"evil_queen":["Snow White wicked queen",["queen","stepmother"]]};
+// Free-licence classic storybook paintings and photos from Wikimedia Commons; our own drawing is the backup.
+const NEG=/disney|film|movie|poster|stamp|logo|cover|\bmap\b|diagram|\btv\b|series|opera|ballet|theat|musical|screenshot|signature|title page|chart|shrek|frozen|toy|figurine/i;
+const IMGX=/\.(jpe?g|png|webp)$/i;
+async function getPhoto(b){
+  if(b.url!==undefined)return b.url;
+  b.url=b.art;
+  const s=SEARCH[b.wiki];
+  if(!s)return b.url;
+  try{
+    const q=encodeURIComponent(s[0]);
+    const r=await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=25&gsrsearch='+q+'&prop=imageinfo&iiprop=url|mime&iiurlwidth=500');
+    if(!r.ok)throw new Error(r.status);
+    const j=await r.json();
+    const pages=Object.values((j.query&&j.query.pages)||{}).sort((a,c)=>a.index-c.index);
+    const urls=pages.filter(p=>{
+      const t=p.title.replace(/^File:/,''),ii=p.imageinfo&&p.imageinfo[0];
+      return ii&&IMGX.test(t)&&!NEG.test(t)&&s[1].some(k=>norm(t).includes(k));
+    }).map(p=>p.imageinfo[0].thumburl||p.imageinfo[0].url);
+    for(const u of urls.slice(0,3)){if(await loadImg(u)){b.url=u;break}}
+  }catch(e){}
+  return b.url;
+}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 const LIMIT=10000;
@@ -290,4 +314,3 @@ $('ltest').onclick=()=>{stopLearn();$('mic').click()};
 </script>
 </body>
 </html>
-
