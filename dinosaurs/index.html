@@ -32,19 +32,67 @@ body{background:linear-gradient(160deg,#fff3c4,#d9f2e6 55%,#cfe8ff)}
 .pop{animation:pop .7s}@keyframes pop{30%{transform:scale(1.06) rotate(-1.5deg)}60%{transform:scale(1.03) rotate(1.5deg)}}
 .shake{animation:shake .5s}@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
 button:active{transform:scale(.95)}#streak{font-size:1rem}
+#photo{display:none}.playing #photo{display:block}
+#cover{text-align:center;padding-bottom:6px}.playing #cover{display:none}
+#cover svg{width:100%;display:block;aspect-ratio:4/3}
+#cover h2{margin:8px 0 2px;font-size:1.6rem}#cover p{margin:0;padding:0 12px}
+.bob{animation:bob 2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-7px)}}
+#learnui{display:none;text-align:center}.learning #learnui{display:block}
+#lname{font-size:2rem;font-weight:800;margin:6px 0 0;padding:0 10px}#lcount{opacity:.7;font-size:.95rem}
+.learning #photo{display:block}
+.learning #cover,.learning #bar,.learning #row1,.learning #row2,.learning #typed{display:none!important}
+.playing #learn{display:none}
+#learn{background:#ff9f1c;color:#fff;font-size:1.2rem;padding:16px 26px}
+#ltest{background:var(--accent);color:#fff}
 </style>
 </head>
 <body>
 <header><h1>🦖 Say It! Dinosaurs</h1><div><span id="stars">⭐ 0</span> <span id="streak"></span></div></header>
 <div class="card">
+  <div id="cover"><svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cartoon dinosaur saying roar">
+<defs><linearGradient id="nsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a5a"/><stop offset="1" stop-color="#ffe3a3"/></linearGradient></defs>
+<rect width="400" height="300" fill="url(#nsky)"/>
+<circle cx="60" cy="50" r="28" fill="#fff2a8"/>
+<polygon points="20,250 95,105 170,250" fill="#7a5a4a"/>
+<polygon points="78,135 95,105 112,135 103,128 95,140 86,128" fill="#ff5722"/>
+<circle cx="100" cy="85" r="10" fill="#9e9e9e" opacity=".7"/><circle cx="112" cy="68" r="13" fill="#bdbdbd" opacity=".6"/>
+<ellipse cx="200" cy="300" rx="300" ry="75" fill="#6bb36b"/>
+<g class="bob">
+<path d="M130 215Q70 238 36 196Q82 208 134 182Z" fill="#43a047"/>
+<rect x="160" y="228" width="26" height="38" rx="12" fill="#388e3c"/><rect x="212" y="228" width="26" height="38" rx="12" fill="#388e3c"/>
+<ellipse cx="173" cy="268" rx="22" ry="9" fill="#2e7d32"/><ellipse cx="225" cy="268" rx="22" ry="9" fill="#2e7d32"/>
+<ellipse cx="200" cy="195" rx="75" ry="55" fill="#4caf50"/>
+<ellipse cx="208" cy="212" rx="48" ry="34" fill="#d4ecac"/>
+<polygon points="165,150 178,122 192,146" fill="#ff9800"/><polygon points="196,142 210,114 224,140" fill="#ff9800"/><polygon points="228,146 242,120 254,148" fill="#ff9800"/>
+<polygon points="232,172 262,118 292,150 262,205" fill="#4caf50"/>
+<ellipse cx="268" cy="132" rx="50" ry="40" fill="#4caf50"/>
+<ellipse cx="308" cy="148" rx="30" ry="23" fill="#4caf50"/>
+<circle cx="278" cy="120" r="11" fill="#fff"/><circle cx="281" cy="121" r="5.5" fill="#222"/><circle cx="283" cy="118" r="2" fill="#fff"/>
+<circle cx="322" cy="140" r="3" fill="#2e7d32"/>
+<path d="M292 158Q312 172 330 154" stroke="#1b5e20" stroke-width="3" fill="none" stroke-linecap="round"/>
+<ellipse cx="248" cy="190" rx="14" ry="9" fill="#43a047" transform="rotate(25 248 190)"/>
+</g>
+<ellipse cx="350" cy="262" rx="15" ry="20" fill="#fffde7"/><circle cx="345" cy="258" r="3" fill="#c5b358"/><circle cx="355" cy="268" r="3" fill="#c5b358"/>
+<ellipse cx="378" cy="272" rx="12" ry="16" fill="#fffde7"/>
+<text x="14" y="288" font-size="30">🌴</text>
+<rect x="244" y="18" width="140" height="46" rx="20" fill="#fff"/><path d="M296 62L308 84L320 62Z" fill="#fff"/>
+<text x="314" y="48" font-size="18" font-weight="700" text-anchor="middle" fill="#c2571a" font-family="system-ui,sans-serif">Roar! Say it!</text>
+</svg>
+<h2>Dino Detectives! 🦖</h2><p>Learn them all first, then test yourself and win stars!</p></div>
   <img id="photo" alt="">
-  <div id="msg">Tap Start — you get 10 seconds per dinosaur!</div>
+  <div id="msg">Tap 📖 Learn to meet them all first, then 🎯 Test me — 10 seconds each!</div>
   <div id="bar"><i id="fill"></i></div>
-  <div id="typed"><input id="tin" placeholder="Type the dinosaur" autocomplete="off"><button id="tgo">Go</button></div>
-  <div class="row">
-    <button id="mic">▶ Start</button>
+  <div id="learnui">
+    <div id="lname"></div><div id="lcount"></div>
+    <div class="row"><button id="lprev">◀ Back</button><button id="lhear">🔊 Hear it</button><button id="lnext">Next ▶</button></div>
+    <div class="row"><button id="lauto">▶ Auto-play</button><button id="ltest">🎯 Test me</button><button id="lclose">✖ Close</button></div>
   </div>
-  <div class="row">
+  <div id="typed"><input id="tin" placeholder="Type the dinosaur" autocomplete="off"><button id="tgo">Go</button></div>
+  <div class="row" id="row1">
+    <button id="learn">📖 Learn them first</button>
+    <button id="mic">🎯 Test me</button>
+  </div>
+  <div class="row" id="row2">
     <button id="skip">⏭ Next one</button>
   </div>
 </div>
@@ -163,7 +211,7 @@ function setBar(on){
   const f=$('fill');f.className='';f.style.transition='none';f.style.width='100%';f.offsetWidth;
   if(on){f.style.transition='width '+LIMIT+'ms linear';f.style.width='0%';barT=[setTimeout(()=>f.className='low',LIMIT*.5),setTimeout(()=>f.className='vlow',LIMIT*.75)]}
 }
-function setMic(){const m=$('mic');m.textContent=running?'⏹ Stop':'▶ Start';m.classList.toggle('on',running)}
+function setMic(){const m=$('mic');m.textContent=running?'⏹ Stop':'🎯 Test me';m.classList.toggle('on',running)}
 function stopRec(){if(rec){const r=rec;rec=null;try{r.abort()}catch(e){}}}
 
 async function next(){
@@ -176,6 +224,7 @@ async function next(){
   cur=b;
   await new Promise(r=>{const im=$('photo');im.onload=r;im.onerror=r;im.src=u});
   if(!running)return;
+  document.body.classList.add('playing');
   $('msg').textContent='Which dinosaur is this? Roar it out! 🦖';
   resolved=false;setBar(true);startRec();
   timer=setTimeout(()=>finish(false,'time'),LIMIT);
@@ -225,18 +274,18 @@ function startRec(){
   r.onerror=e=>{
     if(e.error==='not-allowed'||e.error==='service-not-allowed'){
       running=false;resolved=true;clearTimeout(timer);setBar(false);setMic();
-      $('msg').textContent='Microphone blocked — allow it in the browser\'s site settings, then tap Start.';
+      $('msg').textContent='Microphone blocked — allow it in the browser\'s site settings, then tap Test me.';
     }
   };
   r.onend=()=>{if(!resolved&&running&&rec===r){try{r.start()}catch(e){}}};
   try{r.start()}catch(e){}
 }
 
-if(!SR){$('typed').style.display='flex';$('msg').textContent='Speech recognition isn\'t supported in this browser — you can type the dinosaur instead (Chrome supports the microphone). Tap Start.'}
+if(!SR){$('typed').style.display='flex';$('msg').textContent='Speech recognition isn\'t supported in this browser — you can type the dinosaur instead (Chrome supports the microphone). Tap Test me.'}
 $('mic').onclick=async()=>{
   if(running){
-    running=false;resolved=true;clearTimeout(timer);stopRec();speechSynthesis.cancel();setBar(false);setMic();
-    $('msg').textContent='Great playing! You scored '+stars+' ⭐ Tap Start to play again.';
+    running=false;resolved=true;clearTimeout(timer);stopRec();speechSynthesis.cancel();setBar(false);setMic();document.body.classList.remove('playing');
+    $('msg').textContent='Great playing! You scored '+stars+' ⭐ Tap Test me to play again.';
     say('Great playing! You got '+stars+(stars===1?' star.':' stars.'));return;
   }
   running=true;setMic();streak=0;
@@ -248,6 +297,47 @@ $('mic').onclick=async()=>{
 $('tgo').onclick=()=>{const v=$('tin').value;$('tin').value='';if(!v||!running||resolved)return;matches(v,cur)?finish(true):finish(false,'wrong',v)};
 $('tin').onkeydown=e=>{if(e.key==='Enter')$('tgo').click()};
 $('skip').onclick=()=>{if(running&&!resolved){resolved=true;clearTimeout(timer);stopRec();next()}};
+
+// ---- Learn mode: see every answer first ----
+const TINY='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+let learning=false,li=0,auto=false,autoTok=0;
+async function showLearn(){
+  const b=BREEDS[li];
+  $('lcount').textContent=(li+1)+' of '+BREEDS.length;
+  $('lname').textContent=b.name;
+  const u=await getPhoto(b);
+  if(!learning||BREEDS[li]!==b)return;
+  $('photo').src=u||TINY;
+  await say('This is '+art(b.name)+b.name+'.');
+}
+function goLearn(d){li=(li+d+BREEDS.length)%BREEDS.length;return showLearn()}
+async function autoLoop(tok){
+  while(auto&&tok===autoTok&&learning){
+    await new Promise(r=>setTimeout(r,1500));
+    if(!auto||tok!==autoTok||!learning)return;
+    await goLearn(1);
+  }
+}
+function stopLearn(){
+  learning=false;auto=false;autoTok++;speechSynthesis.cancel();
+  document.body.classList.remove('learning');$('lauto').textContent='▶ Auto-play';
+  $('msg').textContent='Tap 📖 Learn to meet them all first, then 🎯 Test me!';
+}
+$('learn').onclick=()=>{
+  if(running)return;
+  learning=true;li=0;document.body.classList.add('learning');
+  $('msg').textContent='Listen, then say each one out loud! 🗣️';
+  showLearn();
+};
+$('lprev').onclick=()=>goLearn(-1);
+$('lnext').onclick=()=>goLearn(1);
+$('lhear').onclick=()=>say('This is '+art(BREEDS[li].name)+BREEDS[li].name+'.');
+$('lauto').onclick=()=>{
+  auto=!auto;$('lauto').textContent=auto?'⏸ Pause':'▶ Auto-play';
+  if(auto)autoLoop(++autoTok);else{autoTok++}
+};
+$('lclose').onclick=stopLearn;
+$('ltest').onclick=()=>{stopLearn();$('mic').click()};
 </script>
 </body>
 </html>
