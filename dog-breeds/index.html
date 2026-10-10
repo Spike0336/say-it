@@ -32,19 +32,63 @@ body{background:linear-gradient(160deg,#fff3c4,#d9f2e6 55%,#cfe8ff)}
 .pop{animation:pop .7s}@keyframes pop{30%{transform:scale(1.06) rotate(-1.5deg)}60%{transform:scale(1.03) rotate(1.5deg)}}
 .shake{animation:shake .5s}@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
 button:active{transform:scale(.95)}#streak{font-size:1rem}
+#photo{display:none}.playing #photo{display:block}
+#cover{text-align:center;padding-bottom:6px}.playing #cover{display:none}
+#cover svg{width:100%;display:block;aspect-ratio:4/3}
+#cover h2{margin:8px 0 2px;font-size:1.6rem}#cover p{margin:0;padding:0 12px}
+.bob{animation:bob 2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-7px)}}
+#learnui{display:none;text-align:center}.learning #learnui{display:block}
+#lname{font-size:2rem;font-weight:800;margin:6px 0 0;padding:0 10px}#lcount{opacity:.7;font-size:.95rem}
+.learning #photo{display:block}
+.learning #cover,.learning #bar,.learning #row1,.learning #row2,.learning #typed{display:none!important}
+.playing #learn{display:none}
+#learn{background:#ff9f1c;color:#fff;font-size:1.2rem;padding:16px 26px}
+#ltest{background:var(--accent);color:#fff}
 </style>
 </head>
 <body>
 <header><h1>🐕 Say It! Dog Breeds</h1><div><span id="stars">⭐ 0</span> <span id="streak"></span></div></header>
 <div class="card">
+  <div id="cover"><svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cartoon dog saying woof">
+<defs><linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd0ff"/><stop offset="1" stop-color="#e6f7ff"/></linearGradient></defs>
+<rect width="400" height="300" fill="url(#dsky)"/>
+<circle cx="345" cy="55" r="28" fill="#ffe066"/>
+<ellipse cx="90" cy="110" rx="38" ry="14" fill="#fff"/><ellipse cx="115" cy="100" rx="26" ry="12" fill="#fff"/>
+<ellipse cx="200" cy="330" rx="320" ry="120" fill="#7ccf7c"/>
+<ellipse cx="60" cy="300" rx="150" ry="60" fill="#5fba6a"/>
+<g class="bob">
+<ellipse cx="200" cy="250" rx="52" ry="48" fill="#e0a96d"/>
+<ellipse cx="130" cy="140" rx="28" ry="55" fill="#8a5a2b" transform="rotate(15 130 140)"/>
+<ellipse cx="270" cy="140" rx="28" ry="55" fill="#8a5a2b" transform="rotate(-15 270 140)"/>
+<circle cx="200" cy="150" r="68" fill="#e0a96d"/>
+<ellipse cx="200" cy="182" rx="38" ry="30" fill="#f6e0bd"/>
+<circle cx="172" cy="138" r="12" fill="#fff"/><circle cx="228" cy="138" r="12" fill="#fff"/>
+<circle cx="174" cy="140" r="6" fill="#222"/><circle cx="226" cy="140" r="6" fill="#222"/>
+<circle cx="176" cy="137" r="2" fill="#fff"/><circle cx="228" cy="137" r="2" fill="#fff"/>
+<ellipse cx="200" cy="165" rx="13" ry="9" fill="#3a2a22"/>
+<path d="M200 174V184M200 184Q186 197 174 185M200 184Q214 197 226 185" stroke="#3a2a22" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M191 190Q200 224 209 190Z" fill="#ff7a95"/>
+<rect x="152" y="208" width="96" height="14" rx="7" fill="#e53935"/><circle cx="200" cy="230" r="8" fill="#ffc107"/>
+</g>
+<text x="40" y="262" font-size="34">🦴</text><text x="318" y="262" font-size="34">🐾</text><text x="300" y="200" font-size="26">🐾</text>
+<rect x="14" y="22" width="146" height="46" rx="20" fill="#fff"/><path d="M60 66L72 86L84 66Z" fill="#fff"/>
+<text x="87" y="52" font-size="18" font-weight="700" text-anchor="middle" fill="#2e7d5b" font-family="system-ui,sans-serif">Woof! Say it!</text>
+</svg>
+<h2>Guess That Dog! 🐶</h2><p>Learn them all first, then test yourself and win stars!</p></div>
   <img id="photo" alt="">
-  <div id="msg">Tap Start — you get 10 seconds per dog!</div>
+  <div id="msg">Tap 📖 Learn to meet them all first, then 🎯 Test me — 10 seconds each!</div>
   <div id="bar"><i id="fill"></i></div>
-  <div id="typed"><input id="tin" placeholder="Type the breed" autocomplete="off"><button id="tgo">Go</button></div>
-  <div class="row">
-    <button id="mic">▶ Start</button>
+  <div id="learnui">
+    <div id="lname"></div><div id="lcount"></div>
+    <div class="row"><button id="lprev">◀ Back</button><button id="lhear">🔊 Hear it</button><button id="lnext">Next ▶</button></div>
+    <div class="row"><button id="lauto">▶ Auto-play</button><button id="ltest">🎯 Test me</button><button id="lclose">✖ Close</button></div>
   </div>
-  <div class="row">
+  <div id="typed"><input id="tin" placeholder="Type the breed" autocomplete="off"><button id="tgo">Go</button></div>
+  <div class="row" id="row1">
+    <button id="learn">📖 Learn them first</button>
+    <button id="mic">🎯 Test me</button>
+  </div>
+  <div class="row" id="row2">
     <button id="skip">⏭ Next one</button>
   </div>
 </div>
@@ -188,7 +232,7 @@ function setBar(on){
   const f=$('fill');f.className='';f.style.transition='none';f.style.width='100%';f.offsetWidth;
   if(on){f.style.transition='width '+LIMIT+'ms linear';f.style.width='0%';barT=[setTimeout(()=>f.className='low',LIMIT*.5),setTimeout(()=>f.className='vlow',LIMIT*.75)]}
 }
-function setMic(){const m=$('mic');m.textContent=running?'⏹ Stop':'▶ Start';m.classList.toggle('on',running)}
+function setMic(){const m=$('mic');m.textContent=running?'⏹ Stop':'🎯 Test me';m.classList.toggle('on',running)}
 function stopRec(){if(rec){const r=rec;rec=null;try{r.abort()}catch(e){}}}
 
 async function next(){
@@ -201,6 +245,7 @@ async function next(){
   cur=b;
   await new Promise(r=>{const im=$('photo');im.onload=r;im.onerror=r;im.src=u});
   if(!running)return;
+  document.body.classList.add('playing');
   $('msg').textContent='Which breed is this? Say it out loud! 🐶';
   resolved=false;setBar(true);startRec();
   timer=setTimeout(()=>finish(false,'time'),LIMIT);
@@ -250,18 +295,18 @@ function startRec(){
   r.onerror=e=>{
     if(e.error==='not-allowed'||e.error==='service-not-allowed'){
       running=false;resolved=true;clearTimeout(timer);setBar(false);setMic();
-      $('msg').textContent='Microphone blocked — allow it in the browser\'s site settings, then tap Start.';
+      $('msg').textContent='Microphone blocked — allow it in the browser\'s site settings, then tap Test me.';
     }
   };
   r.onend=()=>{if(!resolved&&running&&rec===r){try{r.start()}catch(e){}}};
   try{r.start()}catch(e){}
 }
 
-if(!SR){$('typed').style.display='flex';$('msg').textContent='Speech recognition isn\'t supported in this browser — you can type the breed instead (Chrome supports the microphone). Tap Start.'}
+if(!SR){$('typed').style.display='flex';$('msg').textContent='Speech recognition isn\'t supported in this browser — you can type the breed instead (Chrome supports the microphone). Tap Test me.'}
 $('mic').onclick=async()=>{
   if(running){
-    running=false;resolved=true;clearTimeout(timer);stopRec();speechSynthesis.cancel();setBar(false);setMic();
-    $('msg').textContent='Great playing! You scored '+stars+' ⭐ Tap Start to play again.';
+    running=false;resolved=true;clearTimeout(timer);stopRec();speechSynthesis.cancel();setBar(false);setMic();document.body.classList.remove('playing');
+    $('msg').textContent='Great playing! You scored '+stars+' ⭐ Tap Test me to play again.';
     say('Great playing! You got '+stars+(stars===1?' star.':' stars.'));return;
   }
   running=true;setMic();streak=0;
@@ -273,6 +318,47 @@ $('mic').onclick=async()=>{
 $('tgo').onclick=()=>{const v=$('tin').value;$('tin').value='';if(!v||!running||resolved)return;matches(v,cur)?finish(true):finish(false,'wrong',v)};
 $('tin').onkeydown=e=>{if(e.key==='Enter')$('tgo').click()};
 $('skip').onclick=()=>{if(running&&!resolved){resolved=true;clearTimeout(timer);stopRec();next()}};
+
+// ---- Learn mode: see every answer first ----
+const TINY='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+let learning=false,li=0,auto=false,autoTok=0;
+async function showLearn(){
+  const b=BREEDS[li];
+  $('lcount').textContent=(li+1)+' of '+BREEDS.length;
+  $('lname').textContent=b.name;
+  const u=await getPhoto(b);
+  if(!learning||BREEDS[li]!==b)return;
+  $('photo').src=u||TINY;
+  await say('This is '+art(b.name)+b.name+'.');
+}
+function goLearn(d){li=(li+d+BREEDS.length)%BREEDS.length;return showLearn()}
+async function autoLoop(tok){
+  while(auto&&tok===autoTok&&learning){
+    await new Promise(r=>setTimeout(r,1500));
+    if(!auto||tok!==autoTok||!learning)return;
+    await goLearn(1);
+  }
+}
+function stopLearn(){
+  learning=false;auto=false;autoTok++;speechSynthesis.cancel();
+  document.body.classList.remove('learning');$('lauto').textContent='▶ Auto-play';
+  $('msg').textContent='Tap 📖 Learn to meet them all first, then 🎯 Test me!';
+}
+$('learn').onclick=()=>{
+  if(running)return;
+  learning=true;li=0;document.body.classList.add('learning');
+  $('msg').textContent='Listen, then say each one out loud! 🗣️';
+  showLearn();
+};
+$('lprev').onclick=()=>goLearn(-1);
+$('lnext').onclick=()=>goLearn(1);
+$('lhear').onclick=()=>say('This is '+art(BREEDS[li].name)+BREEDS[li].name+'.');
+$('lauto').onclick=()=>{
+  auto=!auto;$('lauto').textContent=auto?'⏸ Pause':'▶ Auto-play';
+  if(auto)autoLoop(++autoTok);else{autoTok++}
+};
+$('lclose').onclick=stopLearn;
+$('ltest').onclick=()=>{stopLearn();$('mic').click()};
 </script>
 </body>
 </html>
