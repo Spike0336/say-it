@@ -8,6 +8,7 @@ Browser-based speech games: see a picture, say the answer into the microphone, g
 | Dinosaurs | `dinosaurs/` |
 | Kitchen Appliances | `kitchen-appliances/` |
 | Vehicles | `vehicles/` |
+| Flowers | `flowers/` |
 
 ## Adding a new app
 1. Create a new folder with an `index.html`.
