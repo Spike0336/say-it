@@ -24,20 +24,28 @@ button{font:inherit;border:0;border-radius:40px;padding:12px 20px;background:#88
 #typed{display:none;gap:6px;padding:0 12px 12px}
 #typed input{flex:1;font:inherit;padding:10px;border-radius:10px;border:1px solid #8886}
 canvas{position:fixed;inset:0;pointer-events:none}
+body{background:linear-gradient(160deg,#fff3c4,#d9f2e6 55%,#cfe8ff)}
+@media(prefers-color-scheme:dark){body{background:linear-gradient(160deg,#2a2540,#1c2f2b)}}
+.card{border:4px solid #fff8;border-radius:26px}
+#msg{font-size:1.35rem}#bar{height:16px}
+#fill{transition:background .3s}#fill.low{background:#e8a200}#fill.vlow{background:#d9442b}
+.pop{animation:pop .7s}@keyframes pop{30%{transform:scale(1.06) rotate(-1.5deg)}60%{transform:scale(1.03) rotate(1.5deg)}}
+.shake{animation:shake .5s}@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+button:active{transform:scale(.95)}#streak{font-size:1rem}
 </style>
 </head>
 <body>
-<header><h1>🦖 Say It! Dinosaurs</h1><div id="stars">⭐ 0</div></header>
+<header><h1>🦖 Say It! Dinosaurs</h1><div><span id="stars">⭐ 0</span> <span id="streak"></span></div></header>
 <div class="card">
   <img id="photo" alt="">
-  <div id="msg">Tap Start — you get 5 seconds per dinosaur!</div>
+  <div id="msg">Tap Start — you get 10 seconds per dinosaur!</div>
   <div id="bar"><i id="fill"></i></div>
   <div id="typed"><input id="tin" placeholder="Type the dinosaur" autocomplete="off"><button id="tgo">Go</button></div>
   <div class="row">
     <button id="mic">▶ Start</button>
   </div>
   <div class="row">
-    <button id="skip">⏭ Skip</button>
+    <button id="skip">⏭ Next one</button>
   </div>
 </div>
 <canvas id="cv"></canvas>
@@ -126,26 +134,34 @@ function confetti(){
 }
 
 // ---- Photos from Wikipedia (loaded live, so needs internet) ----
+function loadImg(u){return new Promise(r=>{const i=new Image();i.onload=()=>r(true);i.onerror=()=>r(false);i.src=u})}
 async function getPhoto(b){
   if(b.url!==undefined)return b.url;
+  b.url=null;
   try{
     const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+b.wiki);
     const j=await r.json();
-    let u=j.thumbnail&&j.thumbnail.source;
-    if(u)u=u.replace(/\/\d+px-/,'/800px-');
-    b.url=u||null;
-  }catch(e){b.url=null}
+    const t=j.thumbnail&&j.thumbnail.source;
+    if(t){
+      const big=t.replace(/\/\d+px-/,'/500px-');
+      const w=(j.originalimage&&j.originalimage.width)||0;
+      if(w>=500&&await loadImg(big))b.url=big;
+      else if(await loadImg(t))b.url=t;
+    }
+  }catch(e){}
   return b.url;
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
-const LIMIT=5000;
+const LIMIT=10000;
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let running=false,resolved=true,timer=null,rec=null;
 
+let barT=[];
 function setBar(on){
-  const f=$('fill');f.style.transition='none';f.style.width='100%';f.offsetWidth;
-  if(on){f.style.transition='width '+LIMIT+'ms linear';f.style.width='0%'}
+  barT.forEach(clearTimeout);barT=[];
+  const f=$('fill');f.className='';f.style.transition='none';f.style.width='100%';f.offsetWidth;
+  if(on){f.style.transition='width '+LIMIT+'ms linear';f.style.width='0%';barT=[setTimeout(()=>f.className='low',LIMIT*.5),setTimeout(()=>f.className='vlow',LIMIT*.75)]}
 }
 function setMic(){const m=$('mic');m.textContent=running?'⏹ Stop':'▶ Start';m.classList.toggle('on',running)}
 function stopRec(){if(rec){const r=rec;rec=null;try{r.abort()}catch(e){}}}
@@ -153,29 +169,43 @@ function stopRec(){if(rec){const r=rec;rec=null;try{r.abort()}catch(e){}}}
 async function next(){
   resolved=true;clearTimeout(timer);stopRec();setBar(false);
   if(!queue.length)queue=shuffle([...BREEDS]);
-  $('msg').textContent='Finding a dinosaur…';
+  $('msg').textContent='Digging up the next one… 🦴';
   let b,u;
   for(let i=0;i<8;i++){b=queue.pop();if(!b){queue=shuffle([...BREEDS]);b=queue.pop()}u=await getPhoto(b);if(u)break}
   if(!u){$('msg').textContent='Could not load photos — check your internet connection.';running=false;setMic();return}
   cur=b;
   await new Promise(r=>{const im=$('photo');im.onload=r;im.onerror=r;im.src=u});
   if(!running)return;
-  $('msg').textContent='Which dinosaur is this? 5 seconds!';
+  $('msg').textContent='Which dinosaur is this? Roar it out! 🦖';
   resolved=false;setBar(true);startRec();
   timer=setTimeout(()=>finish(false,'time'),LIMIT);
 }
 
+const PRAISE=['Brilliant!','Fantastic!','You got it!','Super!','Well done!','Amazing!','Spot on!','Wonderful!'];
+const OOPS=['Good try!','Nearly!','Not this time!','Ooh, a tricky one!','Don\'t worry!'];
+const TIMEUP=['Time\'s up!','Oh, time ran out!','Tick tock, time\'s up!'];
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+let streak=0;
+function anim(el,c){el.classList.remove(c);el.offsetWidth;el.classList.add(c)}
 async function finish(ok,why,heard){
   if(resolved)return;
   resolved=true;clearTimeout(timer);stopRec();setBar(false);
+  const nm=art(cur.name)+cur.name;
   if(ok){
-    stars++;$('stars').textContent='⭐ '+stars;fanfare();
-    $('msg').textContent='🎉 Yes! '+cur.name+'!';
-    await say('Well done! That is '+art(cur.name)+cur.name+'!');
+    stars++;streak++;
+    $('stars').textContent='⭐ '+stars;$('streak').textContent=streak>=2?'🔥 '+streak:'';
+    anim(document.querySelector('.card'),'pop');fanfare();
+    let line=pick(PRAISE)+' That is '+nm+'.';
+    if(streak>=3)line+=' '+streak+' in a row!';
+    if(stars%5===0)line+=' You are a superstar!';
+    $('msg').textContent='🎉 '+line;
+    await say(line);
   }else{
-    const t=why==='time';
-    $('msg').textContent=(t?'⏰ Time\'s up! ':'Not quite! ')+'It\'s '+art(cur.name)+cur.name+'.'+(heard?` (I heard "${heard}")`:'');
-    await say((t?'Time is up. ':'Not quite. ')+'That is '+art(cur.name)+cur.name+'.');
+    streak=0;$('streak').textContent='';
+    anim($('photo'),'shake');
+    const t=why==='time',lead=t?pick(TIMEUP):pick(OOPS);
+    $('msg').textContent=(t?'⏰ ':'🤔 ')+lead+' It\'s '+nm+'.'+(heard?` (I heard "${heard}")`:'');
+    await say(lead+' That is '+nm+'. On to the next one!');
   }
   if(running)next();
 }
@@ -203,11 +233,17 @@ function startRec(){
 }
 
 if(!SR){$('typed').style.display='flex';$('msg').textContent='Speech recognition isn\'t supported in this browser — you can type the dinosaur instead (Chrome supports the microphone). Tap Start.'}
-$('mic').onclick=()=>{
-  if(running){running=false;resolved=true;clearTimeout(timer);stopRec();speechSynthesis.cancel();setBar(false);setMic();$('msg').textContent='Stopped. Tap Start to play again.';return}
-  running=true;setMic();
+$('mic').onclick=async()=>{
+  if(running){
+    running=false;resolved=true;clearTimeout(timer);stopRec();speechSynthesis.cancel();setBar(false);setMic();
+    $('msg').textContent='Great playing! You scored '+stars+' ⭐ Tap Start to play again.';
+    say('Great playing! You got '+stars+(stars===1?' star.':' stars.'));return;
+  }
+  running=true;setMic();streak=0;
   ac=ac||new(window.AudioContext||window.webkitAudioContext)();ac.resume();
-  next();
+  $('msg').textContent='Hello! Let\'s play! 🎉';
+  await say('Hello! Let\'s play! You have ten seconds for each one. Good luck!');
+  if(running)next();
 };
 $('tgo').onclick=()=>{const v=$('tin').value;$('tin').value='';if(!v||!running||resolved)return;matches(v,cur)?finish(true):finish(false,'wrong',v)};
 $('tin').onkeydown=e=>{if(e.key==='Enter')$('tgo').click()};
