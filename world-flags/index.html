@@ -1,1 +1,344 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Say It! World Flags</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--ink:#222;--accent:#2e7d5b;--bad:#c0562b}
+@media(prefers-color-scheme:dark){:root{--bg:#181a19;--card:#242826;--ink:#eee}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:12px}
+header{width:100%;max-width:560px;display:flex;justify-content:space-between;align-items:center}
+h1{font-size:1.3rem;margin:4px 0}
+#stars{font-size:1.2rem;font-weight:700}
+.card{width:100%;max-width:560px;background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 4px 16px #0003;margin-top:8px}
+#photo{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#8885}
+#msg{min-height:3.2em;text-align:center;font-size:1.25rem;padding:10px 12px;font-weight:600}
+#bar{height:12px;background:#8883;margin:0 14px;border-radius:8px;overflow:hidden}#fill{display:block;height:100%;width:100%;background:var(--accent)}
+.row{display:flex;gap:10px;justify-content:center;padding:6px 12px 16px;flex-wrap:wrap}
+button{font:inherit;border:0;border-radius:40px;padding:12px 20px;background:#8883;color:var(--ink);cursor:pointer}
+#mic{background:var(--accent);color:#fff;font-size:1.3rem;padding:16px 34px}
+#mic.on{background:var(--bad);animation:p 1s infinite}
+@keyframes p{50%{transform:scale(1.07)}}
+#typed{display:none;gap:6px;padding:0 12px 12px}
+#typed input{flex:1;font:inherit;padding:10px;border-radius:10px;border:1px solid #8886}
+canvas{position:fixed;inset:0;pointer-events:none}
+body{background:linear-gradient(160deg,#fff3c4,#d9f2e6 55%,#cfe8ff)}
+@media(prefers-color-scheme:dark){body{background:linear-gradient(160deg,#2a2540,#1c2f2b)}}
+.card{border:4px solid #fff8;border-radius:26px}
+#msg{font-size:1.35rem}#bar{height:16px}
+#fill{transition:background .3s}#fill.low{background:#e8a200}#fill.vlow{background:#d9442b}
+.pop{animation:pop .7s}@keyframes pop{30%{transform:scale(1.06) rotate(-1.5deg)}60%{transform:scale(1.03) rotate(1.5deg)}}
+.shake{animation:shake .5s}@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+button:active{transform:scale(.95)}#streak{font-size:1rem}
+#photo{display:none}.playing #photo{display:block}
+#cover{text-align:center;padding-bottom:6px}.playing #cover{display:none}
+#cover svg{width:100%;display:block;aspect-ratio:4/3}
+#cover h2{margin:8px 0 2px;font-size:1.6rem}#cover p{margin:0;padding:0 12px}
+.bob{animation:bob 2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-7px)}}
+#learnui{display:none;text-align:center}.learning #learnui{display:block}
+#lname{font-size:2rem;font-weight:800;margin:6px 0 0;padding:0 10px}#lcount{opacity:.7;font-size:.95rem}
+.learning #photo{display:block}
+.learning #cover,.learning #bar,.learning #row1,.learning #row2,.learning #typed{display:none!important}
+.playing #learn{display:none}
+#learn{background:#ff9f1c;color:#fff;font-size:1.2rem;padding:16px 26px}
+#ltest{background:var(--accent);color:#fff}
+.homenav{width:100%;max-width:560px}
+a.home{display:inline-block;background:#fffc;color:#1b5e45;text-decoration:none;font-weight:700;padding:8px 16px;border-radius:30px;box-shadow:0 2px 6px #0002;margin-bottom:4px}
+@media(prefers-color-scheme:dark){a.home{background:#ffffff22;color:#cfeee0}}
+#photo{object-fit:contain;background:#fff}
+</style>
+</head>
+<body>
+<nav class="homenav"><a class="home" href="../">🏠 All games</a></nav>
+<header><h1>🚩 Say It! World Flags</h1><div><span id="stars">⭐ 0</span> <span id="streak"></span></div></header>
+<div class="card">
+  <div id="cover"><svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cartoon flags waving on poles">
+<defs><linearGradient id="fsky3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd0ff"/><stop offset="1" stop-color="#eaf8ff"/></linearGradient></defs>
+<rect width="400" height="300" fill="url(#fsky3)"/><circle cx="360" cy="40" r="22" fill="#ffe066"/>
+<ellipse cx="200" cy="320" rx="340" ry="80" fill="#7ccf7c"/>
+<g fill="#78909c"><rect x="46" y="76" width="5" height="190" rx="2"/><rect x="136" y="90" width="5" height="176" rx="2"/><rect x="226" y="70" width="5" height="196" rx="2"/><rect x="316" y="86" width="5" height="180" rx="2"/></g>
+<g fill="#ffc107"><circle cx="48" cy="74" r="5"/><circle cx="138" cy="88" r="5"/><circle cx="228" cy="68" r="5"/><circle cx="318" cy="84" r="5"/></g>
+<g class="bob"><polygon points="50.0,86.0 54.9,88.2 59.9,90.0 64.8,90.9 69.7,90.8 74.7,89.7 74.7,141.7 69.7,142.8 64.8,142.9 59.9,142.0 54.9,140.2 50.0,138.0" fill="#1e4fa8"/><polygon points="74.7,89.7 79.6,87.8 84.5,85.6 89.5,83.4 94.4,81.8 99.3,81.0 99.3,133.0 94.4,133.8 89.5,135.4 84.5,137.6 79.6,139.8 74.7,141.7" fill="#fff"/><polygon points="99.3,81.0 104.3,81.3 109.2,82.6 114.1,84.6 119.1,86.8 124.0,88.9 124.0,140.9 119.1,138.8 114.1,136.6 109.2,134.6 104.3,133.3 99.3,133.0" fill="#e53935"/><polygon points="140.0,100.0 144.6,102.1 149.2,103.8 153.9,104.8 158.5,104.9 163.1,104.2 167.8,102.6 172.4,100.6 177.0,98.5 181.6,96.6 186.2,95.4 190.9,95.0 195.5,95.5 200.1,96.9 204.8,98.8 209.4,101.0 214.0,102.9 214.0,120.3 209.4,118.3 204.8,116.2 200.1,114.2 195.5,112.9 190.9,112.3 186.2,112.7 181.6,113.9 177.0,115.8 172.4,117.9 167.8,119.9 163.1,121.5 158.5,122.3 153.9,122.1 149.2,121.1 144.6,119.4 140.0,117.3" fill="#212121"/><polygon points="140.0,117.3 144.6,119.4 149.2,121.1 153.9,122.1 158.5,122.3 163.1,121.5 167.8,119.9 172.4,117.9 177.0,115.8 181.6,113.9 186.2,112.7 190.9,112.3 195.5,112.9 200.1,114.2 204.8,116.2 209.4,118.3 214.0,120.3 214.0,137.6 209.4,135.6 204.8,133.5 200.1,131.6 195.5,130.2 190.9,129.7 186.2,130.0 181.6,131.3 177.0,133.1 172.4,135.3 167.8,137.3 163.1,138.8 158.5,139.6 153.9,139.5 149.2,138.5 144.6,136.8 140.0,134.7" fill="#d32f2f"/><polygon points="140.0,134.7 144.6,136.8 149.2,138.5 153.9,139.5 158.5,139.6 163.1,138.8 167.8,137.3 172.4,135.3 177.0,133.1 181.6,131.3 186.2,130.0 190.9,129.7 195.5,130.2 200.1,131.6 204.8,133.5 209.4,135.6 214.0,137.6 214.0,154.9 209.4,153.0 204.8,150.8 200.1,148.9 195.5,147.5 190.9,147.0 186.2,147.4 181.6,148.6 177.0,150.5 172.4,152.6 167.8,154.6 163.1,156.2 158.5,156.9 153.9,156.8 149.2,155.8 144.6,154.1 140.0,152.0" fill="#ffc107"/><polygon points="230.0,80.0 234.6,82.1 239.2,83.8 243.9,84.8 248.5,84.9 253.1,84.2 257.8,82.6 262.4,80.6 267.0,78.5 271.6,76.6 276.2,75.4 280.9,75.0 285.5,75.5 290.1,76.9 294.8,78.8 299.4,81.0 304.0,82.9 304.0,134.9 299.4,133.0 294.8,130.8 290.1,128.9 285.5,127.5 280.9,127.0 276.2,127.4 271.6,128.6 267.0,130.5 262.4,132.6 257.8,134.6 253.1,136.2 248.5,136.9 243.9,136.8 239.2,135.8 234.6,134.1 230.0,132.0" fill="#fff"/><circle cx="267" cy="104.5" r="15" fill="#d32f2f"/><polygon points="320.0,96.0 324.3,98.2 328.5,100.0 332.8,100.9 337.1,100.8 341.3,99.7 341.3,151.7 337.1,152.8 332.8,152.9 328.5,152.0 324.3,150.2 320.0,148.0" fill="#2e9e4f"/><polygon points="341.3,99.7 345.6,97.8 349.9,95.6 354.1,93.4 358.4,91.8 362.7,91.0 362.7,143.0 358.4,143.8 354.1,145.4 349.9,147.6 345.6,149.8 341.3,151.7" fill="#fff"/><polygon points="362.7,91.0 366.9,91.3 371.2,92.6 375.5,94.6 379.7,96.8 384.0,98.9 384.0,150.9 379.7,148.8 375.5,146.6 371.2,144.6 366.9,143.3 362.7,143.0" fill="#d32f2f"/></g>
+<rect x="14" y="14" width="196" height="46" rx="20" fill="#fff"/><path d="M60 58L72 80L84 58Z" fill="#fff"/><text x="112" y="44" font-size="18" font-weight="700" text-anchor="middle" fill="#1565c0" font-family="system-ui,sans-serif">Which flag? Say it!</text></svg>
+<h2>Flag Parade! 🚩</h2><p>Learn them all first, then test yourself and win stars!</p></div>
+  <img id="photo" alt="">
+  <div id="msg">Tap 📖 Learn to meet them all first, then 🎯 Test me — 10 seconds each!</div>
+  <div id="bar"><i id="fill"></i></div>
+  <div id="learnui">
+    <div id="lname"></div><div id="lcount"></div>
+    <div class="row"><button id="lprev">◀ Back</button><button id="lhear">🔊 Hear it</button><button id="lnext">Next ▶</button></div>
+    <div class="row"><button id="lauto">▶ Auto-play</button><button id="ltest">🎯 Test me</button><button id="lclose">✖ Close</button></div>
+  </div>
+  <div id="typed"><input id="tin" placeholder="Type the country" autocomplete="off"><button id="tgo">Go</button></div>
+  <div class="row" id="row1">
+    <button id="learn">📖 Learn them first</button>
+    <button id="mic">🎯 Test me</button>
+  </div>
+  <div class="row" id="row2">
+    <button id="skip">⏭ Next one</button>
+  </div>
+</div>
+<canvas id="cv"></canvas>
+<script>
+// Display name | wikipedia title | accepted alternatives (comma separated)
+const BREEDS = `France|Flag_of_France|
+Germany|Flag_of_Germany|
+Italy|Flag_of_Italy|
+Spain|Flag_of_Spain|
+Portugal|Flag_of_Portugal|
+Ireland|Flag_of_Ireland|republic of ireland,eire
+United Kingdom|Flag_of_the_United_Kingdom|union jack,union flag,uk,britain,great britain
+England|Flag_of_England|st georges cross,st george's cross
+Scotland|Flag_of_Scotland|saltire,st andrews cross
+Wales|Flag_of_Wales|welsh dragon,y ddraig goch
+United States|Flag_of_the_United_States|usa,america,stars and stripes,us,the united states
+Canada|Flag_of_Canada|maple leaf
+Mexico|Flag_of_Mexico|
+Brazil|Flag_of_Brazil|
+Argentina|Flag_of_Argentina|
+Chile|Flag_of_Chile|
+Peru|Flag_of_Peru|
+Colombia|Flag_of_Colombia|
+Cuba|Flag_of_Cuba|
+Jamaica|Flag_of_Jamaica|
+Australia|Flag_of_Australia|
+New Zealand|Flag_of_New_Zealand|
+Japan|Flag_of_Japan|
+China|Flag_of_the_People's_Republic_of_China|
+South Korea|Flag_of_South_Korea|korea
+India|Flag_of_India|
+Pakistan|Flag_of_Pakistan|
+Thailand|Flag_of_Thailand|
+Vietnam|Flag_of_Vietnam|
+Philippines|Flag_of_the_Philippines|
+Indonesia|Flag_of_Indonesia|
+Singapore|Flag_of_Singapore|
+Saudi Arabia|Flag_of_Saudi_Arabia|
+Israel|Flag_of_Israel|
+Turkey|Flag_of_Turkey|turkiye
+Egypt|Flag_of_Egypt|
+Morocco|Flag_of_Morocco|
+Nigeria|Flag_of_Nigeria|
+Ghana|Flag_of_Ghana|
+Kenya|Flag_of_Kenya|
+South Africa|Flag_of_South_Africa|
+Russia|Flag_of_Russia|
+Ukraine|Flag_of_Ukraine|
+Poland|Flag_of_Poland|
+Netherlands|Flag_of_the_Netherlands|holland,the netherlands
+Belgium|Flag_of_Belgium|
+Switzerland|Flag_of_Switzerland|swiss
+Austria|Flag_of_Austria|
+Sweden|Flag_of_Sweden|
+Norway|Flag_of_Norway|
+Denmark|Flag_of_Denmark|
+Finland|Flag_of_Finland|
+Iceland|Flag_of_Iceland|
+Greece|Flag_of_Greece|
+Czech Republic|Flag_of_the_Czech_Republic|czechia
+Hungary|Flag_of_Hungary|
+Romania|Flag_of_Romania|
+Croatia|Flag_of_Croatia|
+Malta|Flag_of_Malta|`.split('\n').map(l=>{const[n,w,a]=l.split('|');return{name:n,wiki:w,acc:[n,...(a?a.split(','):[])].map(norm)}});
+
+function norm(s){return s.toLowerCase().replace(/[^a-z ]/g,' ').replace(/\s+/g,' ').trim()}
+function lev(a,b){const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return d[b.length]}
+function matches(heard,breed){
+  const t=norm(heard).split(' ');
+  return breed.acc.some(a=>{
+    const aw=a.split(' ').length;
+    for(let i=0;i+aw<=t.length;i++){
+      const w=t.slice(i,i+aw).join(' ');
+      if(w===a||lev(w,a)<=Math.floor(a.replace(/ /g,'').length/6))return true;
+    }
+    return false;
+  });
+}
+
+const $=id=>document.getElementById(id);
+const art=n=>/^[AEIOU]/i.test(n)?'an ':'a ';
+let queue=[],cur=null,stars=0,misses=0,busy=false,listening=false;
+
+// ---- Narrator (British English voice from the browser) ----
+let voice=null;
+function pickVoice(){const v=speechSynthesis.getVoices();voice=v.find(x=>/en-GB/i.test(x.lang)&&/female|google|serena|kate|libby|sonia/i.test(x.name))||v.find(x=>/en-GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function say(text){return new Promise(res=>{if(!('speechSynthesis' in window))return res();speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(voice)u.voice=voice;u.lang='en-GB';u.rate=.95;u.pitch=1.05;u.onend=res;u.onerror=res;speechSynthesis.speak(u)})}
+
+// ---- Fanfare ----
+let ac;
+function fanfare(){
+  ac=ac||new(window.AudioContext||window.webkitAudioContext)();ac.resume();
+  const seq=[[523,0],[659,.12],[784,.24],[1047,.36],[784,.52],[1047,.64],[1319,.78]];
+  seq.forEach(([f,t],i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=i>4?'square':'triangle';o.frequency.value=f;o.connect(g);g.connect(ac.destination);const s=ac.currentTime+t;g.gain.setValueAtTime(.0001,s);g.gain.exponentialRampToValueAtTime(.25,s+.02);g.gain.exponentialRampToValueAtTime(.0001,s+(i===6?.9:.3));o.start(s);o.stop(s+1)});
+  confetti();
+}
+function confetti(){
+  const c=$('cv'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const P=Array.from({length:140},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*4,r:4+Math.random()*6,h:Math.random()*360}));
+  let n=0;(function f(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;x.fillStyle=`hsl(${p.h},90%,55%)`;x.fillRect(p.x,p.y,p.r,p.r*1.6)});if(++n<150)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})();
+}
+
+// ---- Photos from Wikipedia (loaded live, so needs internet) ----
+function loadImg(u){return new Promise(r=>{const i=new Image();i.onload=()=>r(true);i.onerror=()=>r(false);i.src=u})}
+async function getPhoto(b){
+  if(b.url!==undefined)return b.url;
+  b.url=null;
+  try{
+    const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+b.wiki);
+    const j=await r.json();
+    const t=j.thumbnail&&j.thumbnail.source;
+    if(t){
+      const big=t.replace(/\/\d+px-/,'/500px-');
+      const w=(j.originalimage&&j.originalimage.width)||0;
+      if(w>=500&&await loadImg(big))b.url=big;
+      else if(await loadImg(t))b.url=t;
+    }
+  }catch(e){}
+  return b.url;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+const LIMIT=10000;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let running=false,resolved=true,timer=null,rec=null;
+
+let barT=[];
+function setBar(on){
+  barT.forEach(clearTimeout);barT=[];
+  const f=$('fill');f.className='';f.style.transition='none';f.style.width='100%';f.offsetWidth;
+  if(on){f.style.transition='width '+LIMIT+'ms linear';f.style.width='0%';barT=[setTimeout(()=>f.className='low',LIMIT*.5),setTimeout(()=>f.className='vlow',LIMIT*.75)]}
+}
+function setMic(){const m=$('mic');m.textContent=running?'⏹ Stop':'🎯 Test me';m.classList.toggle('on',running)}
+function stopRec(){if(rec){const r=rec;rec=null;try{r.abort()}catch(e){}}}
+
+async function next(){
+  resolved=true;clearTimeout(timer);stopRec();setBar(false);
+  if(!queue.length)queue=shuffle([...BREEDS]);
+  $('msg').textContent='Raising the next flag… 🚩';
+  let b,u;
+  for(let i=0;i<8;i++){b=queue.pop();if(!b){queue=shuffle([...BREEDS]);b=queue.pop()}u=await getPhoto(b);if(u)break}
+  if(!u){$('msg').textContent='Could not load photos — check your internet connection.';running=false;setMic();return}
+  cur=b;
+  await new Promise(r=>{const im=$('photo');im.onload=r;im.onerror=r;im.src=u});
+  if(!running)return;
+  document.body.classList.add('playing');
+  $('msg').textContent='Which flag is this? Say it out loud! 🚩';
+  resolved=false;setBar(true);startRec();
+  timer=setTimeout(()=>finish(false,'time'),LIMIT);
+}
+
+const PRAISE=['Brilliant!','Fantastic!','You got it!','Super!','Well done!','Amazing!','Spot on!','Wonderful!'];
+const OOPS=['Good try!','Nearly!','Not this time!','Ooh, a tricky one!','Don\'t worry!'];
+const TIMEUP=['Time\'s up!','Oh, time ran out!','Tick tock, time\'s up!'];
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+let streak=0;
+function anim(el,c){el.classList.remove(c);el.offsetWidth;el.classList.add(c)}
+async function finish(ok,why,heard){
+  if(resolved)return;
+  resolved=true;clearTimeout(timer);stopRec();setBar(false);
+  const nm=art(cur.name)+cur.name;
+  if(ok){
+    stars++;streak++;
+    $('stars').textContent='⭐ '+stars;$('streak').textContent=streak>=2?'🔥 '+streak:'';
+    anim(document.querySelector('.card'),'pop');fanfare();
+    let line=pick(PRAISE)+' That is '+nm+'.';
+    if(streak>=3)line+=' '+streak+' in a row!';
+    if(stars%5===0)line+=' You are a superstar!';
+    $('msg').textContent='🎉 '+line;
+    await say(line);
+  }else{
+    streak=0;$('streak').textContent='';
+    anim($('photo'),'shake');
+    const t=why==='time',lead=t?pick(TIMEUP):pick(OOPS);
+    $('msg').textContent=(t?'⏰ ':'🤔 ')+lead+' It\'s '+nm+'.'+(heard?` (I heard "${heard}")`:'');
+    await say(lead+' That is '+nm+'. On to the next one!');
+  }
+  if(running)next();
+}
+
+function startRec(){
+  if(!SR)return;
+  stopRec();
+  const r=new SR();rec=r;
+  r.lang='en-GB';r.continuous=true;r.interimResults=true;r.maxAlternatives=5;
+  r.onresult=e=>{
+    if(resolved)return;
+    const res=e.results[e.results.length-1];
+    const alts=[...res].map(a=>a.transcript);
+    if(alts.some(h=>matches(h,cur)))finish(true);
+    else if(res.isFinal)finish(false,'wrong',alts[0]);
+  };
+  r.onerror=e=>{
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      running=false;resolved=true;clearTimeout(timer);setBar(false);setMic();
+      $('msg').textContent='Microphone blocked — allow it in the browser\'s site settings, then tap Test me.';
+    }
+  };
+  r.onend=()=>{if(!resolved&&running&&rec===r){try{r.start()}catch(e){}}};
+  try{r.start()}catch(e){}
+}
+
+if(!SR){$('typed').style.display='flex';$('msg').textContent='Speech recognition isn\'t supported in this browser — you can type the country instead (Chrome supports the microphone). Tap Test me.'}
+$('mic').onclick=async()=>{
+  if(running){
+    running=false;resolved=true;clearTimeout(timer);stopRec();speechSynthesis.cancel();setBar(false);setMic();document.body.classList.remove('playing');
+    $('msg').textContent='Great playing! You scored '+stars+' ⭐ Tap Test me to play again.';
+    say('Great playing! You got '+stars+(stars===1?' star.':' stars.'));return;
+  }
+  running=true;setMic();streak=0;
+  ac=ac||new(window.AudioContext||window.webkitAudioContext)();ac.resume();
+  $('msg').textContent='Hello! Let\'s play! 🎉';
+  await say('Hello! Let\'s play! You have ten seconds for each one. Good luck!');
+  if(running)next();
+};
+$('tgo').onclick=()=>{const v=$('tin').value;$('tin').value='';if(!v||!running||resolved)return;matches(v,cur)?finish(true):finish(false,'wrong',v)};
+$('tin').onkeydown=e=>{if(e.key==='Enter')$('tgo').click()};
+$('skip').onclick=()=>{if(running&&!resolved){resolved=true;clearTimeout(timer);stopRec();next()}};
+
+// ---- Learn mode: see every answer first ----
+const TINY='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+let learning=false,li=0,auto=false,autoTok=0;
+async function showLearn(){
+  const b=BREEDS[li];
+  $('lcount').textContent=(li+1)+' of '+BREEDS.length;
+  $('lname').textContent=b.name;
+  const u=await getPhoto(b);
+  if(!learning||BREEDS[li]!==b)return;
+  $('photo').src=u||TINY;
+  await say('This is '+art(b.name)+b.name+'.');
+}
+function goLearn(d){li=(li+d+BREEDS.length)%BREEDS.length;return showLearn()}
+async function autoLoop(tok){
+  while(auto&&tok===autoTok&&learning){
+    await new Promise(r=>setTimeout(r,1500));
+    if(!auto||tok!==autoTok||!learning)return;
+    await goLearn(1);
+  }
+}
+function stopLearn(){
+  learning=false;auto=false;autoTok++;speechSynthesis.cancel();
+  document.body.classList.remove('learning');$('lauto').textContent='▶ Auto-play';
+  $('msg').textContent='Tap 📖 Learn to meet them all first, then 🎯 Test me!';
+}
+$('learn').onclick=()=>{
+  if(running)return;
+  learning=true;li=0;document.body.classList.add('learning');
+  $('msg').textContent='Listen, then say each one out loud! 🗣️';
+  showLearn();
+};
+$('lprev').onclick=()=>goLearn(-1);
+$('lnext').onclick=()=>goLearn(1);
+$('lhear').onclick=()=>say('This is '+art(BREEDS[li].name)+BREEDS[li].name+'.');
+$('lauto').onclick=()=>{
+  auto=!auto;$('lauto').textContent=auto?'⏸ Pause':'▶ Auto-play';
+  if(auto)autoLoop(++autoTok);else{autoTok++}
+};
+$('lclose').onclick=stopLearn;
+$('ltest').onclick=()=>{stopLearn();$('mic').click()};
+</script>
+</body>
+</html>
 
