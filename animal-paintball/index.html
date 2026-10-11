@@ -340,8 +340,8 @@
         this.name = animalData.name;
         this.emoji = animalData.emoji;
         this.color = animalData.color;
-        // One fast target – challenging size
-        this.radius = 28 + Math.random() * 12;
+        // Bigger targets so the animal picture is easy to see
+        this.radius = 52 + Math.random() * 16;
         this.x = this.radius + Math.random() * (canvas.width - this.radius * 2);
         this.y = this.radius + 70 + Math.random() * (canvas.height * 0.5);
         // Quite fast movement so one shot is hard
