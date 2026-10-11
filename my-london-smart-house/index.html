@@ -1,1 +1,136 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My London Smart House</title>
+<style>
+:root{--bg:#fdf1dc;--ink:#2b2b3a;--card:#fff;--brick:#b94a35;--acc:#2f7de1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1c2a;--ink:#f4efe4;--card:#2c2b3d}}
+:root[data-theme="dark"]{--bg:#1d1c2a;--ink:#f4efe4;--card:#2c2b3d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0 auto;max-width:560px;padding:8px 10px 24px;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Comic Sans MS",system-ui,sans-serif;user-select:none;-webkit-user-select:none}
+.top{display:flex;align-items:center;gap:6px}
+h1{font-size:19px;margin:0;flex:1}
+.top button{font:inherit;font-size:14px;border:0;border-radius:14px;padding:7px 10px;background:var(--card);color:var(--ink);touch-action:manipulation}
+.roofwrap{position:relative;height:58px;margin-top:6px}
+.roof{position:absolute;inset:0;background:var(--brick);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.pot{position:absolute;top:4px;width:16px;height:26px;background:#873623;border-radius:3px}
+.house{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#7a3a2a;border-radius:0 0 8px 8px}
+.room{position:relative;height:104px;border-radius:4px;overflow:hidden;box-shadow:inset 0 -9px 0 rgba(0,0,0,.13)}
+.room.sel{outline:4px solid var(--acc);outline-offset:-4px}
+.room b{position:absolute;left:6px;top:3px;font-size:11px;color:#333;opacity:.75}
+.lt{position:absolute;right:3px;top:2px;border:0;background:#fffa;border-radius:12px;font-size:16px;padding:0 5px;touch-action:manipulation}
+.room.off::after{content:"";position:absolute;inset:0;background:rgba(15,15,50,.55);pointer-events:none}
+#layer{position:absolute;inset:0;pointer-events:none}
+.it{position:absolute;width:40px;height:40px;font-size:34px;line-height:40px;text-align:center;pointer-events:auto;touch-action:none;filter:drop-shadow(0 2px 1px #0004)}
+.it.p{font-size:38px}
+.it.sel{background:#ffe3604d;border-radius:50%;outline:3px solid gold}
+.nm{position:absolute;top:36px;left:50%;transform:translateX(-50%);font-size:9px;line-height:12px;white-space:nowrap;background:#fffd;color:#222;border-radius:6px;padding:0 4px}
+.bub{position:absolute;transform:translate(-50%,-100%);max-width:150px;background:#fff;color:#222;border:3px solid var(--acc);border-radius:14px;padding:4px 8px;font-size:13px;font-weight:700;text-align:center;z-index:9;pointer-events:none;box-shadow:0 2px 6px #0004}
+.bub.me{border-color:#f08a24}
+.ghost{position:fixed;font-size:46px;transform:translate(-50%,-50%);pointer-events:none;z-index:99;filter:drop-shadow(0 6px 4px #0005)}
+.tabs{display:flex;gap:6px;margin:10px 0 6px}
+.tabs button{flex:1;font:inherit;font-size:14px;padding:8px 2px;border-radius:14px;border:3px solid transparent;background:var(--card);color:var(--ink);touch-action:manipulation}
+.tabs button.on{border-color:var(--acc)}
+#bin{flex:0 0 52px;display:flex;align-items:center;justify-content:center;font-size:26px;border-radius:14px;background:var(--card);border:3px dashed #e5484d}
+#tray{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;background:var(--card);padding:8px;border-radius:16px}
+.cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:29px;line-height:1.1;touch-action:none;border-radius:12px;border:2px dashed #8886}
+.cell small{font-size:9px;opacity:.75}
+.talk{display:flex;gap:10px;align-items:center;margin-top:10px;background:var(--card);padding:8px 10px;border-radius:16px}
+#mic{flex:none;width:68px;height:68px;border-radius:50%;border:0;background:#e5484d;color:#fff;font-size:32px;touch-action:manipulation}
+#mic.on{animation:pu 1s infinite}
+@keyframes pu{50%{transform:scale(1.12)}}
+#who{flex:1;font-size:15px;font-weight:700}
+#typed{display:none;gap:6px;margin-top:8px}
+#typed input{flex:1;font:inherit;font-size:16px;padding:8px 10px;border-radius:12px;border:2px solid #8886;background:var(--card);color:var(--ink);min-width:0}
+#typed button{font:inherit;border:0;border-radius:12px;padding:0 14px;background:var(--acc);color:#fff}
+.hint{font-size:12px;opacity:.7;margin:8px 2px 0;text-align:center}
+</style></head><body>
+<div class="top"><h1>🏠 My London Smart House</h1><button id="bell">🔔 Doorbell</button><button id="tidy">🧹 Tidy</button></div>
+<div class="roofwrap"><div class="roof"></div><div class="pot" style="left:24%"></div><div class="pot" style="left:70%"></div></div>
+<div class="house" id="house"><div id="layer"></div></div>
+<div class="tabs" id="tabs"><div id="bin">🗑️</div></div>
+<div id="tray"></div>
+<div class="talk"><button id="mic" aria-label="Talk">🎤</button><div id="who"></div></div>
+<div id="typed"><input id="ti" placeholder="Type what to say…" maxlength="80"><button id="tb">Say</button></div>
+<p class="hint">Drag things into rooms. Tap 💡 for lights. Tap a person, then 🎤 and talk!</p>
+<script>
+const $=s=>document.querySelector(s),house=$('#house'),layer=$('#layer');
+const R=[["Attic Playroom","#dcefff"],["Attic Bedroom","#eadcff"],["Kids' Bedroom","#ffe3ea"],["Bathroom","#d9f7ef"],["Living Room","#ffecc7"],["Kitchen","#fff8c9"],["Hall","#ece6da"],["Garden Room","#dcf5d0"]];
+const rooms=R.map((r,i)=>{const d=document.createElement('div');d.className='room';d.style.background=r[1];d.innerHTML='<b>'+r[0]+'</b><button class="lt" aria-label="Light">💡</button>';house.insertBefore(d,layer);d.querySelector('.lt').onclick=()=>{S.lights[i]^=1;render();save()};d.onclick=e=>{if(e.target.closest('.lt'))return;S.room=i;render()};return d});
+const CAT=[["🛋️ Furniture",[["🛏️","bed"],["🛋️","sofa"],["🪑","chair"],["🚽","loo"],["🛁","bath"],["🚿","shower"],["📺","telly"],["🧊","fridge"],["🪞","mirror"],["🗄️","cupboard"],["🎹","piano"],["🧺","washing"]]],
+["🧸 Things",[["🧸","teddy"],["🪴","plant"],["📚","books"],["⚽","ball"],["☕","tea"],["🍎","apple"],["🍞","toast"],["🍳","pan"],["🧼","soap"],["🪥","toothbrush"],["🚲","bike"],["🎂","cake"]]],
+["👪 People",[["👩","Mum","Mum, kind and cheerful",1.2],["👨","Dad","Dad, funny and gentle",.7],["👵","Nana","Nana, warm and loves tea",1.1],["👴","Grandad","Grandad, jolly and loves stories",.6],["👧","Ella","Ella, a playful big sister",1.6],["👦","Sam","Sam, a curious little boy",1.5],["👶","Baby","Baby Bea, who says tiny baby words",1.9],["🐶","Biscuit","Biscuit the dog, who answers with woofs and a few simple words",.5],["🐱","Marmalade","Marmalade the cat, who answers with meows and a few simple words",1.8]]]];
+const HOUSE={house:1,n:"Smart House",d:"the cheerful 'Hey House' voice assistant of the smart home",p:1,e:"🏠"};
+let S=null,tab=0;
+try{S=JSON.parse(localStorage.getItem('lh1'))}catch(e){}
+if(!S||!S.items){S={items:[],lights:R.map(_=>1),sel:null,room:4,n:0};
+ const P=n=>CAT[2][1].find(p=>p[1]==n);
+ [["🧊","fridge",5,1,.34],["🛋️","sofa",4,0,.1],["📺","telly",4,0,.36],["🛏️","bed",2,0,.1],["🧸","teddy",2,0,.34],["🛁","bath",3,0,.1],["🪴","plant",6,0,.1],["🚲","bike",7,0,.1]].forEach(a=>S.items.push({id:++S.n,k:0,e:a[0],n:a[1],x:(a[2]%2)*.5+a[4],y:(a[2]>>1)*.24+.08}));
+ [["Mum",5,.12],["Sam",4,.22],["Ella",2,.22],["Biscuit",6,.3]].forEach(a=>{const p=P(a[0]);S.items.push({id:++S.n,k:1,e:p[0],n:p[1],d:p[2],p:p[3],x:(a[1]%2)*.5+a[2],y:(a[1]>>1)*.24+.1})})}
+S.lights=S.lights||R.map(_=>1);
+function save(){try{localStorage.setItem('lh1',JSON.stringify(S))}catch(e){}}
+function roomAt(x,y){return rooms.findIndex(r=>{const b=r.getBoundingClientRect();return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom})}
+function roomOf(it){const h=house.getBoundingClientRect();return roomAt(h.left+it.x*h.width+20,h.top+it.y*h.height+20)}
+function render(){const h=house.getBoundingClientRect();layer.innerHTML='';
+ rooms.forEach((r,i)=>{r.classList.toggle('off',!S.lights[i]);r.classList.toggle('sel',S.room===i)});
+ S.items.forEach(it=>{const d=document.createElement('div');d.className='it'+(it.k?' p':'')+(S.sel===it.id?' sel':'');d.dataset.id=it.id;d.style.left=it.x*h.width+'px';d.style.top=it.y*h.height+'px';d.textContent=it.e;
+  if(it.k){const s=document.createElement('span');s.className='nm';s.textContent=it.n;d.append(s)}
+  d.onpointerdown=e=>startDrag(e,it);layer.append(d)});updWho()}
+function updWho(){const p=S.items.find(i=>i.id===S.sel);$('#who').textContent=p?'Tap 🎤 and say something to '+p.n+'!':'Tap a person 👆 then tap 🎤'}
+function put(it,x,y,ri){const b=rooms[ri].getBoundingClientRect(),h=house.getBoundingClientRect();
+ x=Math.min(Math.max(x,b.left+22),b.right-22);y=Math.min(Math.max(y,b.top+34),b.bottom-30);
+ if(!it.id){it.id=++S.n;S.items.push(it)}it.x=(x-20-h.left)/h.width;it.y=(y-20-h.top)/h.height;if(it.k)S.sel=it.id}
+function startDrag(e,src){e.preventDefault();const sx=e.clientX,sy=e.clientY;let mv=false;
+ const g=document.createElement('div');g.className='ghost';g.textContent=src.e;
+ const orig=src.id?layer.querySelector('[data-id="'+src.id+'"]'):null;
+ function m(ev){if(!mv&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>8){mv=true;document.body.append(g);if(orig)orig.style.opacity=.3}
+  if(mv){g.style.left=ev.clientX+'px';g.style.top=ev.clientY+'px'}}
+ function u(ev){removeEventListener('pointermove',m);removeEventListener('pointerup',u);removeEventListener('pointercancel',u);g.remove();
+  if(!mv){if(!src.id){const b=rooms[S.room].getBoundingClientRect();put(src,b.left+30+Math.random()*(b.width-60),b.top+36+Math.random()*(b.height-70),S.room)}
+   else if(src.k)S.sel=S.sel===src.id?null:src.id}
+  else{const x=ev.clientX,y=ev.clientY,bn=$('#bin').getBoundingClientRect();
+   if(x>=bn.left&&x<=bn.right&&y>=bn.top&&y<=bn.bottom){if(src.id){S.items=S.items.filter(i=>i!==src);if(S.sel===src.id)S.sel=null}}
+   else{const ri=roomAt(x,y);if(ri>=0)put(src,x,y,ri)}}
+  render();save()}
+ addEventListener('pointermove',m);addEventListener('pointerup',u);addEventListener('pointercancel',u)}
+function drawTray(){const t=$('#tray');t.innerHTML='';CAT[tab][1].forEach(a=>{const c=document.createElement('div');c.className='cell';c.innerHTML=a[0]+'<small>'+a[1]+'</small>';
+ c.onpointerdown=e=>startDrag(e,tab==2?{e:a[0],n:a[1],d:a[2],p:a[3],k:1}:{e:a[0],n:a[1],k:0});t.append(c)});
+ document.querySelectorAll('#tabs button').forEach((b,i)=>b.classList.toggle('on',i==tab))}
+CAT.forEach((c,i)=>{const b=document.createElement('button');b.textContent=c[0];b.onclick=()=>{tab=i;drawTray()};$('#tabs').insertBefore(b,$('#bin'))});
+/* talking */
+let SAMPLE=null;try{window.claude&&claude.use("sample").then(s=>SAMPLE=s).catch(()=>{})}catch(e){}
+function bubble(who,text,cls,ri){const h=house.getBoundingClientRect();let x,y;
+ if(who.house){const b=rooms[ri].getBoundingClientRect();x=b.left-h.left+b.width/2;y=b.top-h.top+52}else{x=who.x*h.width+20;y=who.y*h.height+2}
+ x=Math.min(Math.max(x,80),h.width-80);const d=document.createElement('div');d.className='bub '+(cls||'');d.textContent=text;d.style.left=x+'px';d.style.top=Math.max(y,30)+'px';layer.append(d);setTimeout(()=>d.remove(),cls=='me'?4500:8000);return d}
+function say(t,p){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.pitch=p||1;u.rate=.95;const v=speechSynthesis.getVoices().find(v=>v.lang=='en-GB');if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+async function reply(sp,li,text,ri){
+ if(/light|lamp/i.test(text)){const off=/\boff\b|dark|sleep|night/i.test(text);S.lights[ri]=off?0:1;render();save();return off?"Okay, lights off. Night night!":"Okay, lights on! So bright!"}
+ const near=S.items.filter(i=>!i.k&&roomOf(i)==ri).map(i=>i.n).join(", ")||"nothing yet";
+ if(SAMPLE){try{const r=await SAMPLE("You are "+li.d+", in a toddler's pretend smart London house. You are in the "+R[ri][0]+" with: "+near+". "+sp.n+" says to you: \""+text+"\". Reply in ONE very short, warm, silly sentence (max 12 words) that a 3-year-old understands, answering the question if there is one. Plain text only, no emojis, no quotation marks.",{modelTier:'quick',cache:false});
+  const t=(r.text||'').trim().replace(/^["']+|["']+$/g,'');if(t)return t.slice(0,140)}catch(e){}}
+ const f=/dog/.test(li.d)?["Woof woof! I love you!","Woof! Can I have a biscuit?"]:/cat/.test(li.d)?["Meow! Time for a cuddle!","Purr purr, hello friend!"]:["Ooh, what a lovely idea!","Yes please! That sounds fun!","Let's play together!","I am having a lovely day!"];
+ return f[Math.random()*f.length|0]}
+async function ask(text){text=(text||'').trim();if(!text)return;
+ const sp=S.items.find(i=>i.id===S.sel);if(!sp){bubble({house:1},"Tap a person first! 👆","",S.room);return}
+ const ri=roomOf(sp);if(ri<0)return;
+ const o=S.items.filter(i=>i.k&&i!==sp&&roomOf(i)==ri).sort((a,b)=>Math.hypot(a.x-sp.x,a.y-sp.y)-Math.hypot(b.x-sp.x,b.y-sp.y));
+ const li=o[0]||HOUSE;bubble(sp,text,'me',ri);const th=bubble(li,'…','',ri);
+ const a=await reply(sp,li,text,ri);th.remove();bubble(li,a,'',ri);say(a,li.p)}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,live=false;
+function typed(){$('#typed').style.display='flex'}
+$('#mic').onclick=()=>{if(!S.items.find(i=>i.id===S.sel)){bubble({house:1},"Tap a person first! 👆","",S.room);return}
+ if(!SR){typed();return}if(live){rec.stop();return}
+ rec=new SR();rec.lang='en-GB';rec.interimResults=false;
+ rec.onstart=()=>{live=true;$('#mic').classList.add('on');$('#who').textContent='Listening… 👂'};
+ rec.onend=()=>{live=false;$('#mic').classList.remove('on');updWho()};
+ rec.onerror=()=>typed();rec.onresult=e=>ask(e.results[0][0].transcript);
+ try{rec.start()}catch(e){typed()}};
+const go=()=>{const i=$('#ti');ask(i.value);i.value=''};
+$('#tb').onclick=go;$('#ti').onkeydown=e=>{if(e.key=='Enter')go()};
+$('#bell').onclick=()=>{try{const c=new (window.AudioContext||window.webkitAudioContext)();[660,520].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=f;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.25,c.currentTime+i*.4);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.4+.38);o.start(c.currentTime+i*.4);o.stop(c.currentTime+i*.4+.4)})}catch(e){}
+ bubble({house:1},"Ding dong! 🔔 Someone is at the door!","",6);setTimeout(()=>say("Ding dong! Someone is at the door!",1),700)};
+let tt=0;$('#tidy').onclick=function(){if(!tt){this.textContent='Sure? 🧹';tt=setTimeout(()=>{tt=0;this.textContent='🧹 Tidy'},3000)}else{clearTimeout(tt);tt=0;this.textContent='🧹 Tidy';S.items=[];S.sel=null;S.lights=R.map(_=>1);render();save()}};
+addEventListener('resize',render);drawTray();render();
+</script></body></html>
 
