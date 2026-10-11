@@ -1,1 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>What Colour?</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#fff7e0;--card:#fff;--ink:#2b2b3a;--accent:#ff5d8f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#22203a;--card:#34325a;--ink:#fff}}
+:root[data-theme="dark"]{--bg:#22203a;--card:#34325a;--ink:#fff}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Baloo 2","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;text-align:center;min-height:100vh;overflow-x:hidden}
+h1{margin:14px 0 4px;font-size:2rem;letter-spacing:1px}
+h1 span:nth-child(1){color:#e53935}h1 span:nth-child(2){color:#fb8c00}h1 span:nth-child(3){color:#fdd835}h1 span:nth-child(4){color:#43a047}h1 span:nth-child(5){color:#1e88e5}h1 span:nth-child(6){color:#8e24aa}
+#score{font-size:1.4rem;min-height:2rem}
+#card{background:var(--card);margin:10px auto;max-width:420px;width:92%;border-radius:32px;padding:18px 10px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+#pic{font-size:min(46vw,190px);line-height:1.1;transition:transform .3s;user-select:none}
+#pic.pop{animation:pop .5s}
+#pic.shake{animation:shake .4s}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
+#q{font-size:1.6rem;margin:4px 0}
+#msg{font-size:1.5rem;min-height:2.2rem;font-weight:bold}
+button{font:inherit;border:0;cursor:pointer;border-radius:999px}
+#mic{font-size:1.6rem;padding:16px 34px;background:var(--accent);color:#fff;box-shadow:0 6px 0 #c23a6a;margin:8px}
+#mic.on{background:#43a047;box-shadow:0 6px 0 #2e7d32;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+#next,#hear{font-size:1.2rem;padding:10px 22px;margin:4px;background:#1e88e5;color:#fff}
+#next{display:none}
+#fallback{display:none;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px}
+#fallback button{width:56px;height:56px;border:4px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.conf{position:fixed;top:-60px;font-size:2rem;pointer-events:none;animation:fall linear forwards;z-index:9}
+@keyframes fall{to{transform:translateY(115vh) rotate(540deg)}}
+#big{position:fixed;inset:0;display:none;align-items:center;justify-content:center;font-size:min(16vw,90px);font-weight:900;color:#fff;text-shadow:0 4px 0 #c23a6a,0 0 24px #ffd600;z-index:8;pointer-events:none;animation:pop .6s}
+</style>
+</head>
+<body>
+<h1><span>W</span><span>h</span><span>a</span><span>t</span> <span>C</span><span>olour?</span></h1>
+<div id="score">⭐ 0</div>
+<div id="card">
+  <div id="pic">🍎</div>
+  <div id="q">What colour is it?</div>
+  <div id="msg">Tap the button and say it!</div>
+</div>
+<button id="mic">🎤 Say the colour</button><br>
+<button id="hear">🔊 Say it again</button>
+<button id="next">Next ➡️</button>
+<div id="fallback"></div>
+<div id="big">🎉 WELL DONE! 🎉</div>
+
+<script>
+var COLOURS={red:"#e53935",orange:"#fb8c00",yellow:"#fdd835",green:"#43a047",blue:"#1e88e5",purple:"#8e24aa",pink:"#f48fb1",brown:"#795548",black:"#212121",white:"#ffffff",grey:"#9e9e9e"};
+var WORDS={red:["red"],orange:["orange"],yellow:["yellow"],green:["green"],blue:["blue"],purple:["purple","violet"],pink:["pink"],brown:["brown"],black:["black"],white:["white"],grey:["grey","gray"]};
+var ITEMS=[
+["🍎","red"],["🍓","red"],["🚒","red"],["🍒","red"],["🌹","red"],
+["🍊","orange"],["🥕","orange"],["🎃","orange"],["🦊","orange"],
+["🍌","yellow"],["⭐","yellow"],["🌻","yellow"],["🐤","yellow"],["🍋","yellow"],
+["🐸","green"],["🥦","green"],["🌳","green"],["🥒","green"],["🐢","green"],
+["🐳","blue"],["🦋","blue"],["💧","blue"],["🧢","blue"],
+["🍇","purple"],["🍆","purple"],["👾","purple"],["🔮","purple"],
+["🐷","pink"],["🌸","pink"],["🦩","pink"],["🎀","pink"],
+["🐻","brown"],["🍫","brown"],["🥔","brown"],["🪵","brown"],
+["🐈‍⬛","black"],["🎱","black"],
+["☁️","white"],["⛄","white"],["🥚","white"],
+["🐘","grey"],["🐭","grey"],["🪨","grey"]
+];
+var $=function(i){return document.getElementById(i)};
+var order=[],cur=null,score=0,tries=0,done=false,listening=false,rec=null;
+
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function say(t){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.rate=.9;u.pitch=1.2;speechSynthesis.speak(u)}catch(e){}}
+
+function nextItem(){
+  if(!order.length)order=shuffle(ITEMS.slice());
+  cur=order.pop();tries=0;done=false;
+  var p=$("pic");p.textContent=cur[0];p.className="";void p.offsetWidth;p.className="pop";
+  $("msg").textContent="Tap the button and say it!";
+  $("next").style.display="none";$("mic").style.display="";
+  say("What colour is it?");
+}
+
+/* Fanfare */
+var ac=null;
+function tone(f,t,d,type,v){var o=ac.createOscillator(),g=ac.createGain();o.type=type||"sawtooth";o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v||.18,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d+.05)}
+function fanfare(){
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    var t=ac.currentTime+.05;
+    var seq=[[523,.12],[523,.12],[523,.12],[659,.3],[587,.14],[659,.14],[784,.7]];
+    var x=t;seq.forEach(function(n){tone(n[0],x,n[1]+.1,"sawtooth",.16);tone(n[0]/2,x,n[1]+.1,"square",.08);x+=n[1]+.04});
+    [523,659,784,1047].forEach(function(f){tone(f,x+.05,1.2,"triangle",.14)});
+    for(var i=0;i<8;i++)tone(1200+i*220,x+.3+i*.07,.2,"sine",.08);
+  }catch(e){}
+  confetti();
+  var b=$("big");b.style.display="flex";b.style.animation="none";void b.offsetWidth;b.style.animation="pop .6s";
+  setTimeout(function(){b.style.display="none"},2600);
+}
+function confetti(){
+  var E=["🎉","⭐","🎊","✨","🌈","💖","🎈","🌟"];
+  for(var i=0;i<70;i++){
+    var s=document.createElement("div");s.className="conf";
+    s.textContent=E[i%E.length];s.style.left=Math.random()*100+"vw";
+    s.style.animationDuration=(2+Math.random()*2.5)+"s";s.style.animationDelay=(Math.random()*.8)+"s";
+    document.body.appendChild(s);setTimeout(function(el){el.remove()},5500,s);
+  }
+}
+
+function judge(text){
+  if(done)return false;
+  var s=" "+text.toLowerCase().replace(/[^a-z ]/g," ")+" ";
+  var good=WORDS[cur[1]].some(function(w){return s.indexOf(" "+w+" ")>-1});
+  if(good){win();return true}
+  return false;
+}
+function win(){
+  done=true;score++;$("score").textContent="⭐ "+score;
+  $("msg").textContent="Yes! It's "+cur[1]+"! 🎉";
+  fanfare();say("Well done! It is "+cur[1]+"!");
+  $("mic").style.display="none";$("next").style.display="inline-block";
+}
+function wrong(heard){
+  tries++;var p=$("pic");p.className="";void p.offsetWidth;p.className="shake";
+  if(tries>=3){
+    done=true;$("msg").innerHTML="It's <span style='color:"+(cur[1]=="white"?"#999":COLOURS[cur[1]])+"'>"+cur[1]+"</span>!";
+    say("It is "+cur[1]);$("mic").style.display="none";$("next").style.display="inline-block";
+  }else{
+    $("msg").textContent="Good try! Have another go 😊";say("Good try! Have another go!");
+  }
+}
+
+/* Microphone */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function listen(){
+  if(done||listening)return;
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}
+  try{speechSynthesis.cancel()}catch(e){}
+  if(!SR){$("msg").textContent="No microphone here – tap a colour!";return}
+  rec=new SR();rec.lang="en-GB";rec.interimResults=true;rec.maxAlternatives=3;rec.continuous=false;
+  var got=false,final=false;
+  rec.onstart=function(){listening=true;$("mic").classList.add("on");$("mic").textContent="👂 Listening...";$("msg").textContent="I'm listening!"};
+  rec.onresult=function(e){
+    var r=e.results[e.results.length-1];
+    for(var i=0;i<r.length;i++){if(judge(r[i].transcript)){got=true;try{rec.stop()}catch(x){}return}}
+    if(r.isFinal)final=true;
+  };
+  rec.onerror=function(e){
+    if(e.error=="not-allowed"||e.error=="service-not-allowed"){$("msg").textContent="Please allow the microphone – or tap a colour!";$("fallback").style.display="flex"}
+    else if(e.error=="no-speech"){$("msg").textContent="I didn't hear you. Try again!"}
+  };
+  rec.onend=function(){
+    listening=false;$("mic").classList.remove("on");$("mic").textContent="🎤 Say the colour";
+    if(!got&&final&&!done)wrong();
+  };
+  try{rec.start()}catch(e){listening=false}
+}
+
+/* Tap fallback */
+(function(){
+  var f=$("fallback");
+  Object.keys(COLOURS).forEach(function(c){
+    var b=document.createElement("button");b.style.background=COLOURS[c];b.setAttribute("aria-label",c);
+    b.onclick=function(){if(done)return;if(c==cur[1])win();else wrong()};
+    f.appendChild(b);
+  });
+  if(!SR)f.style.display="flex";
+})();
+
+$("mic").onclick=listen;
+$("next").onclick=nextItem;
+$("hear").onclick=function(){say("What colour is it?")};
+$("pic").onclick=function(){say("What colour is it?")};
+nextItem();
+</script>
+</body>
+</html>
 
