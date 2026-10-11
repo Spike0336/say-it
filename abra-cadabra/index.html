@@ -1,1 +1,115 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abra Cadabra</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(#34196e,#9b4fd0 60%,#ff9ad5);font-family:"Comic Sans MS","Chalkboard SE",system-ui,sans-serif;color:#fff;text-align:center;overflow-x:hidden}
+h1{margin:10px 0 0;font-size:clamp(34px,9vw,60px);color:#ffe27a;text-shadow:0 3px 0 #b5469b}
+#stage{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;padding:6px;position:relative}
+#fairy{width:min(46vw,260px);animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px)}}
+#arm{transform-box:view-box;transform-origin:135px 140px}
+#arm.wave{animation:wave .6s ease-in-out 4}
+@keyframes wave{0%,100%{transform:rotate(0)}30%{transform:rotate(-28deg)}70%{transform:rotate(14deg)}}
+#toyBox{width:min(46vw,260px);min-height:min(46vw,260px);display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.18);border:4px dashed #ffe27a;border-radius:28px;padding:8px;position:relative}
+#toy{font-size:clamp(90px,26vw,150px);line-height:1}
+#toy.pop{animation:pop .9s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(0) rotate(-40deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+#name{font-size:clamp(22px,6vw,34px);font-weight:bold;min-height:1.3em}
+.sp{position:absolute;left:50%;top:50%;font-size:22px;pointer-events:none;animation:fly 1.1s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--x),var(--y)) scale(.3) rotate(180deg);opacity:0}}
+#mic{margin:10px auto 4px;display:block;width:clamp(110px,30vw,150px);aspect-ratio:1;border-radius:50%;border:6px solid #fff;background:radial-gradient(#ff7ac6,#d1308f);font-size:clamp(50px,14vw,70px);color:#fff;cursor:pointer;box-shadow:0 8px 0 #8a1f62}
+#mic:active{transform:translateY(4px);box-shadow:0 4px 0 #8a1f62}
+#mic.on{animation:pulse .8s infinite}
+@keyframes pulse{50%{transform:scale(1.1)}}
+#msg{font-size:clamp(18px,5vw,26px);min-height:2.4em;padding:0 12px}
+#chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:4px 10px}
+.chip{font-size:34px;background:#fff3;border:2px solid #fff8;border-radius:16px;padding:4px 12px;cursor:pointer}
+#shelf{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:6px 10px 0;min-height:56px}
+#shelf button{font-size:40px;background:none;border:0;cursor:pointer}
+#typed{margin:10px auto 18px;display:flex;gap:6px;justify-content:center;opacity:.85;padding:0 10px}
+#typed input{font:inherit;padding:8px 12px;border-radius:12px;border:0;width:min(260px,60vw)}
+#typed button{font:inherit;padding:8px 14px;border-radius:12px;border:0;background:#ffe27a;cursor:pointer}
+</style></head><body>
+<h1>✨ Abra Cadabra ✨</h1>
+<div id="stage">
+<svg id="fairy" viewBox="0 0 220 270" aria-label="Fairy Godmother">
+<ellipse cx="55" cy="130" rx="40" ry="55" fill="#e8f6ff" opacity=".75" transform="rotate(-20 55 130)"/>
+<ellipse cx="160" cy="130" rx="38" ry="52" fill="#e8f6ff" opacity=".75" transform="rotate(20 160 130)"/>
+<path d="M62 135 L138 135 L180 258 L20 258 Z" fill="#ff7ac6"/>
+<path d="M62 135 L138 135 L150 160 L50 160 Z" fill="#ff9ad5"/>
+<circle cx="80" cy="200" r="5" fill="#ffe27a"/><circle cx="118" cy="222" r="5" fill="#ffe27a"/><circle cx="100" cy="176" r="4" fill="#ffe27a"/>
+<line x1="68" y1="145" x2="40" y2="185" stroke="#ffd9b8" stroke-width="12" stroke-linecap="round"/>
+<circle cx="100" cy="88" r="38" fill="#f6c453"/>
+<circle cx="100" cy="95" r="30" fill="#ffd9b8"/>
+<path d="M68 85 Q100 40 132 85 Q100 62 68 85Z" fill="#f6c453"/>
+<polygon points="76,58 82,36 92,52 100,30 108,52 118,36 124,58" fill="#ffd23f" stroke="#e0a800" stroke-width="2"/>
+<circle cx="89" cy="95" r="4" fill="#3a2a5a"/><circle cx="111" cy="95" r="4" fill="#3a2a5a"/>
+<circle cx="80" cy="106" r="6" fill="#ff9ab0" opacity=".7"/><circle cx="120" cy="106" r="6" fill="#ff9ab0" opacity=".7"/>
+<path d="M90 106 Q100 118 110 106" stroke="#c0305f" stroke-width="3" fill="none" stroke-linecap="round"/>
+<g id="arm">
+<line x1="135" y1="145" x2="172" y2="108" stroke="#ffd9b8" stroke-width="12" stroke-linecap="round"/>
+<line x1="172" y1="108" x2="198" y2="62" stroke="#8a5a2b" stroke-width="5" stroke-linecap="round"/>
+<polygon points="198,40 203,55 218,55 206,64 210,79 198,70 186,79 190,64 178,55 193,55" fill="#ffe27a" stroke="#e0a800" stroke-width="2"/>
+</g></svg>
+<div id="toyBox"><div id="toy">🎁</div><div id="name">?</div></div>
+</div>
+<button id="mic" aria-label="Tap and talk to the fairy">🎤</button>
+<div id="msg">Tap the button and say:<br>“Abra Cadabra Fairy Godmother, give me a Soldier!”</div>
+<div id="chips"></div>
+<div id="shelf"></div>
+<div id="typed"><input id="inp" placeholder="Grown-up: type a toy…" autocomplete="off"><button id="go">Go</button></div>
+<script>
+const $=id=>document.getElementById(id);
+const LOCAL={soldier:["💂","Toy Soldier"],teddy:["🧸","Teddy Bear"],bear:["🧸","Teddy Bear"],car:["🚗","Toy Car"],train:["🚂","Toy Train"],ball:["⚽","Ball"],drum:["🥁","Toy Drum"],robot:["🤖","Toy Robot"],horse:["🐴","Toy Horse"],duck:["🦆","Rubber Duck"],kite:["🪁","Kite"],doll:["🪆","Doll"],rocket:["🚀","Toy Rocket"],plane:["✈️","Toy Plane"],aeroplane:["✈️","Toy Plane"],boat:["⛵","Toy Boat"],bus:["🚌","Toy Bus"],truck:["🚚","Toy Truck"],blocks:["🧱","Building Blocks"],piano:["🎹","Toy Piano"],guitar:["🎸","Toy Guitar"],unicorn:["🦄","Toy Unicorn"],dinosaur:["🦖","Toy Dinosaur"],dino:["🦖","Toy Dinosaur"],bunny:["🐰","Toy Bunny"],rabbit:["🐰","Toy Bunny"],balloon:["🎈","Balloon"],puzzle:["🧩","Puzzle"],yoyo:["🪀","Yo-yo"],helicopter:["🚁","Toy Helicopter"],tractor:["🚜","Toy Tractor"],digger:["🚜","Toy Digger"],trumpet:["🎺","Toy Trumpet"],crown:["👑","Toy Crown"],wand:["🪄","Magic Wand"]};
+const SURPRISE=["🧸","🚗","🤖","🦆","🚂","🪁","🚀","🎈"];
+const SURNAMES={"🧸":"Teddy Bear","🚗":"Toy Car","🤖":"Toy Robot","🦆":"Rubber Duck","🚂":"Toy Train","🪁":"Kite","🚀":"Toy Rocket","🎈":"Balloon"};
+const CHIPS=["💂","🧸","🚗","🤖","🚂","🦆"];
+const CHIPW={"💂":"soldier","🧸":"teddy","🚗":"car","🤖":"robot","🚂":"train","🦆":"duck"};
+let sample=null,busy=false,rec=null,listening=false;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+function speak(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.9;u.pitch=1.6;speechSynthesis.speak(u)}catch(e){}}
+function clean(s){return s.toLowerCase().replace(/abra\s*ca\s*dabra|abracadabra|fairy\s*god\s*mother|give me|can i have|i want|please|\b(a|an|the|some|my)\b/g," ").replace(/[^a-z\s]/g," ").replace(/\s+/g," ").trim()}
+function local(h){const w=clean(h).split(" ");for(const x of w){const k=x.replace(/s$/,"");if(LOCAL[x])return LOCAL[x];if(LOCAL[k])return LOCAL[k]}const e=SURPRISE[Math.floor(Math.random()*SURPRISE.length)];return[e,SURNAMES[e],"Here is a surprise toy!"]}
+async function getToy(h){
+  if(sample){try{
+    const r=await sample.json(`A 3-year-old child said this to a fairy godmother (speech may be mispronounced): "${h}". Choose ONE safe, friendly TOY they most likely asked for. If it is not a toy, choose the closest similar toy. Reply ONLY with JSON: {"name":"Toy Soldier","emoji":"💂","line":"a short cheerful fairy sentence of under 12 words"}`,{modelTier:"quick"});
+    if(r&&r.emoji&&r.name)return[r.emoji,r.name,r.line||("Here is your "+r.name+"!")];
+  }catch(e){}}
+  const l=local(h);return[l[0],l[1],l[2]||("Here is your "+l[1]+"!")];
+}
+function sparkle(){const b=$("toyBox");for(let i=0;i<22;i++){const s=document.createElement("span");s.className="sp";s.textContent=["✨","⭐","💫","🌟"][i%4];const a=Math.random()*6.28,d=70+Math.random()*90;s.style.setProperty("--x",Math.cos(a)*d+"px");s.style.setProperty("--y",Math.sin(a)*d+"px");b.appendChild(s);setTimeout(()=>s.remove(),1200)}}
+async function handle(h){
+  if(busy||!h.trim())return;busy=true;
+  $("msg").textContent="Abra Cadabra! ✨";speak("Abra Cadabra!");
+  const arm=$("arm");arm.classList.remove("wave");void arm.getBBox();arm.classList.add("wave");
+  $("toy").textContent="✨";$("name").textContent="";
+  const [e,n,line]=await getToy(h);
+  await new Promise(r=>setTimeout(r,1500));
+  const t=$("toy");t.classList.remove("pop");void t.offsetWidth;t.textContent=e;t.classList.add("pop");
+  $("name").textContent=n;$("msg").textContent=line;sparkle();speak(line);
+  const b=document.createElement("button");b.textContent=e;b.title=n;b.onclick=()=>{$("toy").textContent=e;$("name").textContent=n;speak(n)};
+  const sh=$("shelf");sh.prepend(b);while(sh.children.length>8)sh.lastChild.remove();
+  busy=false;
+}
+async function ensureSample(){if(sample)return;try{sample=await claude.use("sample")}catch(e){sample=null}}
+$("mic").onclick=async()=>{
+  await ensureSample();
+  if(!SR){$("msg").textContent="Ask a grown-up to type, or tap a toy below!";return}
+  if(listening){rec&&rec.stop();return}
+  rec=new SR();rec.lang="en-GB";rec.interimResults=false;
+  rec.onstart=()=>{listening=true;$("mic").classList.add("on");$("msg").textContent="I'm listening… 👂"};
+  rec.onend=()=>{listening=false;$("mic").classList.remove("on")};
+  rec.onerror=()=>{$("msg").textContent="I couldn't hear you. Tap a toy below, or try again!"};
+  rec.onresult=ev=>handle(ev.results[0][0].transcript);
+  try{rec.start()}catch(e){}
+};
+CHIPS.forEach(e=>{const c=document.createElement("button");c.className="chip";c.textContent=e;c.onclick=async()=>{await ensureSample();handle("abra cadabra fairy godmother give me a "+CHIPW[e])};$("chips").appendChild(c)});
+async function typed(){await ensureSample();const v=$("inp").value;$("inp").value="";handle(v)}
+$("go").onclick=typed;$("inp").onkeydown=e=>{if(e.key==="Enter")typed()};
+</script></body></html>
 
