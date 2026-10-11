@@ -1,1 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>What Are You Doing?</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#fff8e1;--ink:#3a2e1f;--card:#fff;--ring:#ff7043}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a2433;--ink:#fff3d6;--card:#3b3348}}
+:root[data-theme="dark"]{--bg:#2a2433;--ink:#fff3d6;--card:#3b3348}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Comic Sans MS","Trebuchet MS",system-ui,sans-serif;text-align:center;padding:12px}
+h1{margin:6px 0;font-size:1.7rem}
+#bubble{min-height:64px;margin:8px auto;max-width:480px;background:#fff;color:#3a2e1f;border:4px solid var(--ring);border-radius:24px;padding:12px 16px;font-size:1.5rem;font-weight:bold;display:flex;align-items:center;justify-content:center}
+#ask{font:inherit;font-size:1.2rem;font-weight:bold;background:var(--ring);color:#fff;border:0;border-radius:30px;padding:12px 24px;margin:4px 0 10px}
+#ask:disabled{opacity:.4}
+#grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;max-width:640px;margin:0 auto}
+.card{background:var(--card);border:5px solid transparent;border-radius:20px;padding:0;cursor:pointer;overflow:hidden}
+.card.sel{border-color:var(--ring);transform:scale(1.03)}
+.card svg{width:100%;display:block}
+.card.talk svg{animation:bob .4s infinite alternate}
+@keyframes bob{to{transform:translateY(-5px)}}
+</style>
+</head>
+<body>
+<h1>👦 What Are You Doing?</h1>
+<div id="bubble">Tap a boy, then say “What are you doing?”</div>
+<button id="ask" disabled>🎤 Ask him!</button>
+<div id="grid"></div>
+<script>
+const SK="#f6c9a0";
+const acts=[
+{say:"Cleaning my teeth!",bg:"#bbdefb",shirt:"#42a5f5",arms:[[82,105,84,140],[118,105,108,82]],
+ prop:'<line x1="108" y1="82" x2="140" y2="68" stroke="#e91e63" stroke-width="6" stroke-linecap="round"/><rect x="134" y="62" width="14" height="6" fill="#fff" transform="rotate(-24 134 62)"/><circle cx="92" cy="86" r="3" fill="#fff"/><circle cx="108" cy="88" r="3" fill="#fff"/>'},
+{say:"Making my bed!",bg:"#f8bbd0",shirt:"#ab47bc",arms:[[82,105,45,150],[118,105,155,150]],front:true,
+ prop:'<rect x="15" y="145" width="170" height="40" rx="8" fill="#ef5350"/><rect x="15" y="145" width="170" height="10" fill="#fff"/><rect x="25" y="132" width="40" height="16" rx="8" fill="#fff"/>'},
+{say:"Sweeping the floor!",bg:"#c8e6c9",shirt:"#ffa726",arms:[[82,105,140,112],[118,105,146,92]],
+ prop:'<line x1="152" y1="50" x2="138" y2="168" stroke="#8d6e63" stroke-width="6" stroke-linecap="round"/><polygon points="128,168 152,168 158,188 122,188" fill="#fdd835"/>'},
+{say:"Hoovering the carpet!",bg:"#ffe0b2",shirt:"#26a69a",arms:[[82,105,84,140],[118,105,128,128]],
+ prop:'<rect x="10" y="176" width="180" height="14" fill="#e57373"/><path d="M128 128 Q160 120 150 160" stroke="#555" stroke-width="6" fill="none"/><rect x="130" y="155" width="46" height="22" rx="10" fill="#e53935"/><circle cx="140" cy="178" r="5" fill="#333"/><circle cx="168" cy="178" r="5" fill="#333"/>'},
+{say:"Washing the dishes!",bg:"#b2ebf2",shirt:"#ef5350",arms:[[82,105,78,140],[118,105,122,140]],front:true,
+ prop:'<rect x="15" y="138" width="170" height="50" fill="#90a4ae"/><rect x="40" y="132" width="120" height="14" rx="6" fill="#e1f5fe"/><circle cx="60" cy="128" r="7" fill="#fff" stroke="#81d4fa"/><circle cx="130" cy="124" r="9" fill="#fff" stroke="#81d4fa"/><circle cx="100" cy="120" r="5" fill="#fff" stroke="#81d4fa"/>'},
+{say:"Tidying my toys!",bg:"#e1bee7",shirt:"#66bb6a",arms:[[82,105,60,140],[118,105,145,95]],
+ prop:'<rect x="20" y="150" width="60" height="36" rx="4" fill="#ffb74d"/><rect x="140" y="85" width="20" height="20" fill="#42a5f5"/><rect x="150" y="165" width="20" height="20" fill="#ef5350"/><rect x="172" y="170" width="16" height="16" fill="#fdd835"/>'},
+{say:"Watering the plants!",bg:"#dcedc8",shirt:"#ff7043",arms:[[82,105,84,140],[118,105,126,112]],
+ prop:'<rect x="150" y="150" width="36" height="30" fill="#8d6e63"/><circle cx="160" cy="140" r="12" fill="#43a047"/><circle cx="178" cy="138" r="12" fill="#66bb6a"/><rect x="122" y="104" width="24" height="18" rx="4" fill="#29b6f6"/><line x1="146" y1="110" x2="168" y2="98" stroke="#0288d1" stroke-width="4"/><circle cx="172" cy="108" r="3" fill="#4fc3f7"/><circle cx="174" cy="120" r="3" fill="#4fc3f7"/>'},
+{say:"Folding the laundry!",bg:"#fff9c4",shirt:"#7e57c2",arms:[[82,105,82,138],[118,105,118,138]],front:true,
+ prop:'<rect x="20" y="140" width="160" height="46" fill="#a1887f"/><rect x="70" y="128" width="60" height="12" fill="#ef5350"/><rect x="74" y="118" width="52" height="10" fill="#42a5f5"/><rect x="78" y="109" width="44" height="9" fill="#fdd835"/>'},
+{say:"Wiping the table!",bg:"#ffccbc",shirt:"#26c6da",arms:[[82,105,92,138],[118,105,110,138]],front:true,
+ prop:'<rect x="15" y="142" width="170" height="44" fill="#8d6e63"/><rect x="92" y="132" width="28" height="12" rx="4" fill="#fdd835"/><rect x="150" y="126" width="14" height="16" fill="#fff"/><circle cx="70" cy="136" r="3" fill="#fff"/><circle cx="58" cy="132" r="2" fill="#fff"/>'},
+{say:"Feeding the cat!",bg:"#d7ccc8",shirt:"#ec407a",arms:[[82,105,84,140],[118,105,132,128]],
+ prop:'<rect x="128" y="122" width="12" height="14" fill="#9e9e9e"/><ellipse cx="162" cy="166" rx="18" ry="14" fill="#ff9800"/><circle cx="176" cy="150" r="11" fill="#ff9800"/><polygon points="168,142 170,132 176,141" fill="#ff9800"/><polygon points="178,141 186,133 186,146" fill="#ff9800"/><ellipse cx="138" cy="180" rx="16" ry="6" fill="#1e88e5"/>'},
+{say:"Taking out the rubbish!",bg:"#cfd8dc",shirt:"#8d6e63",arms:[[82,105,84,140],[118,105,140,135]],
+ prop:'<rect x="18" y="135" width="36" height="48" fill="#546e7a"/><rect x="14" y="128" width="44" height="9" fill="#78909c"/><circle cx="146" cy="152" r="17" fill="#263238"/><rect x="140" y="133" width="12" height="6" fill="#263238"/>'},
+{say:"Brushing my hair!",bg:"#e1f5fe",shirt:"#ffca28",arms:[[82,105,84,140],[118,105,126,56]],
+ prop:'<rect x="122" y="36" width="10" height="26" rx="4" fill="#e91e63" transform="rotate(25 127 49)"/><circle cx="150" cy="60" r="3" fill="#fdd835"/><circle cx="158" cy="72" r="2" fill="#fdd835"/>'},
+{say:'Washing the car!',bg:'#b3e5fc',shirt:'#ff7043',arms:[[82,105,84,140],[118,105,132,124]],
+ prop:`<rect x='96' y='146' width='94' height='30' rx='8' fill='#e53935'/><rect x='120' y='132' width='40' height='18' rx='6' fill='#ef9a9a'/><circle cx='118' cy='178' r='9' fill='#333'/><circle cx='172' cy='178' r='9' fill='#333'/><rect x='128' y='118' width='14' height='12' rx='3' fill='#fdd835'/><circle cx='150' cy='120' r='5' fill='#fff'/>`},
+{say:'Washing my hands!',bg:'#e0f7fa',shirt:'#7cb342',arms:[[82,105,88,138],[118,105,112,138]],front:true,
+ prop:`<rect x='20' y='140' width='160' height='46' fill='#b0bec5'/><rect x='70' y='132' width='60' height='10' rx='5' fill='#fff'/><path d='M150 140 V118 H134' stroke='#78909c' stroke-width='6' fill='none'/><circle cx='95' cy='126' r='5' fill='#fff' stroke='#81d4fa'/><circle cx='108' cy='122' r='4' fill='#fff' stroke='#81d4fa'/>`},
+{say:'Setting the table!',bg:'#fff3e0',shirt:'#5c6bc0',arms:[[82,105,90,138],[118,105,128,128]],front:true,
+ prop:`<rect x='15' y='142' width='170' height='44' fill='#a1887f'/><ellipse cx='50' cy='150' rx='18' ry='6' fill='#fff'/><ellipse cx='150' cy='150' rx='18' ry='6' fill='#fff'/><ellipse cx='128' cy='126' rx='12' ry='4' fill='#fff'/><rect x='88' y='140' width='4' height='10' fill='#9e9e9e'/>`},
+{say:'Packing my school bag!',bg:'#c5cae9',shirt:'#ef5350',arms:[[82,105,84,140],[118,105,134,140]],
+ prop:`<rect x='126' y='140' width='44' height='42' rx='8' fill='#1e88e5'/><rect x='134' y='150' width='28' height='14' rx='3' fill='#1565c0'/><rect x='140' y='128' width='20' height='14' fill='#fdd835'/>`},
+{say:'Mopping the floor!',bg:'#e8f5e9',shirt:'#00acc1',arms:[[82,105,140,112],[118,105,146,92]],
+ prop:`<line x1='152' y1='50' x2='138' y2='164' stroke='#8d6e63' stroke-width='6' stroke-linecap='round'/><rect x='122' y='164' width='34' height='12' rx='5' fill='#eceff1'/><rect x='20' y='150' width='34' height='32' fill='#fb8c00'/><ellipse cx='37' cy='150' rx='17' ry='5' fill='#81d4fa'/>`},
+{say:'Cleaning the window!',bg:'#fce4ec',shirt:'#43a047',arms:[[82,105,84,140],[118,105,140,70]],
+ prop:`<rect x='110' y='30' width='80' height='90' fill='#bbdefb' stroke='#795548' stroke-width='6'/><line x1='150' y1='30' x2='150' y2='120' stroke='#795548' stroke-width='4'/><rect x='134' y='62' width='18' height='14' rx='4' fill='#fdd835'/><circle cx='170' cy='50' r='3' fill='#fff'/>`},
+{say:'Dusting the shelf!',bg:'#fff8e1',shirt:'#ab47bc',arms:[[82,105,84,140],[118,105,140,100]],
+ prop:`<rect x='120' y='80' width='70' height='8' fill='#8d6e63'/><rect x='130' y='62' width='12' height='18' fill='#42a5f5'/><rect x='150' y='66' width='14' height='14' fill='#ef5350'/><line x1='140' y1='100' x2='150' y2='76' stroke='#6d4c41' stroke-width='4'/><path d='M146 80 l-8 -8 M150 78 l0 -10 M154 80 l8 -8' stroke='#fdd835' stroke-width='3'/>`},
+{say:'Baking a cake!',bg:'#ffe0b2',shirt:'#f06292',arms:[[82,105,90,138],[118,105,112,130]],front:true,
+ prop:`<rect x='15' y='142' width='170' height='44' fill='#a1887f'/><rect x='70' y='128' width='50' height='14' rx='4' fill='#fff'/><line x1='100' y1='132' x2='112' y2='114' stroke='#8d6e63' stroke-width='4'/><rect x='140' y='122' width='30' height='20' fill='#f48fb1'/><circle cx='155' cy='118' r='4' fill='#e53935'/>`},
+{say:'Washing my face!',bg:'#e3f2fd',shirt:'#fb8c00',arms:[[82,105,84,140],[118,105,100,84]],
+ prop:`<rect x='140' y='90' width='40' height='60' rx='6' fill='#fff' stroke='#90caf9' stroke-width='3'/><circle cx='92' cy='80' r='4' fill='#fff'/><circle cx='112' cy='66' r='3' fill='#fff'/><circle cx='90' cy='64' r='3' fill='#fff'/>`},
+{say:'Cleaning my shoes!',bg:'#d7ccc8',shirt:'#3949ab',arms:[[82,105,84,140],[118,105,130,150]],
+ prop:`<path d='M130 168 q0-20 20-20 h22 q8 0 8 20z' fill='#5d4037'/><rect x='126' y='168' width='56' height='8' fill='#212121'/><rect x='120' y='140' width='18' height='8' rx='3' fill='#fdd835'/>`},
+{say:'Mowing the lawn!',bg:'#c8e6c9',shirt:'#e53935',arms:[[82,105,120,120],[118,105,124,116]],
+ prop:`<rect x='0' y='170' width='200' height='30' fill='#43a047'/><line x1='122' y1='116' x2='160' y2='168' stroke='#616161' stroke-width='5'/><rect x='140' y='160' width='44' height='16' rx='5' fill='#fb8c00'/><circle cx='148' cy='178' r='6' fill='#333'/><circle cx='176' cy='178' r='6' fill='#333'/>`},
+{say:'Raking the leaves!',bg:'#ffecb3',shirt:'#6d4c41',arms:[[82,105,140,112],[118,105,146,92]],
+ prop:`<line x1='152' y1='50' x2='140' y2='164' stroke='#8d6e63' stroke-width='5'/><path d='M124 168 h32 M128 168 v14 M140 168 v14 M152 168 v14' stroke='#795548' stroke-width='4'/><circle cx='50' cy='170' r='8' fill='#ef6c00'/><circle cx='64' cy='176' r='8' fill='#fbc02d'/><circle cx='38' cy='178' r='8' fill='#d84315'/><circle cx='100' cy='186' r='7' fill='#fbc02d'/>`},
+{say:'Feeding the fish!',bg:'#b2dfdb',shirt:'#8e24aa',arms:[[82,105,84,140],[118,105,130,100]],
+ prop:`<rect x='120' y='110' width='66' height='60' rx='6' fill='#81d4fa' stroke='#455a64' stroke-width='4'/><ellipse cx='150' cy='146' rx='10' ry='6' fill='#ff9800'/><polygon points='160,146 170,138 170,154' fill='#ff9800'/><circle cx='142' cy='144' r='2' fill='#333'/><circle cx='134' cy='126' r='2' fill='#fdd835'/><circle cx='142' cy='122' r='2' fill='#fdd835'/>`},
+{say:'Putting my books away!',bg:'#f3e5f5',shirt:'#00897b',arms:[[82,105,84,140],[118,105,134,88]],
+ prop:`<rect x='120' y='96' width='70' height='80' fill='#a1887f'/><rect x='126' y='104' width='10' height='28' fill='#e53935'/><rect x='138' y='108' width='10' height='24' fill='#1e88e5'/><rect x='150' y='102' width='10' height='30' fill='#fdd835'/><rect x='128' y='144' width='10' height='26' fill='#43a047'/><rect x='130' y='80' width='14' height='20' fill='#ab47bc'/>`},
+{say:'Hanging up my coat!',bg:'#eceff1',shirt:'#fdd835',arms:[[82,105,84,140],[118,105,140,70]],
+ prop:`<rect x='130' y='40' width='60' height='8' fill='#8d6e63'/><path d='M144 48 q0 -10 6 -6' stroke='#555' stroke-width='3' fill='none'/><path d='M138 52 h24 l8 50 h-40z' fill='#e53935'/>`},
+{say:'Having a bath!',bg:'#e1f5fe',shirt:'#ffcc80',arms:[[82,105,70,125],[118,105,130,125]],front:true,
+ prop:`<rect x='25' y='128' width='150' height='54' rx='16' fill='#fff' stroke='#90a4ae' stroke-width='4'/><circle cx='50' cy='122' r='9' fill='#fff' stroke='#81d4fa'/><circle cx='150' cy='120' r='11' fill='#fff' stroke='#81d4fa'/><circle cx='100' cy='124' r='8' fill='#fff' stroke='#81d4fa'/><circle cx='84' cy='46' r='5' fill='#fff' stroke='#81d4fa'/>`},
+{say:'Drying the dishes!',bg:'#f0f4c3',shirt:'#3949ab',arms:[[82,105,90,138],[118,105,112,130]],front:true,
+ prop:`<rect x='15' y='142' width='170' height='44' fill='#90a4ae'/><ellipse cx='100' cy='128' rx='16' ry='8' fill='#fff' stroke='#bdbdbd'/><rect x='94' y='122' width='24' height='14' fill='#ef5350'/><rect x='140' y='128' width='10' height='14' fill='#fff' stroke='#bdbdbd'/>`},
+{say:'Cleaning the mirror!',bg:'#f8bbd0',shirt:'#26a69a',arms:[[82,105,84,140],[118,105,140,76]],
+ prop:`<ellipse cx='156' cy='80' rx='26' ry='38' fill='#e0f7fa' stroke='#ffc107' stroke-width='6'/><rect x='134' y='70' width='16' height='12' rx='4' fill='#fdd835'/><path d='M158 60 l6 -6 M162 70 l8 -4' stroke='#fff' stroke-width='3'/>`},
+{say:'Planting a flower!',bg:'#dcedc8',shirt:'#e53935',arms:[[82,105,84,140],[118,105,134,140]],
+ prop:`<rect x='0' y='168' width='200' height='32' fill='#8d6e63'/><line x1='160' y1='168' x2='160' y2='140' stroke='#2e7d32' stroke-width='4'/><circle cx='160' cy='134' r='8' fill='#f06292'/><circle cx='160' cy='134' r='3' fill='#fdd835'/><line x1='134' y1='140' x2='140' y2='176' stroke='#757575' stroke-width='4'/><path d='M130 176 h20 l-4 10 h-12z' fill='#9e9e9e'/>`},
+{say:'Feeding the birds!',bg:'#bbdefb',shirt:'#66bb6a',arms:[[82,105,84,140],[118,105,134,112]],
+ prop:`<ellipse cx='168' cy='170' rx='14' ry='10' fill='#ef5350'/><circle cx='180' cy='160' r='7' fill='#ef5350'/><polygon points='186,160 194,162 186,164' fill='#ffa000'/><circle cx='178' cy='158' r='2' fill='#333'/><circle cx='142' cy='128' r='2' fill='#fdd835'/><circle cx='148' cy='140' r='2' fill='#fdd835'/><circle cx='146' cy='154' r='2' fill='#fdd835'/><rect x='128' y='104' width='12' height='12' fill='#fff' stroke='#bdbdbd'/>`}
+];
+function svg(a){
+ const arms=a.arms.map(r=>`<line x1="${r[0]}" y1="${r[1]}" x2="${r[2]}" y2="${r[3]}" stroke="${SK}" stroke-width="10" stroke-linecap="round"/>`).join("");
+ const boy=`<rect x="85" y="140" width="12" height="40" fill="#5c6bc0"/><rect x="103" y="140" width="12" height="40" fill="#5c6bc0"/><rect x="78" y="95" width="44" height="50" rx="10" fill="${a.shirt}"/>${arms}<circle cx="100" cy="72" r="26" fill="${SK}"/><path d="M74 68 Q78 42 100 44 Q122 42 126 68 Q110 54 74 68Z" fill="#6d4c41"/><circle cx="91" cy="72" r="3" fill="#333"/><circle cx="109" cy="72" r="3" fill="#333"/><path d="M92 84 Q100 92 108 84" stroke="#c0392b" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+ return `<svg viewBox="0 0 200 200" role="img" aria-label="${a.say}"><rect width="200" height="200" fill="${a.bg}"/>${a.front?boy+a.prop:a.prop.replace(/^/,"")+boy+(a.arms.length?"":"")}</svg>`;
+}
+let cur=null;
+const grid=document.getElementById("grid"),bub=document.getElementById("bubble"),ask=document.getElementById("ask");
+acts.forEach((a,i)=>{
+ const b=document.createElement("button");b.className="card";b.innerHTML=svg(a);
+ b.onclick=()=>select(i);grid.appendChild(b);
+});
+const cards=[...document.querySelectorAll(".card")];
+function select(i){
+ cur=i;cards.forEach((c,j)=>c.classList.toggle("sel",i===j));
+ ask.disabled=false;bub.textContent="Say: “What are you doing?”";listen();
+}
+function reply(){
+ const t=acts[cur].say;bub.textContent=t;
+ cards[cur].classList.add("talk");
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.pitch=1.5;u.rate=.95;
+  u.onend=()=>cards[cur]&&cards[cur].classList.remove("talk");speechSynthesis.speak(u);}catch(e){}
+ setTimeout(()=>cards.forEach(c=>c.classList.remove("talk")),2500);
+}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null;
+function listen(){
+ if(!SR||cur===null)return;
+ try{rec&&rec.abort();}catch(e){}
+ rec=new SR();rec.lang="en-GB";rec.interimResults=false;rec.maxAlternatives=3;
+ rec.onresult=e=>{
+  const heard=[...e.results[0]].map(r=>r.transcript.toLowerCase()).join(" ");
+  if(/doing|what are you|what're you/.test(heard))reply();
+  else bub.textContent="Say: “What are you doing?”";
+ };
+ rec.onerror=()=>{bub.textContent="Tap 🎤 Ask him!"};
+ try{rec.start();}catch(e){}
+}
+ask.onclick=()=>{if(cur!==null)reply();};
+</script>
+</body>
+</html>
 
