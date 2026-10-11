@@ -12,6 +12,10 @@ Browser-based speech games: see a picture, say the answer into the microphone, g
 | Cartoon Characters | `cartoon-characters/` |
 | Fairytale Characters | `fairytale-characters/` |
 | Vegetables | `vegetables/` |
+| Sea Creatures | `sea-creatures/` |
+| Aircraft | `aircraft/` |
+| Car Makes | `car-makes/` |
+| Famous People | `famous-people/` |
 
 ## Adding a new app
 1. Create a new folder with an `index.html`.
