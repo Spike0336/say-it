@@ -1,1 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Farm Animal Sounds</title>
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0;background:#bfe6ff;font-family:"Comic Sans MS","Chalkboard SE",system-ui,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
+#app{display:flex;flex-direction:column;height:100%}
+#scene{position:relative;flex:1;overflow:hidden;background:linear-gradient(#8ed1ff 0 45%,#7ed957 45% 100%);touch-action:none}
+.deco{position:absolute;pointer-events:none}
+.animal{position:absolute;font-size:min(18vw,96px);line-height:1;transform:translate(-50%,-50%);touch-action:none;cursor:grab;filter:drop-shadow(0 4px 3px rgba(0,0,0,.25))}
+.animal.bounce{animation:b .5s 3}
+@keyframes b{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-70%) scale(1.25) rotate(-8deg)}}
+.bubble{position:absolute;left:50%;bottom:105%;transform:translateX(-50%);background:#fff;border:3px solid #333;border-radius:20px;padding:4px 14px;font-size:max(5vw,22px);font-weight:bold;white-space:nowrap;color:#222;pointer-events:none}
+#tray{display:flex;gap:8px;overflow-x:auto;padding:10px;background:#fff7d6;border-top:4px solid #f2c94c;-webkit-overflow-scrolling:touch}
+#tray button{flex:0 0 auto;font-size:min(13vw,64px);background:#fff;border:3px solid #f2c94c;border-radius:20px;padding:4px 12px;cursor:pointer}
+#tray button:active{transform:scale(.9)}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#fff7d6}
+#mic{font-size:min(8vw,36px);border:none;border-radius:50px;padding:10px 22px;background:#e74c3c;color:#fff;font-family:inherit;font-weight:bold;cursor:pointer}
+#mic.on{background:#27ae60;animation:p 1.2s infinite}
+@keyframes p{50%{box-shadow:0 0 0 14px rgba(39,174,96,.25)}}
+#hint{flex:1;font-size:max(3.8vw,15px);color:#333}
+#clear{font-size:30px;background:none;border:none;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="scene">
+    <div class="deco" style="left:6%;top:4%;font-size:60px">☀️</div>
+    <div class="deco" style="left:55%;top:6%;font-size:56px">☁️</div>
+    <div class="deco" style="left:30%;top:14%;font-size:44px">☁️</div>
+    <div class="deco" style="right:4%;top:22%;font-size:min(30vw,150px)">🏡</div>
+    <div class="deco" style="left:2%;top:30%;font-size:60px">🌳</div>
+    <div class="deco" style="left:40%;top:88%;font-size:40px">🌻</div>
+    <div class="deco" style="right:30%;top:90%;font-size:40px">🌼</div>
+  </div>
+  <div id="tray"></div>
+  <div id="bar">
+    <button id="mic">🎤 Talk</button>
+    <div id="hint">Tap an animal to add it. Then say “Dog says woof woof!”</div>
+    <button id="clear" title="Clear farm">🧹</button>
+  </div>
+</div>
+<script>
+const A={
+ dog:{e:'🐶',s:'Woof woof!',k:['dog','doggy','doggie','puppy','woof','bark'],p:1.4,r:.9},
+ cat:{e:'🐱',s:'Meeeow!',k:['cat','kitty','kitten','meow','miaow','meeow','mew'],p:1.9,r:.7},
+ cow:{e:'🐮',s:'Mooooo!',k:['cow','moo'],p:.5,r:.5},
+ pig:{e:'🐷',s:'Oink oink!',k:['pig','piggy','oink'],p:.8,r:.8},
+ sheep:{e:'🐑',s:'Baaaa!',k:['sheep','lamb','baa','bah'],p:1.5,r:.55},
+ chicken:{e:'🐔',s:'Cluck cluck!',k:['chicken','hen','cluck'],p:2,r:1},
+ horse:{e:'🐴',s:'Neeeigh!',k:['horse','pony','neigh'],p:1,r:.6},
+ duck:{e:'🦆',s:'Quack quack!',k:['duck','quack'],p:1.8,r:.9}
+};
+const scene=document.getElementById('scene'),tray=document.getElementById('tray');
+const els={};let busy=0,listening=false,rec=null;
+const syn=window.speechSynthesis;
+
+function place(el,x,y){const w=scene.clientWidth,h=scene.clientHeight;el.style.left=Math.max(30,Math.min(w-30,x))+'px';el.style.top=Math.max(50,Math.min(h-30,y))+'px'}
+
+function addAnimal(n){
+  if(els[n]&&els[n].length>=3)return els[n][0];
+  const el=document.createElement('div');el.className='animal';el.textContent=A[n].e;
+  const w=scene.clientWidth,h=scene.clientHeight;
+  place(el,w*(.12+Math.random()*.55),h*(.5+Math.random()*.38));
+  let sx,sy,ox,oy,moved=0;
+  el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);sx=e.clientX;sy=e.clientY;ox=el.offsetLeft;oy=el.offsetTop;moved=0;el.style.zIndex=10});
+  el.addEventListener('pointermove',e=>{if(sx==null)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>8)moved=1;if(moved)place(el,ox+dx,oy+dy)});
+  el.addEventListener('pointerup',()=>{if(sx!=null&&!moved)speak(n,el);sx=null;el.style.zIndex=''});
+  scene.appendChild(el);(els[n]=els[n]||[]).push(el);return el;
+}
+
+function speak(n,el){
+  el=el||(els[n]&&els[n][0])||addAnimal(n);
+  const a=A[n];
+  el.classList.remove('bounce');void el.offsetWidth;el.classList.add('bounce');
+  const b=document.createElement('div');b.className='bubble';b.textContent=a.s;el.appendChild(b);
+  setTimeout(()=>b.remove(),1800);
+  try{
+    const u=new SpeechSynthesisUtterance(a.s.replace(/!/g,''));
+    u.lang='en-GB';u.pitch=a.p;u.rate=a.r;u.volume=1;
+    u.onstart=()=>{busy++};
+    u.onend=u.onerror=()=>{busy=Math.max(0,busy-1);setTimeout(()=>{if(!busy)busy=0},400)};
+    syn.speak(u);
+  }catch(e){}
+}
+
+Object.keys(A).forEach(n=>{
+  const b=document.createElement('button');b.textContent=A[n].e;b.setAttribute('aria-label',n);
+  b.onclick=()=>{const el=addAnimal(n);speak(n,el)};
+  tray.appendChild(b);
+});
+
+document.getElementById('clear').onclick=()=>{Object.values(els).flat().forEach(e=>e.remove());for(const k in els)delete els[k]};
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const mic=document.getElementById('mic'),hint=document.getElementById('hint');
+if(!SR){mic.style.display='none';hint.textContent='Tap the animals to hear them! (Microphone needs Chrome or Safari.)'}
+else{
+  rec=new SR();rec.lang='en-GB';rec.continuous=true;rec.interimResults=false;
+  rec.onresult=e=>{
+    if(busy)return;
+    const t=e.results[e.results.length-1][0].transcript.toLowerCase();
+    Object.keys(A).forEach(n=>{if(A[n].k.some(w=>t.includes(w)))speak(n)});
+  };
+  rec.onend=()=>{if(listening)setTimeout(()=>{try{rec.start()}catch(e){}},300)};
+  rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){listening=false;mic.classList.remove('on');mic.textContent='🎤 Talk';hint.textContent='Please allow the microphone, then tap Talk.'}};
+  mic.onclick=()=>{
+    if(listening){listening=false;rec.stop();mic.classList.remove('on');mic.textContent='🎤 Talk';return}
+    listening=true;try{rec.start()}catch(e){}
+    try{syn.speak(new SpeechSynthesisUtterance(''))}catch(e){}
+    mic.classList.add('on');mic.textContent='👂 Listening';
+    hint.textContent='Say: “Dog says woof woof!” or “Cat says meow!”';
+  };
+}
+</script>
+</body>
+</html>
 
