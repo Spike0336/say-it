@@ -1,1 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Animal Catcher – Catch & Learn!</title>
+  <meta name="description" content="A fun children's game where you catch animals in a net and learn their names. Over 200 animals!" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦋</text></svg>" />
+</head>
+<body>
+  <!-- Start Screen -->
+  <div id="start-screen" class="screen">
+    <div class="start-content">
+      <h1>🦋 Animal Catcher 🦋</h1>
+      <p class="subtitle">Catch the animals with your net!</p>
+      <p class="instructions">
+        Animals pop out of holes one at a time – be quick!<br>
+        Move the net and click/tap when one appears.<br>
+        Catch them for a big celebration and they will tell you their name!
+      </p>
+      <button id="start-btn" class="big-btn">Start Catching!</button>
+      <p class="tip">Tip: Works best with sound on 🔊</p>
+    </div>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game-screen" class="screen hidden">
+    <div id="hud">
+      <div class="hud-item">Score: <span id="score">0</span></div>
+      <div class="hud-item">Caught: <span id="caught-count">0</span></div>
+      <div class="hud-item">Unique: <span id="unique-count">0</span></div>
+      <div class="hud-item">Level: <span id="level">1</span></div>
+    </div>
+
+    <div id="play-area">
+      <!-- Animals will be added here dynamically -->
+      <div id="net"></div>
+      <div id="catch-message" class="hidden"></div>
+    </div>
+
+    <div id="controls">
+      <button id="mute-btn" title="Toggle voice">🔊 Voice On</button>
+      <button id="pause-btn">Pause</button>
+    </div>
+  </div>
+
+  <!-- Pause Overlay -->
+  <div id="pause-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <h2>Paused</h2>
+      <button id="resume-btn" class="big-btn">Resume</button>
+      <button id="restart-btn" class="big-btn secondary">Restart</button>
+    </div>
+  </div>
+
+  <!-- End / Celebration (optional future) -->
+  <script src="script.js"></script>
+</body>
+</html>
 
