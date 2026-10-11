@@ -15,74 +15,385 @@
 
     body {
       font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
-      background: linear-gradient(180deg, #0a1628 0%, #1a3a5c 40%, #2d5a3d 100%);
+      background: #1a120b;
       min-height: 100vh;
       overflow: hidden;
       color: white;
       position: relative;
     }
 
-    /* Falling snow */
-    .snowflake {
-      position: fixed;
-      top: -20px;
-      color: white;
-      font-size: 1.2em;
-      opacity: 0.8;
-      animation: fall linear infinite;
+    /* ========== ROOM ========== */
+    .room {
+      position: absolute;
+      inset: 0;
+      background:
+        /* ceiling fade */
+        linear-gradient(180deg, #2c1810 0%, transparent 18%),
+        /* wall */
+        linear-gradient(180deg, #3d2317 0%, #4a2c1a 55%, #3a2214 100%);
+      overflow: hidden;
+    }
+
+    /* Subtle wallpaper pattern */
+    .room::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(139, 90, 43, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(139, 90, 43, 0.12) 0%, transparent 35%),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 48px,
+          rgba(60, 30, 15, 0.08) 48px,
+          rgba(60, 30, 15, 0.08) 50px
+        );
       pointer-events: none;
+    }
+
+    /* ========== WINDOW ========== */
+    .window {
+      position: absolute;
+      top: 4%;
+      right: 3%;
+      width: min(22vw, 160px);
+      height: min(28vh, 200px);
+      background: linear-gradient(180deg, #0a1a2e 0%, #1a3050 60%, #2a4060 100%);
+      border: 8px solid #5c3a1e;
+      border-radius: 6px;
+      box-shadow:
+        inset 0 0 30px rgba(0,0,0,0.5),
+        0 0 20px rgba(0,0,0,0.4);
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .window::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 48%, #5c3a1e 48%, #5c3a1e 52%, transparent 52%),
+        linear-gradient(180deg, transparent 48%, #5c3a1e 48%, #5c3a1e 52%, transparent 52%);
+      z-index: 3;
+    }
+
+    .window-snow {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 35%;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.7));
       z-index: 1;
     }
 
-    @keyframes fall {
-      to {
-        transform: translateY(105vh) rotate(360deg);
-      }
+    .window-flakes {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      font-size: 0.7rem;
+      opacity: 0.7;
     }
 
-    header {
-      text-align: center;
-      padding: 12px 10px 8px;
-      position: relative;
+    /* ========== FIREPLACE ========== */
+    .fireplace-area {
+      position: absolute;
+      bottom: 18%;
+      left: 2%;
+      width: min(28vw, 220px);
       z-index: 10;
     }
 
-    h1 {
-      font-size: clamp(1.4rem, 5vw, 2.2rem);
-      text-shadow: 0 0 10px #ffd700, 0 0 20px #ff6b6b;
-      animation: glow 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes glow {
-      from { text-shadow: 0 0 10px #ffd700, 0 0 20px #ff6b6b; }
-      to { text-shadow: 0 0 20px #ffd700, 0 0 40px #ff6b6b, 0 0 60px #00ff88; }
-    }
-
-    .subtitle {
-      font-size: clamp(0.9rem, 3vw, 1.1rem);
-      opacity: 0.9;
-      margin-top: 4px;
-    }
-
-    .game-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      height: calc(100vh - 90px);
+    .chimney {
       position: relative;
+      width: 100%;
+      height: min(38vh, 280px);
+      background: linear-gradient(90deg, #4a3020 0%, #6b4423 15%, #5c3a1e 50%, #6b4423 85%, #4a3020 100%);
+      border-radius: 8px 8px 0 0;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.4);
+    }
+
+    /* Brick texture */
+    .chimney::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 18px,
+          rgba(0,0,0,0.25) 18px,
+          rgba(0,0,0,0.25) 20px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 28px,
+          rgba(0,0,0,0.15) 28px,
+          rgba(0,0,0,0.15) 30px
+        );
+      border-radius: 8px 8px 0 0;
+      opacity: 0.7;
+    }
+
+    /* Mantel */
+    .mantel {
+      position: absolute;
+      top: -12px;
+      left: -8%;
+      width: 116%;
+      height: 18px;
+      background: linear-gradient(180deg, #8b6914, #5c4010);
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
       z-index: 5;
     }
 
-    /* Tree container */
-    .tree-container {
-      position: relative;
-      width: min(90vw, 380px);
-      height: min(55vh, 420px);
+    .mantel::after {
+      content: '🕯️  🦌  🕯️';
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.3rem;
+      white-space: nowrap;
+      letter-spacing: 8px;
+    }
+
+    /* Fire opening */
+    .fire-opening {
+      position: absolute;
+      bottom: 0;
+      left: 12%;
+      width: 76%;
+      height: 42%;
+      background: #1a0a00;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+    }
+
+    /* Animated fire */
+    .fire {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      height: 100%;
+    }
+
+    .flame {
+      position: absolute;
+      bottom: 0;
+      border-radius: 50% 50% 20% 20%;
+      animation: flicker 0.4s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+    }
+
+    .flame1 {
+      left: 20%;
+      width: 30%;
+      height: 70%;
+      background: radial-gradient(ellipse at bottom, #ff0 0%, #f80 40%, #f40 70%, transparent 100%);
+      animation-delay: 0s;
+    }
+    .flame2 {
+      left: 35%;
+      width: 35%;
+      height: 95%;
+      background: radial-gradient(ellipse at bottom, #ff4 0%, #fa0 30%, #f60 60%, #c00 90%, transparent 100%);
+      animation-delay: 0.1s;
+    }
+    .flame3 {
+      left: 50%;
+      width: 28%;
+      height: 80%;
+      background: radial-gradient(ellipse at bottom, #ff8 0%, #f90 40%, #f50 70%, transparent 100%);
+      animation-delay: 0.2s;
+    }
+    .flame4 {
+      left: 15%;
+      width: 22%;
+      height: 55%;
+      background: radial-gradient(ellipse at bottom, #ff0 0%, #f70 50%, transparent 100%);
+      animation-delay: 0.15s;
+    }
+    .flame5 {
+      left: 60%;
+      width: 25%;
+      height: 60%;
+      background: radial-gradient(ellipse at bottom, #ff6 0%, #f80 50%, transparent 100%);
+      animation-delay: 0.25s;
+    }
+
+    @keyframes flicker {
+      0% { transform: scaleY(1) scaleX(1) rotate(-2deg); opacity: 0.9; }
+      100% { transform: scaleY(1.15) scaleX(0.9) rotate(2deg); opacity: 1; }
+    }
+
+    /* Glow from fire */
+    .fire-glow {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140%;
+      height: 80px;
+      background: radial-gradient(ellipse, rgba(255,120,0,0.45) 0%, transparent 70%);
+      pointer-events: none;
+      animation: glowPulse 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes glowPulse {
+      from { opacity: 0.6; }
+      to { opacity: 1; }
+    }
+
+    /* Stockings */
+    .stockings {
+      position: absolute;
+      top: 8%;
+      left: 8%;
+      right: 8%;
+      display: flex;
+      justify-content: space-around;
+      z-index: 6;
+    }
+
+    .stocking {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5));
+      animation: stockingSway 3s ease-in-out infinite;
+    }
+    .stocking:nth-child(2) { animation-delay: 0.5s; }
+    .stocking:nth-child(3) { animation-delay: 1s; }
+
+    @keyframes stockingSway {
+      0%, 100% { transform: rotate(-4deg); }
+      50% { transform: rotate(4deg); }
+    }
+
+    /* ========== FLOOR & SNOW ========== */
+    .floor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 22%;
+      background: linear-gradient(180deg, #3d2b1a 0%, #2a1c10 40%, #1f150c 100%);
+      z-index: 5;
+    }
+
+    /* Wood floor planks */
+    .floor::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 40px,
+        rgba(0,0,0,0.15) 40px,
+        rgba(0,0,0,0.15) 42px
+      );
+      opacity: 0.6;
+    }
+
+    /* Snowy ground under tree */
+    .snow-ground {
+      position: absolute;
+      bottom: 18%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(70vw, 520px);
+      height: 55px;
+      background: radial-gradient(ellipse at center, #fff 0%, #e8f4ff 40%, transparent 70%);
+      border-radius: 50%;
+      z-index: 8;
+      box-shadow: 0 0 30px rgba(255,255,255,0.3);
+    }
+
+    .snow-ground::before {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 10%;
+      right: 10%;
+      height: 25px;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.9) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    /* ========== PRESENTS ========== */
+    .presents {
+      position: absolute;
+      bottom: 19%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(65vw, 480px);
+      height: 70px;
+      z-index: 12;
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      margin-top: 5px;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .present {
+      position: relative;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    .present .lid {
+      position: absolute;
+      top: -6px;
+      left: -4%;
+      width: 108%;
+      height: 10px;
+      border-radius: 3px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .present .bow {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.1rem;
+      z-index: 2;
+    }
+
+    .p1 { width: 48px; height: 38px; background: linear-gradient(135deg, #c41e3a, #8b0000); }
+    .p1 .lid { background: #ffd700; }
+    .p2 { width: 38px; height: 48px; background: linear-gradient(135deg, #006400, #228b22); }
+    .p2 .lid { background: #ff6b6b; }
+    .p3 { width: 55px; height: 32px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
+    .p3 .lid { background: #fbbf24; }
+    .p4 { width: 42px; height: 42px; background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+    .p4 .lid { background: #f472b6; }
+    .p5 { width: 35px; height: 28px; background: linear-gradient(135deg, #ea580c, #f97316); }
+    .p5 .lid { background: #22d3ee; }
+    .p6 { width: 50px; height: 36px; background: linear-gradient(135deg, #be185d, #ec4899); }
+    .p6 .lid { background: #a3e635; }
+
+    /* ========== TREE ========== */
+    .tree-area {
+      position: absolute;
+      bottom: 22%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(85vw, 560px);
+      height: min(68vh, 580px);
+      z-index: 15;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
     }
 
     .tree {
@@ -91,7 +402,7 @@
       height: 100%;
     }
 
-    /* CSS Christmas Tree layers */
+    /* More realistic layered tree using multiple overlapping triangles + gradients */
     .tree-layer {
       position: absolute;
       left: 50%;
@@ -99,31 +410,62 @@
       width: 0;
       height: 0;
       border-style: solid;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));
     }
 
-    .layer1 {
+    /* Bottom-most (widest) */
+    .l1 {
+      bottom: 8%;
+      border-width: 0 210px 170px 210px;
+      border-color: transparent transparent #0d5c2e transparent;
+    }
+    .l2 {
       bottom: 18%;
-      border-width: 0 110px 140px 110px;
-      border-color: transparent transparent #1a7a3a transparent;
+      border-width: 0 190px 150px 190px;
+      border-color: transparent transparent #146b35 transparent;
+    }
+    .l3 {
+      bottom: 28%;
+      border-width: 0 170px 135px 170px;
+      border-color: transparent transparent #1a7a3c transparent;
+    }
+    .l4 {
+      bottom: 38%;
+      border-width: 0 148px 120px 148px;
+      border-color: transparent transparent #228b45 transparent;
+    }
+    .l5 {
+      bottom: 47%;
+      border-width: 0 125px 105px 125px;
+      border-color: transparent transparent #2a9b50 transparent;
+    }
+    .l6 {
+      bottom: 55%;
+      border-width: 0 100px 90px 100px;
+      border-color: transparent transparent #32ab5a transparent;
+    }
+    .l7 {
+      bottom: 62%;
+      border-width: 0 75px 75px 75px;
+      border-color: transparent transparent #3abb65 transparent;
+    }
+    .l8 {
+      bottom: 68%;
+      border-width: 0 52px 60px 52px;
+      border-color: transparent transparent #42cb70 transparent;
     }
 
-    .layer2 {
-      bottom: 32%;
-      border-width: 0 95px 120px 95px;
-      border-color: transparent transparent #228b22 transparent;
-    }
-
-    .layer3 {
-      bottom: 45%;
-      border-width: 0 80px 100px 80px;
-      border-color: transparent transparent #2e8b2e transparent;
-    }
-
-    .layer4 {
-      bottom: 56%;
-      border-width: 0 65px 85px 65px;
-      border-color: transparent transparent #3cb371 transparent;
+    /* Soft highlight on right side of each layer for depth */
+    .tree-layer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      opacity: 0.25;
+      pointer-events: none;
     }
 
     .trunk {
@@ -131,68 +473,146 @@
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 36px;
-      height: 55px;
-      background: linear-gradient(90deg, #5d3a1a, #8b5a2b, #5d3a1a);
-      border-radius: 4px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      width: 48px;
+      height: 70px;
+      background: linear-gradient(90deg, #3e2723 0%, #6d4c41 25%, #5d4037 50%, #6d4c41 75%, #3e2723 100%);
+      border-radius: 4px 4px 2px 2px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      z-index: 1;
     }
 
-    /* Decoration drop zone overlay */
+    /* Drop zone covers the foliage */
     .drop-zone {
       position: absolute;
       top: 0;
-      left: 0;
-      width: 100%;
-      height: 85%;
-      z-index: 20;
+      left: 5%;
+      width: 90%;
+      height: 88%;
+      z-index: 30;
       cursor: pointer;
     }
 
-    /* Placed decorations on tree */
+    /* Placed decorations */
     .placed-decoration {
       position: absolute;
-      font-size: 1.8rem;
+      font-size: 1.9rem;
       cursor: grab;
-      transition: transform 0.15s ease;
-      z-index: 25;
-      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
+      z-index: 35;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
       touch-action: none;
+      transition: transform 0.15s ease;
     }
 
     .placed-decoration:active {
       cursor: grabbing;
-      transform: scale(1.2);
+      transform: scale(1.25);
     }
 
     .placed-decoration.star {
-      font-size: 2.8rem;
-      z-index: 30;
-      animation: star-twinkle 1.5s ease-in-out infinite;
+      font-size: 3.2rem;
+      z-index: 40;
+      animation: starTwinkle 1.4s ease-in-out infinite;
     }
 
-    @keyframes star-twinkle {
-      0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 8px gold); }
-      50% { transform: scale(1.15) rotate(10deg); filter: drop-shadow(0 0 20px gold); }
+    @keyframes starTwinkle {
+      0%, 100% { transform: scale(1) rotate(-5deg); filter: drop-shadow(0 0 10px gold); }
+      50% { transform: scale(1.2) rotate(5deg); filter: drop-shadow(0 0 22px gold); }
     }
+
+    /* Tree lights (appear on celebration) */
+    .tree-lights {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 1.2s;
+    }
+    .tree-lights.on { opacity: 1; }
+
+    .light {
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      animation: twinkle 1.3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.35; transform: scale(0.75); }
+      50% { opacity: 1; transform: scale(1.35); }
+    }
+
+    /* ========== UI ========== */
+    header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding: 10px 8px 6px;
+      z-index: 50;
+      background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 100%);
+    }
+
+    h1 {
+      font-size: clamp(1.3rem, 4.5vw, 2rem);
+      text-shadow: 0 0 12px #ffd700, 0 0 25px #ff6b6b;
+      animation: glow 2.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ffd700, 0 0 20px #ff6b6b; }
+      to { text-shadow: 0 0 22px #ffd700, 0 0 45px #ff6b6b, 0 0 60px #00ff88; }
+    }
+
+    .subtitle {
+      font-size: clamp(0.85rem, 2.8vw, 1.05rem);
+      opacity: 0.95;
+      margin-top: 2px;
+    }
+
+    .tip {
+      position: absolute;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 215, 0, 0.95);
+      color: #1a1a2e;
+      padding: 7px 16px;
+      border-radius: 22px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      z-index: 55;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: tipPulse 2s ease infinite;
+    }
+
+    @keyframes tipPulse {
+      0%, 100% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.04); }
+    }
+
+    .tip.hidden { display: none; }
 
     /* Decoration tray */
     .tray {
-      position: relative;
-      width: 100%;
-      max-width: 500px;
-      padding: 10px 8px 20px;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 20px 20px 0 0;
-      margin-top: auto;
-      z-index: 15;
-      backdrop-filter: blur(6px);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 6px 14px;
+      background: linear-gradient(180deg, rgba(20,10,5,0.75) 0%, rgba(10,5,2,0.92) 100%);
+      border-top: 3px solid rgba(255, 215, 0, 0.35);
+      z-index: 60;
+      backdrop-filter: blur(8px);
     }
 
     .tray-title {
       text-align: center;
-      font-size: 1.1rem;
-      margin-bottom: 8px;
+      font-size: 1rem;
+      margin-bottom: 6px;
       color: #ffd700;
     }
 
@@ -200,58 +620,60 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 8px;
+      gap: 7px;
+      max-width: 640px;
+      margin: 0 auto;
       padding: 0 4px;
     }
 
     .deco-btn {
-      width: 52px;
-      height: 52px;
-      font-size: 1.9rem;
-      background: rgba(255, 255, 255, 0.15);
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-radius: 14px;
+      width: 48px;
+      height: 48px;
+      font-size: 1.75rem;
+      background: rgba(255, 255, 255, 0.12);
+      border: 2.5px solid rgba(255, 255, 255, 0.28);
+      border-radius: 12px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
+      transition: all 0.18s ease;
       touch-action: manipulation;
     }
 
     .deco-btn:hover, .deco-btn:active {
-      transform: scale(1.15);
-      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.14);
+      background: rgba(255, 255, 255, 0.28);
       border-color: #ffd700;
-      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+      box-shadow: 0 0 14px rgba(255, 215, 0, 0.55);
     }
 
     .deco-btn.selected {
-      background: rgba(255, 215, 0, 0.4);
+      background: rgba(255, 215, 0, 0.38);
       border-color: #ffd700;
-      box-shadow: 0 0 20px gold;
+      box-shadow: 0 0 18px gold;
       transform: scale(1.1);
     }
 
     .counter {
       text-align: center;
-      margin-top: 8px;
-      font-size: 1rem;
+      margin-top: 6px;
+      font-size: 0.95rem;
       color: #a0e0ff;
     }
 
     .counter span {
       color: #ffd700;
       font-weight: bold;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
     }
 
-    /* Celebration overlay */
+    /* Celebration */
     .celebration {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 1000;
+      background: rgba(0, 0, 0, 0.72);
+      z-index: 2000;
       display: none;
       flex-direction: column;
       align-items: center;
@@ -271,28 +693,27 @@
     }
 
     .celebration h2 {
-      font-size: clamp(2rem, 8vw, 3.5rem);
+      font-size: clamp(2rem, 8vw, 3.4rem);
       color: #ffd700;
       text-shadow: 0 0 20px #ff6b6b, 0 0 40px #00ff88;
       animation: bounce 0.8s ease infinite;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     @keyframes bounce {
       0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-15px) scale(1.05); }
+      50% { transform: translateY(-14px) scale(1.05); }
     }
 
     .celebration p {
-      font-size: clamp(1.2rem, 4vw, 1.8rem);
-      margin: 10px 0 25px;
-      color: #fff;
+      font-size: clamp(1.15rem, 4vw, 1.7rem);
+      margin: 8px 0 22px;
     }
 
     .celebration .big-emoji {
-      font-size: 4rem;
-      animation: spin 2s linear infinite;
-      margin: 15px 0;
+      font-size: 3.8rem;
+      animation: spin 2.2s linear infinite;
+      margin: 12px 0;
     }
 
     @keyframes spin {
@@ -304,8 +725,8 @@
       background: linear-gradient(135deg, #ff6b6b, #ffd700);
       color: #1a1a2e;
       border: none;
-      padding: 16px 36px;
-      font-size: 1.3rem;
+      padding: 15px 34px;
+      font-size: 1.25rem;
       font-family: inherit;
       font-weight: bold;
       border-radius: 50px;
@@ -315,84 +736,111 @@
     }
 
     .play-again:hover, .play-again:active {
-      transform: scale(1.08);
+      transform: scale(1.07);
     }
 
-    /* Confetti canvas */
     #confetti {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 999;
+      z-index: 1999;
     }
 
-    /* Lights effect on tree */
-    .tree-lights {
-      position: absolute;
-      inset: 0;
+    /* Falling room snow (subtle) */
+    .snowflake {
+      position: fixed;
+      top: -20px;
+      color: white;
+      font-size: 1em;
+      opacity: 0.55;
+      animation: fall linear infinite;
       pointer-events: none;
-      z-index: 15;
-      opacity: 0;
-      transition: opacity 1s;
+      z-index: 4;
     }
 
-    .tree-lights.on {
-      opacity: 1;
+    @keyframes fall {
+      to { transform: translateY(105vh) rotate(360deg); }
     }
 
-    .light {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      animation: twinkle 1.2s ease-in-out infinite;
+    /* Responsive */
+    @media (max-width: 600px) {
+      .fireplace-area { width: 26vw; }
+      .window { width: 20vw; height: 22vh; }
+      .tree-area { height: min(62vh, 480px); }
+      .deco-btn { width: 44px; height: 44px; font-size: 1.55rem; }
     }
 
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.4; transform: scale(0.8); }
-      50% { opacity: 1; transform: scale(1.3); }
-    }
-
-    /* Instruction tip */
-    .tip {
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 215, 0, 0.9);
-      color: #1a1a2e;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      font-weight: bold;
-      z-index: 40;
-      white-space: nowrap;
-      animation: tipPulse 2s ease infinite;
-    }
-
-    @keyframes tipPulse {
-      0%, 100% { transform: translateX(-50%) scale(1); }
-      50% { transform: translateX(-50%) scale(1.05); }
-    }
-
-    .tip.hidden {
-      display: none;
-    }
-
-    /* Responsive tweaks */
     @media (max-height: 700px) {
-      .tree-container {
-        height: min(48vh, 360px);
-      }
-      .deco-btn {
-        width: 46px;
-        height: 46px;
-        font-size: 1.6rem;
-      }
+      .tree-area { height: min(58vh, 420px); }
+      .fireplace-area { height: auto; }
+      .chimney { height: min(32vh, 220px); }
     }
   </style>
 </head>
 <body>
+  <div class="room">
+    <!-- Window -->
+    <div class="window">
+      <div class="window-snow"></div>
+      <div class="window-flakes">❄ ✧ ❅ ✦ ❄</div>
+    </div>
+
+    <!-- Fireplace -->
+    <div class="fireplace-area">
+      <div class="chimney">
+        <div class="mantel"></div>
+        <div class="stockings">
+          <span class="stocking">🧦</span>
+          <span class="stocking">🧦</span>
+          <span class="stocking">🧦</span>
+        </div>
+        <div class="fire-opening">
+          <div class="fire">
+            <div class="flame flame1"></div>
+            <div class="flame flame2"></div>
+            <div class="flame flame3"></div>
+            <div class="flame flame4"></div>
+            <div class="flame flame5"></div>
+          </div>
+        </div>
+        <div class="fire-glow"></div>
+      </div>
+    </div>
+
+    <!-- Floor -->
+    <div class="floor"></div>
+
+    <!-- Snowy base under tree -->
+    <div class="snow-ground"></div>
+
+    <!-- Presents around the tree -->
+    <div class="presents">
+      <div class="present p1"><div class="lid"></div><div class="bow">🎀</div></div>
+      <div class="present p2"><div class="lid"></div><div class="bow">🎀</div></div>
+      <div class="present p3"><div class="lid"></div><div class="bow">🎀</div></div>
+      <div class="present p4"><div class="lid"></div><div class="bow">🎀</div></div>
+      <div class="present p5"><div class="lid"></div><div class="bow">🎀</div></div>
+      <div class="present p6"><div class="lid"></div><div class="bow">🎀</div></div>
+    </div>
+
+    <!-- The big tree -->
+    <div class="tree-area">
+      <div class="tree" id="tree">
+        <div class="tree-layer l8"></div>
+        <div class="tree-layer l7"></div>
+        <div class="tree-layer l6"></div>
+        <div class="tree-layer l5"></div>
+        <div class="tree-layer l4"></div>
+        <div class="tree-layer l3"></div>
+        <div class="tree-layer l2"></div>
+        <div class="tree-layer l1"></div>
+        <div class="trunk"></div>
+        <div class="tree-lights" id="treeLights"></div>
+        <div class="drop-zone" id="dropZone"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="snow-container"></div>
   <canvas id="confetti"></canvas>
 
@@ -401,26 +849,12 @@
     <p class="subtitle">Tap a decoration, then tap the tree!</p>
   </header>
 
-  <div class="game-area">
-    <div class="tip" id="tip">👆 Pick a decoration below!</div>
+  <div class="tip" id="tip">👆 Pick a decoration below!</div>
 
-    <div class="tree-container">
-      <div class="tree" id="tree">
-        <div class="tree-layer layer4"></div>
-        <div class="tree-layer layer3"></div>
-        <div class="tree-layer layer2"></div>
-        <div class="tree-layer layer1"></div>
-        <div class="trunk"></div>
-        <div class="tree-lights" id="treeLights"></div>
-        <div class="drop-zone" id="dropZone"></div>
-      </div>
-    </div>
-
-    <div class="tray">
-      <div class="tray-title">✨ Choose decorations ✨</div>
-      <div class="decorations-grid" id="decoGrid"></div>
-      <div class="counter">Decorations: <span id="count">0</span> / <span id="goal">12</span></div>
-    </div>
+  <div class="tray">
+    <div class="tray-title">✨ Choose decorations ✨</div>
+    <div class="decorations-grid" id="decoGrid"></div>
+    <div class="counter">Decorations: <span id="count">0</span> / <span id="goal">12</span></div>
   </div>
 
   <div class="celebration" id="celebration">
@@ -432,14 +866,14 @@
   </div>
 
   <script>
-    // ===== CONFIG =====
-    const GOAL = 12; // decorations needed to win
+    const GOAL = 12;
     const DECORATIONS = [
       { emoji: '🔴', name: 'red bauble' },
       { emoji: '🔵', name: 'blue bauble' },
       { emoji: '🟡', name: 'gold bauble' },
       { emoji: '🟢', name: 'green bauble' },
       { emoji: '🟣', name: 'purple bauble' },
+      { emoji: '🟠', name: 'orange bauble' },
       { emoji: '⭐', name: 'star', special: 'star' },
       { emoji: '🌟', name: 'sparkle star' },
       { emoji: '🎀', name: 'bow' },
@@ -453,22 +887,18 @@
       { emoji: '🍭', name: 'candy' },
       { emoji: '🍪', name: 'cookie' },
       { emoji: '❤️', name: 'heart' },
-      { emoji: '🎄', name: 'mini tree' },
       { emoji: '✨', name: 'sparkles' },
       { emoji: '💫', name: 'dizzy star' },
-      { emoji: '🎀', name: 'pink bow' },
-      { emoji: '🟡', name: 'yellow ball' },
-      { emoji: '🟠', name: 'orange bauble' }
+      { emoji: '🎄', name: 'mini tree' },
+      { emoji: '👼', name: 'angel' },
+      { emoji: '🎪', name: 'ornament' }
     ];
 
-    // ===== STATE =====
     let selectedDeco = null;
     let placedCount = 0;
-    let hasStar = false;
     let isCelebrating = false;
     let placedElements = [];
 
-    // ===== DOM =====
     const decoGrid = document.getElementById('decoGrid');
     const dropZone = document.getElementById('dropZone');
     const countEl = document.getElementById('count');
@@ -482,7 +912,7 @@
 
     goalEl.textContent = GOAL;
 
-    // ===== BUILD DECORATION BUTTONS =====
+    // Build decoration buttons
     DECORATIONS.forEach((deco, i) => {
       const btn = document.createElement('button');
       btn.className = 'deco-btn';
@@ -495,7 +925,6 @@
 
     function selectDecoration(index, btn) {
       if (isCelebrating) return;
-      // deselect previous
       document.querySelectorAll('.deco-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedDeco = DECORATIONS[index];
@@ -503,34 +932,21 @@
       tip.classList.remove('hidden');
     }
 
-    // ===== PLACE ON TREE =====
-    dropZone.addEventListener('click', (e) => {
+    function placeAt(clientX, clientY) {
       if (!selectedDeco || isCelebrating) return;
-
       const rect = dropZone.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      // Keep decorations roughly on the tree shape (triangle-ish)
-      const relX = x / rect.width;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
       const relY = y / rect.height;
-      // Simple bounds check - allow a bit of freedom
-      if (relY > 0.92) return; // too low (trunk)
-
+      if (relY > 0.93) return; // avoid trunk area
       placeDecoration(x, y, selectedDeco);
-    });
+    }
 
-    // Also support touch
-    dropZone.addEventListener('touchend', (e) => {
+    dropZone.addEventListener('click', e => placeAt(e.clientX, e.clientY));
+    dropZone.addEventListener('touchend', e => {
       e.preventDefault();
-      if (!selectedDeco || isCelebrating) return;
-      const touch = e.changedTouches[0];
-      const rect = dropZone.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      const relY = y / rect.height;
-      if (relY > 0.92) return;
-      placeDecoration(x, y, selectedDeco);
+      const t = e.changedTouches[0];
+      placeAt(t.clientX, t.clientY);
     }, { passive: false });
 
     function placeDecoration(x, y, deco) {
@@ -538,72 +954,61 @@
       el.className = 'placed-decoration';
       if (deco.special === 'star') {
         el.classList.add('star');
-        // Stars go near the top
-        y = Math.min(y, 40);
-        hasStar = true;
+        y = Math.min(y, 55);
       }
       el.textContent = deco.emoji;
-      el.style.left = (x - 16) + 'px';
-      el.style.top = (y - 16) + 'px';
-
-      // Make placed items also draggable a bit
+      el.style.left = (x - 18) + 'px';
+      el.style.top = (y - 18) + 'px';
       makeDraggable(el);
-
       document.getElementById('tree').appendChild(el);
       placedElements.push(el);
       placedCount++;
       countEl.textContent = placedCount;
 
-      // Clear selection
       selectedDeco = null;
       document.querySelectorAll('.deco-btn').forEach(b => b.classList.remove('selected'));
       tip.classList.add('hidden');
 
-      // Little pop animation
       el.style.transform = 'scale(0)';
       requestAnimationFrame(() => {
-        el.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        el.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
         el.style.transform = 'scale(1)';
       });
 
-      // Check win
       if (placedCount >= GOAL) {
-        setTimeout(startCelebration, 400);
+        setTimeout(startCelebration, 450);
       }
     }
 
     function makeDraggable(el) {
       let startX, startY, origX, origY;
-      el.addEventListener('touchstart', (e) => {
+      el.addEventListener('touchstart', e => {
         if (isCelebrating) return;
         const t = e.touches[0];
-        startX = t.clientX;
-        startY = t.clientY;
+        startX = t.clientX; startY = t.clientY;
         origX = parseFloat(el.style.left);
         origY = parseFloat(el.style.top);
       }, { passive: true });
-
-      el.addEventListener('touchmove', (e) => {
+      el.addEventListener('touchmove', e => {
         if (isCelebrating) return;
         e.preventDefault();
         const t = e.touches[0];
-        const dx = t.clientX - startX;
-        const dy = t.clientY - startY;
-        el.style.left = (origX + dx) + 'px';
-        el.style.top = (origY + dy) + 'px';
+        el.style.left = (origX + (t.clientX - startX)) + 'px';
+        el.style.top = (origY + (t.clientY - startY)) + 'px';
       }, { passive: false });
     }
 
-    // ===== LIGHTS =====
+    // Tree lights
     function createLights() {
-      const colors = ['#ff0000', '#00ff00', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#ffffff'];
-      // Approximate positions on the triangular tree
+      const colors = ['#ff2020', '#20ff40', '#ffff20', '#ff40ff', '#40ffff', '#ff8800', '#ffffff', '#ffd700'];
       const positions = [
-        [50, 12], [35, 22], [65, 22],
-        [25, 35], [50, 32], [75, 35],
-        [20, 48], [40, 45], [60, 45], [80, 48],
-        [15, 62], [35, 58], [55, 58], [75, 62],
-        [25, 72], [50, 70], [70, 72]
+        [50, 8], [38, 16], [62, 16],
+        [28, 26], [50, 24], [72, 26],
+        [22, 36], [40, 34], [60, 34], [78, 36],
+        [18, 46], [35, 44], [55, 44], [72, 46],
+        [15, 56], [32, 54], [50, 52], [68, 54], [82, 56],
+        [20, 66], [40, 64], [60, 64], [78, 66],
+        [30, 74], [50, 72], [70, 74]
       ];
       positions.forEach((pos, i) => {
         const light = document.createElement('div');
@@ -611,23 +1016,21 @@
         light.style.left = pos[0] + '%';
         light.style.top = pos[1] + '%';
         light.style.background = colors[i % colors.length];
-        light.style.boxShadow = `0 0 8px ${colors[i % colors.length]}`;
-        light.style.animationDelay = (i * 0.15) + 's';
+        light.style.boxShadow = `0 0 10px ${colors[i % colors.length]}`;
+        light.style.animationDelay = (i * 0.12) + 's';
         treeLights.appendChild(light);
       });
     }
     createLights();
 
-    // ===== CELEBRATION =====
     function startCelebration() {
       if (isCelebrating) return;
       isCelebrating = true;
       treeLights.classList.add('on');
       celebration.classList.add('active');
       launchConfetti();
-      // Extra fun: make all decorations bounce a bit
       placedElements.forEach((el, i) => {
-        el.style.animation = `bounce 0.6s ease ${i * 0.05}s infinite`;
+        el.style.animation = `bounce 0.6s ease ${i * 0.04}s infinite`;
       });
     }
 
@@ -636,7 +1039,6 @@
     function resetGame() {
       isCelebrating = false;
       placedCount = 0;
-      hasStar = false;
       countEl.textContent = '0';
       celebration.classList.remove('active');
       treeLights.classList.remove('on');
@@ -649,25 +1051,25 @@
       document.querySelectorAll('.deco-btn').forEach(b => b.classList.remove('selected'));
     }
 
-    // ===== SNOW =====
+    // Soft falling snow
     function createSnow() {
       const container = document.getElementById('snow-container');
-      const flakes = ['❄', '❅', '❆', '✦', '✧'];
-      for (let i = 0; i < 35; i++) {
+      const flakes = ['❄', '❅', '❆', '✦'];
+      for (let i = 0; i < 28; i++) {
         const flake = document.createElement('div');
         flake.className = 'snowflake';
         flake.textContent = flakes[Math.floor(Math.random() * flakes.length)];
         flake.style.left = Math.random() * 100 + 'vw';
-        flake.style.fontSize = (0.6 + Math.random() * 1.2) + 'em';
-        flake.style.animationDuration = (6 + Math.random() * 12) + 's';
-        flake.style.animationDelay = (Math.random() * 8) + 's';
-        flake.style.opacity = 0.4 + Math.random() * 0.5;
+        flake.style.fontSize = (0.5 + Math.random() * 1.1) + 'em';
+        flake.style.animationDuration = (8 + Math.random() * 14) + 's';
+        flake.style.animationDelay = (Math.random() * 10) + 's';
+        flake.style.opacity = 0.3 + Math.random() * 0.4;
         container.appendChild(flake);
       }
     }
     createSnow();
 
-    // ===== CONFETTI =====
+    // Confetti
     let confettiParticles = [];
     let confettiAnimId = null;
 
@@ -676,17 +1078,17 @@
       confettiCanvas.height = window.innerHeight;
       confettiParticles = [];
       const colors = ['#ff0000', '#00ff00', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#ffffff', '#ffd700'];
-      for (let i = 0; i < 180; i++) {
+      for (let i = 0; i < 200; i++) {
         confettiParticles.push({
           x: Math.random() * confettiCanvas.width,
           y: Math.random() * confettiCanvas.height - confettiCanvas.height,
-          w: 6 + Math.random() * 8,
-          h: 4 + Math.random() * 6,
+          w: 6 + Math.random() * 9,
+          h: 4 + Math.random() * 7,
           color: colors[Math.floor(Math.random() * colors.length)],
-          speed: 2 + Math.random() * 4,
+          speed: 2 + Math.random() * 4.5,
           rot: Math.random() * 360,
-          rotSpeed: -4 + Math.random() * 8,
-          sway: Math.random() * 2
+          rotSpeed: -5 + Math.random() * 10,
+          sway: Math.random() * 2.2
         });
       }
       animateConfetti();
@@ -719,7 +1121,6 @@
       confettiParticles = [];
     }
 
-    // Resize confetti canvas
     window.addEventListener('resize', () => {
       confettiCanvas.width = window.innerWidth;
       confettiCanvas.height = window.innerHeight;
@@ -727,4 +1128,3 @@
   </script>
 </body>
 </html>
-
