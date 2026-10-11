@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Animal Paintball Fun!</title>
+  <title>Animal Paintball Challenge!</title>
   <style>
     * {
       margin: 0;
@@ -12,7 +12,7 @@
       touch-action: none;
     }
     body {
-      background: linear-gradient(180deg, #87CEEB 0%, #98D8C8 50%, #90EE90 100%);
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
       overflow: hidden;
       height: 100vh;
@@ -25,55 +25,59 @@
     #game-container {
       position: relative;
       width: 100%;
-      max-width: 900px;
+      max-width: 1000px;
       height: 100vh;
-      max-height: 700px;
+      max-height: 750px;
     }
     canvas {
       display: block;
       width: 100%;
       height: 100%;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 40%, #90EE90 100%);
-      cursor: crosshair;
+      border-radius: 16px;
+      box-shadow: 0 0 40px rgba(0,200,255,0.3);
+      background: linear-gradient(180deg, #0f2027 0%, #203a43 40%, #2c5364 100%);
+      cursor: none;
     }
     #ui {
       position: absolute;
-      top: 15px;
+      top: 12px;
       left: 0;
       right: 0;
       display: flex;
       justify-content: space-between;
-      padding: 0 20px;
+      padding: 0 16px;
       pointer-events: none;
       z-index: 10;
+      gap: 8px;
     }
-    .score-box, .hits-box {
-      background: rgba(255,255,255,0.9);
-      padding: 10px 20px;
-      border-radius: 50px;
-      font-size: 22px;
+    .stat-box {
+      background: rgba(0,0,0,0.7);
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 18px;
       font-weight: bold;
-      color: #333;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      border: 3px solid #FF6B6B;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      border: 2px solid #00d2ff;
     }
     #message {
       position: absolute;
-      top: 50%;
+      top: 45%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 36px;
+      font-size: 28px;
       font-weight: bold;
-      color: #FF6B6B;
-      text-shadow: 3px 3px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+      color: #ff6b6b;
+      text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.25s;
       pointer-events: none;
       z-index: 20;
       text-align: center;
-      max-width: 80%;
+      max-width: 85%;
+      background: rgba(0,0,0,0.6);
+      padding: 12px 24px;
+      border-radius: 16px;
     }
     #message.show {
       opacity: 1;
@@ -81,68 +85,88 @@
     #start-screen {
       position: absolute;
       inset: 0;
-      background: rgba(255,255,255,0.95);
+      background: rgba(10,20,40,0.97);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 30;
-      border-radius: 20px;
+      border-radius: 16px;
       text-align: center;
       padding: 20px;
+      color: #fff;
     }
     #start-screen h1 {
-      font-size: 48px;
-      color: #FF6B6B;
-      margin-bottom: 10px;
-      text-shadow: 3px 3px 0 #FFE66D;
+      font-size: 42px;
+      color: #00d2ff;
+      margin-bottom: 8px;
+      text-shadow: 0 0 20px #00d2ff;
     }
     #start-screen p {
-      font-size: 20px;
-      color: #555;
-      margin: 8px 0;
-      max-width: 400px;
+      font-size: 17px;
+      color: #bcd;
+      margin: 6px 0;
+      max-width: 420px;
     }
     #start-btn {
-      margin-top: 25px;
-      padding: 18px 50px;
-      font-size: 28px;
+      margin-top: 22px;
+      padding: 16px 48px;
+      font-size: 26px;
       font-weight: bold;
-      background: linear-gradient(180deg, #FF6B6B, #EE5A5A);
+      background: linear-gradient(180deg, #ff6b6b, #ee5a5a);
       color: white;
       border: none;
       border-radius: 50px;
       cursor: pointer;
-      box-shadow: 0 8px 0 #C44545, 0 12px 20px rgba(0,0,0,0.2);
+      box-shadow: 0 6px 0 #c44545, 0 10px 25px rgba(0,0,0,0.4);
       transition: transform 0.1s, box-shadow 0.1s;
       font-family: inherit;
     }
     #start-btn:hover {
       transform: translateY(2px);
-      box-shadow: 0 6px 0 #C44545, 0 10px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 0 #c44545, 0 8px 18px rgba(0,0,0,0.4);
     }
     #start-btn:active {
       transform: translateY(6px);
-      box-shadow: 0 2px 0 #C44545, 0 5px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 0 #c44545;
     }
     .animal-preview {
-      font-size: 40px;
-      margin: 15px 0;
-      letter-spacing: 8px;
+      font-size: 32px;
+      margin: 12px 0;
+      letter-spacing: 6px;
     }
     #instructions {
       position: absolute;
-      bottom: 15px;
+      bottom: 10px;
       left: 0;
       right: 0;
       text-align: center;
-      font-size: 16px;
-      color: #333;
-      background: rgba(255,255,255,0.8);
-      padding: 8px;
-      border-radius: 20px;
-      margin: 0 20px;
+      font-size: 14px;
+      color: #a0d0ff;
+      background: rgba(0,0,0,0.6);
+      padding: 6px 12px;
+      border-radius: 16px;
+      margin: 0 16px;
       pointer-events: none;
+    }
+    #ammo-bar {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 12px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #00d2ff;
+      pointer-events: none;
+    }
+    #ammo-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #00d2ff, #00ff9f);
+      transition: width 0.1s;
     }
   </style>
 </head>
@@ -150,18 +174,21 @@
   <div id="game-container">
     <canvas id="gameCanvas"></canvas>
     <div id="ui">
-      <div class="score-box">Score: <span id="score">0</span></div>
-      <div class="hits-box">Hits: <span id="hits">0</span></div>
+      <div class="stat-box">Score: <span id="score">0</span></div>
+      <div class="stat-box">Hits: <span id="hits">0</span></div>
+      <div class="stat-box">Missed: <span id="missed">0</span></div>
     </div>
     <div id="message"></div>
-    <div id="instructions">Click or tap anywhere to shoot colorful paintballs!</div>
+    <div id="ammo-bar"><div id="ammo-fill"></div></div>
+    <div id="instructions">Move mouse / drag to aim the gun • Click / tap to shoot • Lead the fast targets!</div>
     <div id="start-screen">
-      <h1>🎨 Animal Paintball!</h1>
-      <div class="animal-preview">🐯 🦁 🐘 🐻 🦊 🐼</div>
-      <p>Hit the animal targets with paintballs!</p>
-      <p>When you hit one, it will tell you its name!</p>
-      <p>How many can you hit?</p>
-      <button id="start-btn">Start Game!</button>
+      <h1>🎯 Animal Paintball Challenge</h1>
+      <div class="animal-preview">🐯 🦁 🐘 🐻 🦊 🐼 🦓 🦒</div>
+      <p><strong>Over 200 different animals!</strong></p>
+      <p>Aim your paintball gun left and right, then fire!</p>
+      <p>Targets move fast — you must lead your shots.</p>
+      <p>There's a short cooldown between shots. Good luck!</p>
+      <button id="start-btn">Start Challenge!</button>
     </div>
   </div>
 
@@ -170,11 +197,12 @@
     const ctx = canvas.getContext('2d');
     const scoreEl = document.getElementById('score');
     const hitsEl = document.getElementById('hits');
+    const missedEl = document.getElementById('missed');
     const messageEl = document.getElementById('message');
     const startScreen = document.getElementById('start-screen');
     const startBtn = document.getElementById('start-btn');
+    const ammoFill = document.getElementById('ammo-fill');
 
-    // Resize canvas
     function resize() {
       const container = document.getElementById('game-container');
       canvas.width = container.clientWidth;
@@ -183,77 +211,151 @@
     resize();
     window.addEventListener('resize', resize);
 
+    // ========== 220+ ANIMALS ==========
+    const animalNames = [
+      "aardvark","albatross","alligator","alpaca","anaconda","angelfish","ant","anteater","antelope","armadillo",
+      "axolotl","baboon","badger","barracuda","bat","bear","beaver","bee","beetle","bison",
+      "blackbird","boar","bobcat","buffalo","butterfly","camel","capybara","caribou","cassowary","cat",
+      "caterpillar","catfish","centipede","chameleon","cheetah","chicken","chimpanzee","chinchilla","chipmunk","cicada",
+      "clam","clownfish","cobra","cockroach","cod","condor","cougar","cow","coyote","crab",
+      "crane","crayfish","cricket","crocodile","crow","cuckoo","deer","dingo","dinosaur","dog",
+      "dolphin","donkey","dove","dragonfly","duck","dugong","eagle","earthworm","eel","egret",
+      "elephant","elk","emu","falcon","ferret","finch","firefly","flamingo","flea","fly",
+      "fox","frog","gazelle","gecko","gerbil","gibbon","giraffe","goat","goldfish","goose",
+      "gorilla","grasshopper","hamster","hare","hawk","hedgehog","heron","hippopotamus","hornet","horse",
+      "hummingbird","hyena","ibis","iguana","impala","jackal","jaguar","jellyfish","kangaroo","kingfisher",
+      "kiwi","koala","komodo dragon","kookaburra","ladybug","lemur","leopard","lion","lizard","llama",
+      "lobster","lynx","macaw","magpie","manatee","mandrill","manta ray","meerkat","mink","mole",
+      "mongoose","monkey","moose","mosquito","moth","mouse","mule","narwhal","newt","nightingale",
+      "octopus","okapi","opossum","orangutan","orca","ostrich","otter","owl","ox","oyster",
+      "panda","panther","parakeet","parrot","peacock","pelican","penguin","pheasant","pig","pigeon",
+      "piranha","platypus","polar bear","porcupine","possum","prawn","puffin","puma","python","quail",
+      "quokka","rabbit","raccoon","ram","rat","rattlesnake","raven","reindeer","rhinoceros","robin",
+      "rooster","salamander","salmon","sandpiper","scorpion","seahorse","seal","shark","sheep","shrimp",
+      "skunk","sloth","snail","snake","sparrow","spider","squid","squirrel","starfish","stingray",
+      "stork","swan","tamarin","tapir","tarantula","termite","tiger","toad","tortoise","toucan",
+      "trout","turkey","turtle","viper","vulture","wallaby","walrus","wasp","weasel","whale",
+      "wild boar","wolf","wolverine","wombat","woodpecker","worm","yak","zebra","zebu","zorilla"
+    ];
+
+    // Common emoji map (fallback to letter circle for others)
+    const emojiMap = {
+      tiger: "🐯", lion: "🦁", elephant: "🐘", bear: "🐻", fox: "🦊", panda: "🐼",
+      koala: "🐨", giraffe: "🦒", zebra: "🦓", monkey: "🐒", penguin: "🐧", owl: "🦉",
+      dog: "🐶", cat: "🐱", mouse: "🐭", hamster: "🐹", rabbit: "🐰", frog: "🐸",
+      chicken: "🐔", penguin: "🐧", bird: "🐦", eagle: "🦅", duck: "🦆", swan: "🦢",
+      owl: "🦉", bat: "🦇", wolf: "🐺", boar: "🐗", horse: "🐴", unicorn: "🦄",
+      bee: "🐝", butterfly: "🦋", snail: "🐌", bug: "🐛", ant: "🐜", ladybug: "🐞",
+      spider: "🕷", scorpion: "🦂", crab: "🦀", lobster: "🦞", shrimp: "🦐", squid: "🦑",
+      octopus: "🐙", fish: "🐟", tropical: "🐠", blowfish: "🐡", shark: "🦈", whale: "🐋",
+      dolphin: "🐬", crocodile: "🐊", turtle: "🐢", lizard: "🦎", snake: "🐍", sauropod: "🦕",
+      t_rex: "🦖", dragon: "🐉", camel: "🐪", llama: "🦙", giraffe: "🦒", rhinoceros: "🦏",
+      hippopotamus: "🦛", mammoth: "🦣", goat: "🐐", ram: "🐏", sheep: "🐑", deer: "🦌",
+      cow: "🐄", ox: "🐂", water_buffalo: "🐃", pig: "🐷", boar: "🐗", raccoon: "🦝",
+      badger: "🦡", skunk: "🦨", kangaroo: "🦘", flamingo: "🦩", peacock: "🦚", parrot: "🦜",
+      swan: "🦢", dodo: "🦤", turkey: "🦃", seal: "🦭", otter: "🦦", beaver: "🦫",
+      bison: "🦬", polar_bear: "🐻‍❄️"
+    };
+
+    function getEmoji(name) {
+      const key = name.toLowerCase().replace(/ /g, "_");
+      if (emojiMap[key]) return emojiMap[key];
+      // try partial
+      for (const k of Object.keys(emojiMap)) {
+        if (name.includes(k) || k.includes(name.split(" ")[0])) return emojiMap[k];
+      }
+      return null;
+    }
+
+    // Colors for targets
+    const targetColors = [
+      "#FF6B6B","#4ECDC4","#FFE66D","#FF9FF3","#54A0FF","#5F27CD","#01A3A4","#FF9F43",
+      "#10ac84","#ee5a24","#0abde3","#c8d6e5","#f368e0","#ff9f43","#48dbfb","#1dd1a1"
+    ];
+
+    const paintColors = ["#FF6B6B","#4ECDC4","#FFE66D","#FF9FF3","#54A0FF","#5F27CD","#01A3A4","#FF9F43","#00ff9f","#ff4757"];
+
     // Game state
-    let score = 0;
-    let hits = 0;
+    let score = 0, hits = 0, missed = 0;
     let gameRunning = false;
     let paintballs = [];
     let targets = [];
     let particles = [];
     let lastTime = 0;
-
-    // Animal data
-    const animals = [
-      { emoji: '🐯', name: 'tiger', color: '#FF9F43' },
-      { emoji: '🦁', name: 'lion', color: '#FECA57' },
-      { emoji: '🐘', name: 'elephant', color: '#A4B0BE' },
-      { emoji: '🐻', name: 'bear', color: '#8B5A2B' },
-      { emoji: '🦊', name: 'fox', color: '#FF7F50' },
-      { emoji: '🐼', name: 'panda', color: '#2F3542' },
-      { emoji: '🐨', name: 'koala', color: '#A0A0A0' },
-      { emoji: '🦒', name: 'giraffe', color: '#F9CA24' },
-      { emoji: '🦓', name: 'zebra', color: '#2C3A47' },
-      { emoji: '🐒', name: 'monkey', color: '#CD853F' },
-      { emoji: '🐧', name: 'penguin', color: '#1E90FF' },
-      { emoji: '🦉', name: 'owl', color: '#8B4513' }
-    ];
-
-    // Paint colors
-    const paintColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9FF3', '#54A0FF', '#5F27CD', '#01A3A4', '#FF9F43'];
+    let aimAngle = -Math.PI / 2; // straight up
+    let mouseX = 0, mouseY = 0;
+    let cooldown = 0;
+    const COOLDOWN_TIME = 0.38; // seconds between shots - makes it harder
+    let gunX, gunY;
 
     class Target {
       constructor() {
-        this.reset();
+        this.reset(true);
       }
 
-      reset() {
-        const animal = animals[Math.floor(Math.random() * animals.length)];
-        this.emoji = animal.emoji;
-        this.name = animal.name;
-        this.color = animal.color;
-        this.radius = 40 + Math.random() * 20;
+      reset(initial = false) {
+        const name = animalNames[Math.floor(Math.random() * animalNames.length)];
+        this.name = name;
+        this.emoji = getEmoji(name);
+        this.color = targetColors[Math.floor(Math.random() * targetColors.length)];
+        // Smaller targets for difficulty
+        this.radius = 22 + Math.random() * 18;
         this.x = this.radius + Math.random() * (canvas.width - this.radius * 2);
-        this.y = this.radius + 80 + Math.random() * (canvas.height - this.radius * 2 - 100);
-        this.vx = (Math.random() - 0.5) * 2;
-        this.vy = (Math.random() - 0.5) * 2;
+        this.y = this.radius + 70 + Math.random() * (canvas.height * 0.55);
+        // Faster and more erratic movement
+        const speed = 2.2 + Math.random() * 3.5;
+        const angle = Math.random() * Math.PI * 2;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
         this.hit = false;
         this.hitTime = 0;
         this.scale = 1;
         this.rotation = 0;
+        this.wobble = Math.random() * Math.PI * 2;
+        this.lifetime = 8 + Math.random() * 10; // disappear if not hit
+        this.age = 0;
       }
 
       update(dt) {
         if (this.hit) {
           this.hitTime += dt;
-          this.scale = Math.max(0, 1 - this.hitTime / 0.6);
-          this.rotation += dt * 10;
-          if (this.hitTime > 0.6) {
-            this.reset();
-          }
+          this.scale = Math.max(0, 1 - this.hitTime / 0.45);
+          this.rotation += dt * 14;
+          if (this.hitTime > 0.45) this.reset();
           return;
         }
 
-        this.x += this.vx;
-        this.y += this.vy;
+        this.age += dt;
+        if (this.age > this.lifetime) {
+          missed++;
+          missedEl.textContent = missed;
+          this.reset();
+          return;
+        }
 
-        // Bounce off walls
+        this.wobble += dt * 3;
+        this.x += this.vx + Math.sin(this.wobble) * 0.8;
+        this.y += this.vy + Math.cos(this.wobble * 1.3) * 0.6;
+
+        // Bounce
         if (this.x < this.radius || this.x > canvas.width - this.radius) {
           this.vx *= -1;
           this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
         }
-        if (this.y < this.radius + 60 || this.y > canvas.height - this.radius - 40) {
+        if (this.y < this.radius + 55 || this.y > canvas.height * 0.72) {
           this.vy *= -1;
-          this.y = Math.max(this.radius + 60, Math.min(canvas.height - this.radius - 40, this.y));
+          this.y = Math.max(this.radius + 55, Math.min(canvas.height * 0.72, this.y));
+        }
+
+        // Occasional direction change (makes it harder)
+        if (Math.random() < 0.008) {
+          this.vx += (Math.random() - 0.5) * 2;
+          this.vy += (Math.random() - 0.5) * 2;
+          const sp = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+          if (sp > 5.5) {
+            this.vx *= 5.5 / sp;
+            this.vy *= 5.5 / sp;
+          }
         }
       }
 
@@ -263,10 +365,16 @@
         ctx.rotate(this.rotation);
         ctx.scale(this.scale, this.scale);
 
+        // Warning pulse when about to expire
+        if (!this.hit && this.age > this.lifetime - 2.5) {
+          const pulse = 0.5 + 0.5 * Math.sin(this.age * 12);
+          ctx.globalAlpha = 0.4 + pulse * 0.4;
+        }
+
         // Shadow
         ctx.beginPath();
-        ctx.arc(4, 6, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.arc(3, 5, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
         ctx.fill();
 
         // Outer ring
@@ -274,81 +382,86 @@
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 5;
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 3;
         ctx.stroke();
 
-        // Inner circle
+        // Inner
         ctx.beginPath();
-        ctx.arc(0, 0, this.radius * 0.75, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.arc(0, 0, this.radius * 0.72, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.92)";
         ctx.fill();
 
-        // Emoji
-        ctx.font = `${this.radius * 0.9}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(this.emoji, 0, 2);
+        if (this.emoji) {
+          ctx.font = `${this.radius * 0.95}px Arial`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(this.emoji, 0, 1);
+        } else {
+          // Letter circle for rare animals
+          ctx.fillStyle = this.color;
+          ctx.font = `bold ${this.radius * 0.7}px Arial`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(this.name.charAt(0).toUpperCase(), 0, 1);
+        }
 
         ctx.restore();
+        ctx.globalAlpha = 1;
       }
 
       checkHit(px, py, pr) {
         if (this.hit) return false;
         const dx = this.x - px;
         const dy = this.y - py;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        return dist < this.radius + pr;
+        return Math.sqrt(dx * dx + dy * dy) < this.radius + pr * 0.85;
       }
     }
 
     class Paintball {
-      constructor(x, y, tx, ty) {
+      constructor(x, y, angle) {
         this.x = x;
         this.y = y;
-        const angle = Math.atan2(ty - y, tx - x);
-        const speed = 15;
+        const speed = 16 + Math.random() * 2;
         this.vx = Math.cos(angle) * speed;
         this.vy = Math.sin(angle) * speed;
-        this.radius = 10;
+        this.radius = 8;
         this.color = paintColors[Math.floor(Math.random() * paintColors.length)];
         this.alive = true;
         this.trail = [];
       }
 
-      update() {
+      update(dt) {
         this.trail.push({ x: this.x, y: this.y });
-        if (this.trail.length > 6) this.trail.shift();
+        if (this.trail.length > 7) this.trail.shift();
 
         this.x += this.vx;
         this.y += this.vy;
+        this.vy += 0.22; // gravity - must lead shots
 
-        // Gravity-ish
-        this.vy += 0.15;
-
-        if (this.x < -20 || this.x > canvas.width + 20 ||
-            this.y < -20 || this.y > canvas.height + 20) {
+        if (this.x < -30 || this.x > canvas.width + 30 ||
+            this.y < -30 || this.y > canvas.height + 30) {
           this.alive = false;
         }
       }
 
       draw() {
-        // Trail
         for (let i = 0; i < this.trail.length; i++) {
           const t = this.trail[i];
-          const alpha = (i + 1) / this.trail.length * 0.4;
+          const a = (i + 1) / this.trail.length * 0.5;
           ctx.beginPath();
-          ctx.arc(t.x, t.y, this.radius * (0.4 + i * 0.1), 0, Math.PI * 2);
-          ctx.fillStyle = this.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+          ctx.arc(t.x, t.y, this.radius * (0.3 + i * 0.1), 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.globalAlpha = a;
           ctx.fill();
         }
+        ctx.globalAlpha = 1;
 
-        // Main ball
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.strokeStyle = "rgba(255,255,255,0.7)";
         ctx.lineWidth = 2;
         ctx.stroke();
       }
@@ -358,22 +471,20 @@
       constructor(x, y, color) {
         this.x = x;
         this.y = y;
-        this.vx = (Math.random() - 0.5) * 12;
-        this.vy = (Math.random() - 0.5) * 12;
-        this.radius = 3 + Math.random() * 6;
+        this.vx = (Math.random() - 0.5) * 14;
+        this.vy = (Math.random() - 0.5) * 14;
+        this.radius = 2 + Math.random() * 5;
         this.color = color;
         this.life = 1;
-        this.decay = 0.02 + Math.random() * 0.03;
+        this.decay = 0.025 + Math.random() * 0.03;
       }
-
       update() {
         this.x += this.vx;
         this.y += this.vy;
-        this.vy += 0.2;
+        this.vy += 0.25;
         this.life -= this.decay;
-        this.radius *= 0.98;
+        this.radius *= 0.97;
       }
-
       draw() {
         ctx.globalAlpha = Math.max(0, this.life);
         ctx.beginPath();
@@ -384,109 +495,205 @@
       }
     }
 
-    function spawnTargets(count = 6) {
+    function spawnTargets(n = 9) {
       targets = [];
-      for (let i = 0; i < count; i++) {
-        targets.push(new Target());
-      }
+      for (let i = 0; i < n; i++) targets.push(new Target());
     }
 
     function showMessage(text) {
       messageEl.textContent = text;
-      messageEl.classList.add('show');
-      setTimeout(() => messageEl.classList.remove('show'), 1500);
+      messageEl.classList.add("show");
+      setTimeout(() => messageEl.classList.remove("show"), 1400);
     }
 
     function speak(text) {
-      if ('speechSynthesis' in window) {
-        // Cancel any ongoing speech
+      if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1.2;
-        utterance.volume = 1;
-        // Try to use a friendly voice
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95;
+        u.pitch = 1.15;
+        u.volume = 1;
         const voices = window.speechSynthesis.getVoices();
-        const preferred = voices.find(v => 
-          v.name.includes('Google') || v.name.includes('Samantha') || 
-          v.name.includes('Female') || v.lang.startsWith('en')
+        const preferred = voices.find(v =>
+          v.name.includes("Google") || v.name.includes("Samantha") ||
+          v.name.includes("Female") || (v.lang && v.lang.startsWith("en"))
         );
-        if (preferred) utterance.voice = preferred;
-        window.speechSynthesis.speak(utterance);
+        if (preferred) u.voice = preferred;
+        window.speechSynthesis.speak(u);
       }
     }
 
     function createExplosion(x, y, color) {
-      for (let i = 0; i < 18; i++) {
-        particles.push(new Particle(x, y, color));
-      }
+      for (let i = 0; i < 16; i++) particles.push(new Particle(x, y, color));
     }
 
-    function shoot(x, y) {
-      if (!gameRunning) return;
-      // Shoot from bottom center-ish
-      const startX = canvas.width / 2;
-      const startY = canvas.height - 30;
-      paintballs.push(new Paintball(startX, startY, x, y));
+    function shoot() {
+      if (!gameRunning || cooldown > 0) return;
+      cooldown = COOLDOWN_TIME;
+      const muzzleX = gunX + Math.cos(aimAngle) * 55;
+      const muzzleY = gunY + Math.sin(aimAngle) * 55;
+      paintballs.push(new Paintball(muzzleX, muzzleY, aimAngle));
     }
 
-    // Input
-    function handlePointer(e) {
-      e.preventDefault();
+    // Input – mouse / touch aim
+    function updateAim(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
-      let clientX, clientY;
-      if (e.touches && e.touches.length) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-      const x = (clientX - rect.left) * scaleX;
-      const y = (clientY - rect.top) * scaleY;
-      shoot(x, y);
+      mouseX = (clientX - rect.left) * scaleX;
+      mouseY = (clientY - rect.top) * scaleY;
+
+      gunX = canvas.width / 2;
+      gunY = canvas.height - 25;
+
+      // Aim angle limited to roughly left-up-right (not straight down)
+      let angle = Math.atan2(mouseY - gunY, mouseX - gunX);
+      // Clamp so gun can't point too far down
+      const minA = -Math.PI + 0.25;
+      const maxA = -0.25;
+      if (angle > 0) angle = angle > Math.PI / 2 ? minA : maxA;
+      aimAngle = Math.max(minA, Math.min(maxA, angle));
     }
 
-    canvas.addEventListener('mousedown', handlePointer);
-    canvas.addEventListener('touchstart', handlePointer, { passive: false });
+    canvas.addEventListener("mousemove", e => {
+      updateAim(e.clientX, e.clientY);
+    });
+    canvas.addEventListener("mousedown", e => {
+      updateAim(e.clientX, e.clientY);
+      shoot();
+    });
+    canvas.addEventListener("touchmove", e => {
+      e.preventDefault();
+      if (e.touches.length) updateAim(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
+    canvas.addEventListener("touchstart", e => {
+      e.preventDefault();
+      if (e.touches.length) {
+        updateAim(e.touches[0].clientX, e.touches[0].clientY);
+        shoot();
+      }
+    }, { passive: false });
 
-    // Prevent scrolling on mobile
-    document.body.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+    document.body.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
+
+    // Keyboard aim assist (optional)
+    const keys = {};
+    window.addEventListener("keydown", e => {
+      keys[e.key] = true;
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        shoot();
+      }
+    });
+    window.addEventListener("keyup", e => { keys[e.key] = false; });
+
+    function drawGun() {
+      gunX = canvas.width / 2;
+      gunY = canvas.height - 25;
+
+      ctx.save();
+      ctx.translate(gunX, gunY);
+      ctx.rotate(aimAngle + Math.PI / 2); // gun points along aimAngle
+
+      // Gun body
+      ctx.fillStyle = "#2d3436";
+      ctx.fillRect(-14, -8, 28, 50);
+      ctx.fillStyle = "#636e72";
+      ctx.fillRect(-10, -6, 20, 40);
+
+      // Barrel
+      ctx.fillStyle = "#1e272e";
+      ctx.fillRect(-6, -55, 12, 50);
+      ctx.fillStyle = "#576574";
+      ctx.fillRect(-4, -52, 8, 45);
+
+      // Muzzle
+      ctx.beginPath();
+      ctx.arc(0, -55, 9, 0, Math.PI * 2);
+      ctx.fillStyle = "#2d3436";
+      ctx.fill();
+      ctx.strokeStyle = "#00d2ff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Grip
+      ctx.fillStyle = "#ee5a24";
+      ctx.fillRect(-12, 30, 24, 22);
+
+      // Sight
+      ctx.strokeStyle = "#00ff9f";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-8, -20);
+      ctx.lineTo(0, -28);
+      ctx.lineTo(8, -20);
+      ctx.stroke();
+
+      ctx.restore();
+
+      // Base platform
+      ctx.beginPath();
+      ctx.ellipse(gunX, gunY + 18, 45, 14, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "#2d3436";
+      ctx.fill();
+      ctx.strokeStyle = "#00d2ff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function drawCrosshair() {
+      // Small indicator in aim direction
+      const hx = gunX + Math.cos(aimAngle) * 90;
+      const hy = gunY + Math.sin(aimAngle) * 90;
+      ctx.beginPath();
+      ctx.arc(hx, hy, 6, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(0,210,255,0.7)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(hx - 10, hy);
+      ctx.lineTo(hx + 10, hy);
+      ctx.moveTo(hx, hy - 10);
+      ctx.lineTo(hx, hy + 10);
+      ctx.stroke();
+    }
 
     function gameLoop(timestamp) {
       const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
       lastTime = timestamp;
 
-      // Clear
+      if (cooldown > 0) cooldown -= dt;
+      ammoFill.style.width = ((1 - cooldown / COOLDOWN_TIME) * 100) + "%";
+
+      // Keyboard fine aim
+      if (keys["ArrowLeft"] || keys["a"] || keys["A"]) aimAngle -= 1.8 * dt;
+      if (keys["ArrowRight"] || keys["d"] || keys["D"]) aimAngle += 1.8 * dt;
+      aimAngle = Math.max(-Math.PI + 0.25, Math.min(-0.25, aimAngle));
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw soft ground
-      const groundGrad = ctx.createLinearGradient(0, canvas.height - 80, 0, canvas.height);
-      groundGrad.addColorStop(0, 'rgba(144, 238, 144, 0)');
-      groundGrad.addColorStop(1, 'rgba(76, 175, 80, 0.3)');
-      ctx.fillStyle = groundGrad;
-      ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+      // Atmosphere
+      const grd = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grd.addColorStop(0, "rgba(0,50,80,0.3)");
+      grd.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Update & draw targets
+      // Targets
       for (const t of targets) {
         t.update(dt);
         t.draw();
       }
 
-      // Update & draw paintballs + collisions
+      // Paintballs + collision
       for (let i = paintballs.length - 1; i >= 0; i--) {
         const p = paintballs[i];
-        p.update();
+        p.update(dt);
         p.draw();
-
         if (!p.alive) {
           paintballs.splice(i, 1);
           continue;
         }
-
-        // Check hits
         for (const t of targets) {
           if (t.checkHit(p.x, p.y, p.radius)) {
             t.hit = true;
@@ -494,15 +701,14 @@
             p.alive = false;
             paintballs.splice(i, 1);
 
-            // Score & feedback
-            score += 10;
-            hits += 1;
+            score += 15;
+            hits++;
             scoreEl.textContent = score;
             hitsEl.textContent = hits;
 
             createExplosion(t.x, t.y, p.color);
             const phrase = `I am a ${t.name}. You hit me!`;
-            showMessage(`${t.emoji} ${phrase}`);
+            showMessage(`${t.emoji || "🎯"} ${phrase}`);
             speak(phrase);
             break;
           }
@@ -513,58 +719,36 @@
       for (let i = particles.length - 1; i >= 0; i--) {
         particles[i].update();
         particles[i].draw();
-        if (particles[i].life <= 0) {
-          particles.splice(i, 1);
-        }
+        if (particles[i].life <= 0) particles.splice(i, 1);
       }
 
-      // Draw shooter base
-      ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height + 10, 40, Math.PI, 0);
-      ctx.fillStyle = '#FF6B6B';
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 4;
-      ctx.stroke();
+      drawGun();
+      drawCrosshair();
 
-      // Crosshair hint at bottom
-      ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height - 30, 8, 0, Math.PI * 2);
-      ctx.fillStyle = '#FF6B6B';
-      ctx.fill();
-
-      if (gameRunning) {
-        requestAnimationFrame(gameLoop);
-      }
+      if (gameRunning) requestAnimationFrame(gameLoop);
     }
 
-    // Start game
-    startBtn.addEventListener('click', () => {
-      startScreen.style.display = 'none';
+    startBtn.addEventListener("click", () => {
+      startScreen.style.display = "none";
       gameRunning = true;
-      score = 0;
-      hits = 0;
-      scoreEl.textContent = '0';
-      hitsEl.textContent = '0';
+      score = hits = missed = 0;
+      scoreEl.textContent = hitsEl.textContent = missedEl.textContent = "0";
       paintballs = [];
       particles = [];
-      spawnTargets(7);
+      cooldown = 0;
+      spawnTargets(10);
       lastTime = performance.now();
-      // Preload voices
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.getVoices();
-      }
+      gunX = canvas.width / 2;
+      gunY = canvas.height - 25;
+      aimAngle = -Math.PI / 2;
+      if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
       requestAnimationFrame(gameLoop);
     });
 
-    // Load voices early
-    if ('speechSynthesis' in window) {
+    if ("speechSynthesis" in window) {
       window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
   </script>
 </body>
 </html>
-
