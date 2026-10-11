@@ -147,7 +147,9 @@ function matches(heard,breed){
 }
 
 const $=id=>document.getElementById(id);
-const art=n=>/^[AEIOU]/i.test(n)?'an ':'a ';
+const ARTMODE="none";const ART_OVR={};const PLURAL=new Set([]);
+const art=n=>Object.prototype.hasOwnProperty.call(ART_OVR,n)?ART_OVR[n]:(ARTMODE==='none'?'':(/^[AEIOU]/i.test(n)?'an ':'a '));
+const isw=(w,n)=>PLURAL.has(n)?(w==='This'?'These are ':'Those are '):w+' is ';
 let queue=[],cur=null,stars=0,misses=0,busy=false,listening=false;
 
 // ---- Narrator (British English voice from the browser) ----
@@ -233,7 +235,7 @@ async function finish(ok,why,heard){
     stars++;streak++;
     $('stars').textContent='⭐ '+stars;$('streak').textContent=streak>=2?'🔥 '+streak:'';
     anim(document.querySelector('.card'),'pop');fanfare();
-    let line=pick(PRAISE)+' That is '+nm+'.';
+    let line=pick(PRAISE)+' '+isw('That',cur.name)+nm+'.';
     if(streak>=3)line+=' '+streak+' in a row!';
     if(stars%5===0)line+=' You are a superstar!';
     $('msg').textContent='🎉 '+line;
@@ -242,8 +244,8 @@ async function finish(ok,why,heard){
     streak=0;$('streak').textContent='';
     anim($('photo'),'shake');
     const t=why==='time',lead=t?pick(TIMEUP):pick(OOPS);
-    $('msg').textContent=(t?'⏰ ':'🤔 ')+lead+' It\'s '+nm+'.'+(heard?` (I heard "${heard}")`:'');
-    await say(lead+' That is '+nm+'. On to the next one!');
+    $('msg').textContent=(t?'⏰ ':'🤔 ')+lead+' '+(PLURAL.has(cur.name)?'They are ':'It\'s ')+nm+'.'+(heard?` (I heard "${heard}")`:'');
+    await say(lead+' '+isw('That',cur.name)+nm+'. On to the next one!');
   }
   if(running)next();
 }
@@ -297,7 +299,7 @@ async function showLearn(){
   const u=await getPhoto(b);
   if(!learning||BREEDS[li]!==b)return;
   $('photo').src=u||TINY;
-  await say('This is '+art(b.name)+b.name+'.');
+  await say(isw('This',b.name)+art(b.name)+b.name+'.');
 }
 function goLearn(d){li=(li+d+BREEDS.length)%BREEDS.length;return showLearn()}
 async function autoLoop(tok){
@@ -320,7 +322,7 @@ $('learn').onclick=()=>{
 };
 $('lprev').onclick=()=>goLearn(-1);
 $('lnext').onclick=()=>goLearn(1);
-$('lhear').onclick=()=>say('This is '+art(BREEDS[li].name)+BREEDS[li].name+'.');
+$('lhear').onclick=()=>say(isw('This',BREEDS[li].name)+art(BREEDS[li].name)+BREEDS[li].name+'.');
 $('lauto').onclick=()=>{
   auto=!auto;$('lauto').textContent=auto?'⏸ Pause':'▶ Auto-play';
   if(auto)autoLoop(++autoTok);else{autoTok++}
@@ -330,4 +332,3 @@ $('ltest').onclick=()=>{stopLearn();$('mic').click()};
 </script>
 </body>
 </html>
-
