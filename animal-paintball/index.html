@@ -1,1 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Animal Paintball Fun!</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      touch-action: none;
+    }
+    body {
+      background: linear-gradient(180deg, #87CEEB 0%, #98D8C8 50%, #90EE90 100%);
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      height: 100vh;
+      max-height: 700px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 40%, #90EE90 100%);
+      cursor: crosshair;
+    }
+    #ui {
+      position: absolute;
+      top: 15px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 20px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .score-box, .hits-box {
+      background: rgba(255,255,255,0.9);
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      border: 3px solid #FF6B6B;
+    }
+    #message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      font-weight: bold;
+      color: #FF6B6B;
+      text-shadow: 3px 3px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 20;
+      text-align: center;
+      max-width: 80%;
+    }
+    #message.show {
+      opacity: 1;
+    }
+    #start-screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+      border-radius: 20px;
+      text-align: center;
+      padding: 20px;
+    }
+    #start-screen h1 {
+      font-size: 48px;
+      color: #FF6B6B;
+      margin-bottom: 10px;
+      text-shadow: 3px 3px 0 #FFE66D;
+    }
+    #start-screen p {
+      font-size: 20px;
+      color: #555;
+      margin: 8px 0;
+      max-width: 400px;
+    }
+    #start-btn {
+      margin-top: 25px;
+      padding: 18px 50px;
+      font-size: 28px;
+      font-weight: bold;
+      background: linear-gradient(180deg, #FF6B6B, #EE5A5A);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 0 #C44545, 0 12px 20px rgba(0,0,0,0.2);
+      transition: transform 0.1s, box-shadow 0.1s;
+      font-family: inherit;
+    }
+    #start-btn:hover {
+      transform: translateY(2px);
+      box-shadow: 0 6px 0 #C44545, 0 10px 15px rgba(0,0,0,0.2);
+    }
+    #start-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #C44545, 0 5px 10px rgba(0,0,0,0.2);
+    }
+    .animal-preview {
+      font-size: 40px;
+      margin: 15px 0;
+      letter-spacing: 8px;
+    }
+    #instructions {
+      position: absolute;
+      bottom: 15px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 16px;
+      color: #333;
+      background: rgba(255,255,255,0.8);
+      padding: 8px;
+      border-radius: 20px;
+      margin: 0 20px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui">
+      <div class="score-box">Score: <span id="score">0</span></div>
+      <div class="hits-box">Hits: <span id="hits">0</span></div>
+    </div>
+    <div id="message"></div>
+    <div id="instructions">Click or tap anywhere to shoot colorful paintballs!</div>
+    <div id="start-screen">
+      <h1>🎨 Animal Paintball!</h1>
+      <div class="animal-preview">🐯 🦁 🐘 🐻 🦊 🐼</div>
+      <p>Hit the animal targets with paintballs!</p>
+      <p>When you hit one, it will tell you its name!</p>
+      <p>How many can you hit?</p>
+      <button id="start-btn">Start Game!</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const hitsEl = document.getElementById('hits');
+    const messageEl = document.getElementById('message');
+    const startScreen = document.getElementById('start-screen');
+    const startBtn = document.getElementById('start-btn');
+
+    // Resize canvas
+    function resize() {
+      const container = document.getElementById('game-container');
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Game state
+    let score = 0;
+    let hits = 0;
+    let gameRunning = false;
+    let paintballs = [];
+    let targets = [];
+    let particles = [];
+    let lastTime = 0;
+
+    // Animal data
+    const animals = [
+      { emoji: '🐯', name: 'tiger', color: '#FF9F43' },
+      { emoji: '🦁', name: 'lion', color: '#FECA57' },
+      { emoji: '🐘', name: 'elephant', color: '#A4B0BE' },
+      { emoji: '🐻', name: 'bear', color: '#8B5A2B' },
+      { emoji: '🦊', name: 'fox', color: '#FF7F50' },
+      { emoji: '🐼', name: 'panda', color: '#2F3542' },
+      { emoji: '🐨', name: 'koala', color: '#A0A0A0' },
+      { emoji: '🦒', name: 'giraffe', color: '#F9CA24' },
+      { emoji: '🦓', name: 'zebra', color: '#2C3A47' },
+      { emoji: '🐒', name: 'monkey', color: '#CD853F' },
+      { emoji: '🐧', name: 'penguin', color: '#1E90FF' },
+      { emoji: '🦉', name: 'owl', color: '#8B4513' }
+    ];
+
+    // Paint colors
+    const paintColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9FF3', '#54A0FF', '#5F27CD', '#01A3A4', '#FF9F43'];
+
+    class Target {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        const animal = animals[Math.floor(Math.random() * animals.length)];
+        this.emoji = animal.emoji;
+        this.name = animal.name;
+        this.color = animal.color;
+        this.radius = 40 + Math.random() * 20;
+        this.x = this.radius + Math.random() * (canvas.width - this.radius * 2);
+        this.y = this.radius + 80 + Math.random() * (canvas.height - this.radius * 2 - 100);
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = (Math.random() - 0.5) * 2;
+        this.hit = false;
+        this.hitTime = 0;
+        this.scale = 1;
+        this.rotation = 0;
+      }
+
+      update(dt) {
+        if (this.hit) {
+          this.hitTime += dt;
+          this.scale = Math.max(0, 1 - this.hitTime / 0.6);
+          this.rotation += dt * 10;
+          if (this.hitTime > 0.6) {
+            this.reset();
+          }
+          return;
+        }
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Bounce off walls
+        if (this.x < this.radius || this.x > canvas.width - this.radius) {
+          this.vx *= -1;
+          this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+        }
+        if (this.y < this.radius + 60 || this.y > canvas.height - this.radius - 40) {
+          this.vy *= -1;
+          this.y = Math.max(this.radius + 60, Math.min(canvas.height - this.radius - 40, this.y));
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.scale(this.scale, this.scale);
+
+        // Shadow
+        ctx.beginPath();
+        ctx.arc(4, 6, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fill();
+
+        // Outer ring
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+
+        // Inner circle
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius * 0.75, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.fill();
+
+        // Emoji
+        ctx.font = `${this.radius * 0.9}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.emoji, 0, 2);
+
+        ctx.restore();
+      }
+
+      checkHit(px, py, pr) {
+        if (this.hit) return false;
+        const dx = this.x - px;
+        const dy = this.y - py;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        return dist < this.radius + pr;
+      }
+    }
+
+    class Paintball {
+      constructor(x, y, tx, ty) {
+        this.x = x;
+        this.y = y;
+        const angle = Math.atan2(ty - y, tx - x);
+        const speed = 15;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.radius = 10;
+        this.color = paintColors[Math.floor(Math.random() * paintColors.length)];
+        this.alive = true;
+        this.trail = [];
+      }
+
+      update() {
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > 6) this.trail.shift();
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Gravity-ish
+        this.vy += 0.15;
+
+        if (this.x < -20 || this.x > canvas.width + 20 ||
+            this.y < -20 || this.y > canvas.height + 20) {
+          this.alive = false;
+        }
+      }
+
+      draw() {
+        // Trail
+        for (let i = 0; i < this.trail.length; i++) {
+          const t = this.trail[i];
+          const alpha = (i + 1) / this.trail.length * 0.4;
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, this.radius * (0.4 + i * 0.1), 0, Math.PI * 2);
+          ctx.fillStyle = this.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+          ctx.fill();
+        }
+
+        // Main ball
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 12;
+        this.vy = (Math.random() - 0.5) * 12;
+        this.radius = 3 + Math.random() * 6;
+        this.color = color;
+        this.life = 1;
+        this.decay = 0.02 + Math.random() * 0.03;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.2;
+        this.life -= this.decay;
+        this.radius *= 0.98;
+      }
+
+      draw() {
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    function spawnTargets(count = 6) {
+      targets = [];
+      for (let i = 0; i < count; i++) {
+        targets.push(new Target());
+      }
+    }
+
+    function showMessage(text) {
+      messageEl.textContent = text;
+      messageEl.classList.add('show');
+      setTimeout(() => messageEl.classList.remove('show'), 1500);
+    }
+
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.2;
+        utterance.volume = 1;
+        // Try to use a friendly voice
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = voices.find(v => 
+          v.name.includes('Google') || v.name.includes('Samantha') || 
+          v.name.includes('Female') || v.lang.startsWith('en')
+        );
+        if (preferred) utterance.voice = preferred;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function createExplosion(x, y, color) {
+      for (let i = 0; i < 18; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function shoot(x, y) {
+      if (!gameRunning) return;
+      // Shoot from bottom center-ish
+      const startX = canvas.width / 2;
+      const startY = canvas.height - 30;
+      paintballs.push(new Paintball(startX, startY, x, y));
+    }
+
+    // Input
+    function handlePointer(e) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      let clientX, clientY;
+      if (e.touches && e.touches.length) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      const x = (clientX - rect.left) * scaleX;
+      const y = (clientY - rect.top) * scaleY;
+      shoot(x, y);
+    }
+
+    canvas.addEventListener('mousedown', handlePointer);
+    canvas.addEventListener('touchstart', handlePointer, { passive: false });
+
+    // Prevent scrolling on mobile
+    document.body.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+    function gameLoop(timestamp) {
+      const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+      lastTime = timestamp;
+
+      // Clear
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw soft ground
+      const groundGrad = ctx.createLinearGradient(0, canvas.height - 80, 0, canvas.height);
+      groundGrad.addColorStop(0, 'rgba(144, 238, 144, 0)');
+      groundGrad.addColorStop(1, 'rgba(76, 175, 80, 0.3)');
+      ctx.fillStyle = groundGrad;
+      ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+
+      // Update & draw targets
+      for (const t of targets) {
+        t.update(dt);
+        t.draw();
+      }
+
+      // Update & draw paintballs + collisions
+      for (let i = paintballs.length - 1; i >= 0; i--) {
+        const p = paintballs[i];
+        p.update();
+        p.draw();
+
+        if (!p.alive) {
+          paintballs.splice(i, 1);
+          continue;
+        }
+
+        // Check hits
+        for (const t of targets) {
+          if (t.checkHit(p.x, p.y, p.radius)) {
+            t.hit = true;
+            t.hitTime = 0;
+            p.alive = false;
+            paintballs.splice(i, 1);
+
+            // Score & feedback
+            score += 10;
+            hits += 1;
+            scoreEl.textContent = score;
+            hitsEl.textContent = hits;
+
+            createExplosion(t.x, t.y, p.color);
+            const phrase = `I am a ${t.name}. You hit me!`;
+            showMessage(`${t.emoji} ${phrase}`);
+            speak(phrase);
+            break;
+          }
+        }
+      }
+
+      // Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+
+      // Draw shooter base
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height + 10, 40, Math.PI, 0);
+      ctx.fillStyle = '#FF6B6B';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      // Crosshair hint at bottom
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height - 30, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#FF6B6B';
+      ctx.fill();
+
+      if (gameRunning) {
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    // Start game
+    startBtn.addEventListener('click', () => {
+      startScreen.style.display = 'none';
+      gameRunning = true;
+      score = 0;
+      hits = 0;
+      scoreEl.textContent = '0';
+      hitsEl.textContent = '0';
+      paintballs = [];
+      particles = [];
+      spawnTargets(7);
+      lastTime = performance.now();
+      // Preload voices
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
+      requestAnimationFrame(gameLoop);
+    });
+
+    // Load voices early
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  </script>
+</body>
+</html>
 
