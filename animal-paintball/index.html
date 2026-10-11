@@ -238,33 +238,68 @@
       "wild boar","wolf","wolverine","wombat","woodpecker","worm","yak","zebra","zebu","zorilla"
     ];
 
-    // Common emoji map (fallback to letter circle for others)
-    const emojiMap = {
-      tiger: "🐯", lion: "🦁", elephant: "🐘", bear: "🐻", fox: "🦊", panda: "🐼",
-      koala: "🐨", giraffe: "🦒", zebra: "🦓", monkey: "🐒", penguin: "🐧", owl: "🦉",
-      dog: "🐶", cat: "🐱", mouse: "🐭", hamster: "🐹", rabbit: "🐰", frog: "🐸",
-      chicken: "🐔", penguin: "🐧", bird: "🐦", eagle: "🦅", duck: "🦆", swan: "🦢",
-      owl: "🦉", bat: "🦇", wolf: "🐺", boar: "🐗", horse: "🐴", unicorn: "🦄",
-      bee: "🐝", butterfly: "🦋", snail: "🐌", bug: "🐛", ant: "🐜", ladybug: "🐞",
-      spider: "🕷", scorpion: "🦂", crab: "🦀", lobster: "🦞", shrimp: "🦐", squid: "🦑",
-      octopus: "🐙", fish: "🐟", tropical: "🐠", blowfish: "🐡", shark: "🦈", whale: "🐋",
-      dolphin: "🐬", crocodile: "🐊", turtle: "🐢", lizard: "🦎", snake: "🐍", sauropod: "🦕",
-      t_rex: "🦖", dragon: "🐉", camel: "🐪", llama: "🦙", giraffe: "🦒", rhinoceros: "🦏",
-      hippopotamus: "🦛", mammoth: "🦣", goat: "🐐", ram: "🐏", sheep: "🐑", deer: "🦌",
-      cow: "🐄", ox: "🐂", water_buffalo: "🐃", pig: "🐷", boar: "🐗", raccoon: "🦝",
-      badger: "🦡", skunk: "🦨", kangaroo: "🦘", flamingo: "🦩", peacock: "🦚", parrot: "🦜",
-      swan: "🦢", dodo: "🦤", turkey: "🦃", seal: "🦭", otter: "🦦", beaver: "🦫",
-      bison: "🦬", polar_bear: "🐻‍❄️"
-    };
+    // Comprehensive keyword → emoji mapping so almost every animal gets a picture
+    const emojiRules = [
+      ["polar bear", "🐻‍❄️"], ["komodo dragon", "🦎"], ["hippopotamus", "🦛"], ["rhinoceros", "🦏"],
+      ["orangutan", "🦧"], ["chimpanzee", "🐒"], ["gorilla", "🦍"], ["kangaroo", "🦘"], ["wallaby", "🦘"],
+      ["platypus", "🦫"], ["hedgehog", "🦔"], ["porcupine", "🦔"], ["chipmunk", "🐿️"], ["squirrel", "🐿️"],
+      ["raccoon", "🦝"], ["badger", "🦡"], ["skunk", "🦨"], ["otter", "🦦"], ["beaver", "🦫"],
+      ["seal", "🦭"], ["walrus", "🦭"], ["manatee", "🦭"], ["dugong", "🦭"],
+      ["flamingo", "🦩"], ["peacock", "🦚"], ["parrot", "🦜"], ["macaw", "🦜"], ["toucan", "🦜"],
+      ["penguin", "🐧"], ["eagle", "🦅"], ["falcon", "🦅"], ["hawk", "🦅"], ["owl", "🦉"], ["vulture", "🦅"],
+      ["duck", "🦆"], ["swan", "🦢"], ["goose", "🦢"], ["turkey", "🦃"], ["chicken", "🐔"], ["rooster", "🐓"],
+      ["dove", "🕊️"], ["pigeon", "🕊️"], ["butterfly", "🦋"], ["moth", "🦋"], ["bee", "🐝"], ["hornet", "🐝"], ["wasp", "🐝"],
+      ["ant", "🐜"], ["termite", "🐜"], ["ladybug", "🐞"], ["beetle", "🐞"], ["cockroach", "🪳"],
+      ["spider", "🕷️"], ["tarantula", "🕷️"], ["scorpion", "🦂"], ["snail", "🐌"], ["worm", "🪱"], ["earthworm", "🪱"],
+      ["centipede", "🐛"], ["caterpillar", "🐛"], ["grasshopper", "🦗"], ["cricket", "🦗"], ["cicada", "🦗"],
+      ["dragonfly", "🦟"], ["mosquito", "🦟"], ["fly", "🪰"], ["flea", "🪰"],
+      ["crocodile", "🐊"], ["alligator", "🐊"], ["lizard", "🦎"], ["gecko", "🦎"], ["iguana", "🦎"], ["chameleon", "🦎"],
+      ["snake", "🐍"], ["python", "🐍"], ["cobra", "🐍"], ["viper", "🐍"], ["rattlesnake", "🐍"], ["anaconda", "🐍"],
+      ["turtle", "🐢"], ["tortoise", "🐢"], ["frog", "🐸"], ["toad", "🐸"], ["salamander", "🦎"], ["newt", "🦎"], ["axolotl", "🦎"],
+      ["shark", "🦈"], ["whale", "🐋"], ["orca", "🐋"], ["dolphin", "🐬"], ["narwhal", "🐋"],
+      ["salmon", "🐟"], ["trout", "🐟"], ["cod", "🐟"], ["tuna", "🐟"], ["clownfish", "🐠"], ["angelfish", "🐠"],
+      ["goldfish", "🐠"], ["catfish", "🐟"], ["piranha", "🐟"], ["eel", "🐍"], ["jellyfish", "🪼"],
+      ["octopus", "🐙"], ["squid", "🦑"], ["crab", "🦀"], ["lobster", "🦞"], ["shrimp", "🦐"], ["prawn", "🦐"], ["crayfish", "🦞"],
+      ["clam", "🐚"], ["oyster", "🐚"], ["starfish", "⭐"], ["stingray", "🐟"], ["manta ray", "🐟"], ["seahorse", "🐠"],
+      ["tiger", "🐯"], ["lion", "🦁"], ["leopard", "🐆"], ["cheetah", "🐆"], ["jaguar", "🐆"], ["panther", "🐆"],
+      ["cougar", "🐈"], ["puma", "🐈"], ["lynx", "🐈"], ["bobcat", "🐈"], ["cat", "🐱"],
+      ["dog", "🐶"], ["wolf", "🐺"], ["fox", "🦊"], ["jackal", "🐺"], ["coyote", "🐺"], ["dingo", "🐕"], ["hyena", "🐺"],
+      ["bear", "🐻"], ["panda", "🐼"], ["koala", "🐨"], ["elephant", "🐘"], ["mammoth", "🦣"],
+      ["giraffe", "🦒"], ["zebra", "🦓"], ["horse", "🐴"], ["donkey", "🫏"], ["mule", "🫏"],
+      ["camel", "🐪"], ["llama", "🦙"], ["alpaca", "🦙"], ["deer", "🦌"], ["elk", "🦌"], ["moose", "🫎"],
+      ["caribou", "🦌"], ["reindeer", "🦌"], ["antelope", "🦌"], ["gazelle", "🦌"], ["impala", "🦌"],
+      ["bison", "🦬"], ["buffalo", "🐃"], ["ox", "🐂"], ["cow", "🐄"], ["bull", "🐂"],
+      ["pig", "🐷"], ["boar", "🐗"], ["sheep", "🐑"], ["ram", "🐏"], ["goat", "🐐"],
+      ["rabbit", "🐰"], ["hare", "🐰"], ["mouse", "🐭"], ["rat", "🐀"], ["hamster", "🐹"], ["gerbil", "🐹"], ["mole", "🐀"],
+      ["bat", "🦇"], ["monkey", "🐒"], ["baboon", "🐒"], ["mandrill", "🐒"], ["gibbon", "🐒"], ["lemur", "🐒"], ["tamarin", "🐒"],
+      ["ape", "🦍"], ["sloth", "🦥"], ["armadillo", "🦔"], ["anteater", "🦔"], ["aardvark", "🦔"],
+      ["wombat", "🐨"], ["opossum", "🐀"], ["possum", "🐀"], ["mink", "🦦"], ["weasel", "🦦"], ["ferret", "🦦"],
+      ["mongoose", "🦦"], ["meerkat", "🦦"], ["yak", "🐂"], ["zebu", "🐂"], ["tapir", "🐷"], ["okapi", "🦒"],
+      ["quokka", "🦘"], ["capybara", "🦫"], ["chinchilla", "🐹"], ["dinosaur", "🦕"], ["dragon", "🐉"],
+      ["puffin", "🐧"], ["sandpiper", "🐦"], ["nightingale", "🐦"], ["kookaburra", "🐦"], ["pheasant", "🐦"],
+      ["quail", "🐦"], ["parakeet", "🦜"], ["zorilla", "🦨"], ["wolverine", "🦡"], ["wild boar", "🐗"]
+    ];
 
     function getEmoji(name) {
-      const key = name.toLowerCase().replace(/ /g, "_");
-      if (emojiMap[key]) return emojiMap[key];
-      // try partial
-      for (const k of Object.keys(emojiMap)) {
-        if (name.includes(k) || k.includes(name.split(" ")[0])) return emojiMap[k];
+      const lower = name.toLowerCase();
+      // Exact / contains match from rules
+      for (const [key, emoji] of emojiRules) {
+        if (lower === key || lower.includes(key) || key.includes(lower)) {
+          return emoji;
+        }
       }
-      return null;
+      // Broad category fallbacks so almost nothing shows only a letter
+      if (/bird|jay|warbler|sparrow|finch|dove|pigeon|crow|raven|robin|owl|eagle|hawk|falcon|duck|swan|goose|chicken|turkey|penguin|parrot|flamingo|peacock|toucan|stork|crane|heron|pelican|albatross|condor|vulture|woodpecker|kingfisher|humming|magpie|cuckoo|quail|pheasant|ostrich|emu|kiwi|cassowary|nightingale|kookaburra|puffin|sandpiper|blue jay/.test(lower)) return "🐦";
+      if (/fish|shark|whale|dolphin|ray|eel|salmon|trout|tuna|cod|piranha|goldfish|clownfish|angelfish|catfish|seahorse|barracuda/.test(lower)) return "🐟";
+      if (/snake|python|cobra|viper|rattlesnake|anaconda/.test(lower)) return "🐍";
+      if (/lizard|gecko|iguana|chameleon|salamander|newt|axolotl|komodo/.test(lower)) return "🦎";
+      if (/bug|insect|beetle|ant|bee|wasp|hornet|fly|mosquito|moth|butterfly|cricket|grasshopper|cicada|dragonfly|cockroach|termite|flea|ladybug|spider|scorpion|centipede|caterpillar|tarantula/.test(lower)) return "🐛";
+      if (/crab|lobster|shrimp|prawn|crayfish|clam|oyster|starfish|octopus|squid|jellyfish/.test(lower)) return "🦀";
+      if (/frog|toad/.test(lower)) return "🐸";
+      if (/turtle|tortoise/.test(lower)) return "🐢";
+      if (/croc|alligator/.test(lower)) return "🐊";
+      // Friendly paw-print fallback instead of a plain letter
+      return "🐾";
     }
 
     // Colors for targets
@@ -401,19 +436,11 @@
         ctx.fillStyle = "rgba(255,255,255,0.92)";
         ctx.fill();
 
-        if (this.emoji) {
-          ctx.font = `${this.radius * 0.95}px Arial`;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(this.emoji, 0, 1);
-        } else {
-          // Letter circle for rare animals
-          ctx.fillStyle = this.color;
-          ctx.font = `bold ${this.radius * 0.7}px Arial`;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(this.name.charAt(0).toUpperCase(), 0, 1);
-        }
+        // Always draw an emoji / symbol (getEmoji almost never returns null now)
+        ctx.font = `${this.radius * 0.95}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", Arial, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(this.emoji || "🐾", 0, 1);
 
         ctx.restore();
         ctx.globalAlpha = 1;
