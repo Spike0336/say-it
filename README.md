@@ -16,6 +16,11 @@ Browser-based speech games: see a picture, say the answer into the microphone, g
 | Aircraft | `aircraft/` |
 | Car Makes | `car-makes/` |
 | Famous People | `famous-people/` |
+| Planets & Space | `planets/` |
+| Birds | `birds/` |
+| Cities of the World | `cities/` |
+| Star Signs | `star-signs/` |
+| World Flags | `world-flags/` |
 
 ## Adding a new app
 1. Create a new folder with an `index.html`.
