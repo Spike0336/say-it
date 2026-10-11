@@ -1,1 +1,247 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sticker Book</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:#fff3c4;font-family:"Comic Sans MS","Chalkboard SE",system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;flex-wrap:wrap}
+.tabs,.tools{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;border:0;border-radius:16px;background:#fff;box-shadow:0 3px 0 #0003;cursor:pointer;touch-action:manipulation}
+.tab{padding:6px 12px;font-size:18px}
+.tab.on{background:#ff9f1c;color:#fff}
+.tool{width:48px;height:48px;font-size:24px;padding:0}
+.tool:disabled{opacity:.35}
+#clear{width:auto;padding:0 12px;font-size:16px}
+#scene{flex:1;position:relative;overflow:hidden;margin:0 8px;border-radius:22px;box-shadow:0 4px 0 #0003;min-height:0}
+#bg,#bg svg{position:absolute;inset:0;width:100%;height:100%}
+#layer{position:absolute;inset:0}
+.st{position:absolute;font-size:calc(var(--u,60px)*var(--s,1));line-height:1;cursor:grab;touch-action:none;filter:drop-shadow(0 3px 2px #0004);animation:pop .25s ease-out}
+.st.sel{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px #ff9f1c)}
+@keyframes pop{from{scale:.2}to{scale:1}}
+#tray{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding:8px 10px;margin:8px 8px 8px;background:#fff9;border-radius:22px;touch-action:pan-x;transition:background .15s}
+#tray.del{background:#ff6b6b}
+.ti{flex:0 0 auto;width:68px;height:68px;font-size:42px;line-height:1;padding:0;touch-action:pan-x}
+.pp{display:flex;flex-direction:column;align-items:center}.pp b{font-weight:400;line-height:1;display:block}.pp svg{width:.62em;height:.74em;margin-top:-.3em;display:block;overflow:visible}.pr{position:absolute;right:-.2em;bottom:.05em;font-size:.42em;font-style:normal;line-height:1}.ti.pt{font-size:36px;justify-content:flex-start;overflow:hidden}
+.hint{font-size:13px;text-align:center;color:#6b5400;margin:-2px 0 2px}
+.sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4s ease-in-out infinite}
+@keyframes sway{50%{rotate:5deg}}
+.rise{animation:rise 7s linear infinite}
+@keyframes rise{from{translate:0 0;opacity:.8}to{translate:0 -520px;opacity:0}}
+</style></head>
+<body>
+<header>
+ <div class="tabs"><button class="tab on" data-s="farm">🐄 Farm</button><button class="tab" data-s="sea">🐠 Sea</button><button class="tab" data-s="town">🏙️ Town</button><button class="tab" data-s="shop">🛒 Shop</button><button class="tab" data-s="centre">🏛️ High Street</button></div>
+ <div class="tools">
+  <button class="tool" id="sm" title="Smaller">➖</button><button class="tool" id="bg2" title="Bigger">➕</button>
+  <button class="tool" id="fl" title="Flip">↔️</button><button class="tool" id="del" title="Remove">🗑️</button>
+  <button class="tool" id="clear">🧹 Clear</button>
+ </div>
+</header>
+<div id="scene"><div id="bg"></div><div id="layer"></div></div>
+<div class="hint">Tap or drag a sticker up into the picture. Drag it back to the bottom to remove it.</div>
+<div id="tray"></div>
+<script>
+const SETS={
+ farm:["🐄","🐂","🐖","🐑","🐏","🐎","🐐","🐓","🐔","🐣","🦆","🦢","🦃","🐕","🐈","🐇","🚜","🌻","🌳","🌽","🥕","🍎","🏡","🌈","🦋","🐝"],
+ sea:["🐠","🐟","🐡","🐙","🦀","🦞","🐬","🐳","🐋","🦈","🐢","🦑","🦭","🦐","🐚","⭐","🪸","🫧","🚢","⚓","🏝️"],
+ town:["🚗","🚕","🚙","🚓","🚑","🚒","🚌","🚚","🏍️","🚲","🛵","🛴","🚶","🚶‍♀️","🏃","🏃‍♀️","🧍","🧍‍♀️","💃","🕺","👨‍👩‍👧","🐕","🐩","🦮","🐕‍🦺","🐈","🐦","🕊️","🚦","🌳","🌷","🏠","🏪","🏫","🏥","⛲","🚏","🎈","🚁"],
+ shop:["🛒","🧺","🛍️","🍎","🍌","🍇","🍊","🍓","🍉","🥕","🥦","🌽","🍅","🥔","🍞","🥖","🧀","🥛","🥚","🥩","🍗","🐟","🍕","🎂","🍪","🍫","🍩","🍦","🍨","🧊","🧃","🥤","🧴","🏷️","💳","🪙","🚶","🚶‍♀️","🧍","🧍‍♀️","🏃","👨‍👩‍👧"],
+ centre:[
+  ["👮","#27408b","#1d2a4d"],
+  ["👨‍🚒","#f4a300","#2c2c2c","🚒"],
+  ["👨‍🎨","#f4f4f4","#f4f4f4","🖌️"],
+  ["👨","#d62828","#1d2a4d","📮"],
+  ["🤵","#8e1b1b","#222","🏅"],
+  ["🧔","#f1f1f1","#3b3b3b","🥩"],
+  ["👨‍🍳","#ffffff","#bdbdbd","🍞"],
+  ["👷","#ff8c00","#3a3a3a","🪜"],
+  ["👨‍💼","#2d3142","#2d3142","💼"],
+  ["👩","#e76f9a","#6b5b95","🛍️"],
+  ["👨‍⚕️","#ffffff","#3c5a8a","🩺"],
+  ["👩‍⚕️","#3fa7d6","#3fa7d6","💉"],
+  ["👩‍🏫","#8a5cc2","#444444","📚"],
+  ["👨‍🍳","#ffffff","#555555","🍳"],
+  ["👷","#f4d03f","#3a4a63","🧱"],
+  ["👨‍🔧","#2f5fa8","#2f5fa8","🔧"],
+  ["🧑‍🔧","#3d3d3d","#3d3d3d","⚡"],
+  ["👨","#1d6fb8","#222222","🚌"],
+  ["👨‍🦱","#333333","#333333","🚕"],
+  ["👨","#f5f5f5","#dddddd","🥛"],
+  ["👨","#4aa3df","#2a4d69","🧽"],
+  ["👨‍🌾","#4c9a2a","#6b4f2a","🌱"],
+  ["👨","#2e7d32","#555555","🍎"],
+  ["👩","#f48fb1","#6a4c93","💐"],
+  ["🧔","#222222","#222222","✂️"],
+  ["👩","#f2e600","#333333","🛑"],
+  ["👨‍🦳","#1a1a1a","#1a1a1a","✝️"],
+  ["🧔","#7b3f00","#333333","🍺"],
+  ["👨","#6b4f2a","#444444","📰"],
+  ["👨","#2e8b57","#333333","🧹"],
+  ["👨‍⚖️","#111111","#111111","⚖️"],
+  ["👨","#ff7043","#1565c0","📷"],
+  ["🧒","#1d2a4d","#555555","🎒"],
+  ["👵","#b39ddb","#6d6d6d","🧶"],
+  ["💂","#c62828","#1a1a1a"],
+  ["🧑‍🎤","#7e57c2","#212121","🎸"],
+  "🚌","🚕","🚓","🚒","🚑","📮","🚲","🐕","🕊️","🚦","🌳","🌷","🏛️","⛪","🏪","🏦","🍺","🎈"]
+};
+const unit=(x,w,y)=>{let s=`<rect x="${x}" y="${y}" width="${w}" height="172" fill="#a8742f"/>`;for(let r=0;r<4;r++){const by=y+8+r*41;s+=`<rect x="${x+5}" y="${by}" width="${w-10}" height="36" fill="#efe0bf"/><rect x="${x+3}" y="${by+36}" width="${w-6}" height="5" fill="#6b4a1e"/>`;for(let i=0;i<Math.floor((w-20)/40);i++)s+=`<rect x="${x+14+i*40}" y="${by+37}" width="16" height="6" rx="1" fill="#fff"/>`}return s};
+const till=(x,n)=>`<rect x="${x}" y="392" width="160" height="80" rx="6" fill="#4a90d9"/><rect x="${x}" y="378" width="160" height="16" rx="4" fill="#333"/><g stroke="#555" stroke-width="3"><path d="M${x+14} 386 H${x+96}" stroke="#666" stroke-dasharray="10 8"/></g><rect x="${x+108}" y="334" width="46" height="44" rx="6" fill="#555"/><rect x="${x+114}" y="341" width="34" height="18" rx="3" fill="#9be7a5"/><rect x="${x+6}" y="300" width="7" height="80" fill="#555"/><circle cx="${x+10}" cy="292" r="21" fill="#e74c3c"/><text x="${x+10}" y="302" font-size="28" font-weight="bold" fill="#fff" text-anchor="middle" font-family="system-ui,sans-serif">${n}</text>`;
+const trolley=(x,y)=>`<g transform="translate(${x} ${y})"><path d="M0 0 H70 L60 40 H12Z" fill="#e3e8ee" fill-opacity=".6" stroke="#7a838f" stroke-width="3"/><path d="M12 0 L18 40 M26 0 L28 40 M38 0 L38 40 M50 0 L48 40 M62 0 L58 40 M4 14 H66 M8 28 H63" stroke="#9aa3ae" stroke-width="2" fill="none"/><path d="M0 0 L-12 -14 H-26" stroke="#e74c3c" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M14 40 L10 58 M58 40 L62 58" stroke="#7a838f" stroke-width="3"/><circle cx="10" cy="62" r="5" fill="#333"/><circle cx="62" cy="62" r="5" fill="#333"/></g>`;
+const shopf=(x,w,top,wall,aw,name,sc,tc)=>{
+ let s=`<rect x="${x}" y="${top}" width="${w}" height="${330-top}" fill="${wall}"/><rect x="${x-3}" y="${top-12}" width="${w+6}" height="14" fill="#4b4f5c"/><rect x="${x+w*.7}" y="${top-34}" width="14" height="24" fill="#8a4b38"/>`;
+ s+=`<rect x="${x+w*.12}" y="${top+22}" width="${w*.3}" height="38" fill="#cfeaff" stroke="#fff" stroke-width="3"/><rect x="${x+w*.58}" y="${top+22}" width="${w*.3}" height="38" fill="#cfeaff" stroke="#fff" stroke-width="3"/>`;
+ s+=`<rect x="${x+5}" y="226" width="${w-10}" height="26" rx="3" fill="${sc}"/><text x="${x+w/2}" y="245" font-size="${Math.min(16,(w-16)/name.length*1.7)}" font-weight="bold" fill="${tc||'#fff'}" text-anchor="middle" font-family="Comic Sans MS,system-ui,sans-serif">${name}</text>`;
+ for(let i=0;i<6;i++)s+=`<rect x="${x+i*w/6}" y="254" width="${w/6}" height="20" fill="${i%2?'#fff':aw}"/>`;
+ s+=`<rect x="${x+8}" y="278" width="${w*.5}" height="50" fill="#a9d6e8" stroke="#fff" stroke-width="3"/><rect x="${x+w*.68}" y="278" width="${w*.24}" height="52" rx="3" fill="#6b4226"/>`;
+ return s};
+const bub=[...Array(9)].map((_,i)=>`<circle class="rise" cx="${60+i*85}" cy="${470+(i%3)*10}" r="${5+(i%4)*3}" fill="#fff" fill-opacity=".6" style="animation-delay:${-i*0.8}s;animation-duration:${6+i%4}s"/>`).join("");
+const BG={
+farm:`<svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6cc6ff"/><stop offset="1" stop-color="#e3f6ff"/></linearGradient></defs>
+<rect width="800" height="500" fill="url(#sk)"/><circle cx="690" cy="85" r="46" fill="#ffd93b"/>
+<g fill="#fff"><ellipse cx="150" cy="80" rx="60" ry="22"/><ellipse cx="190" cy="68" rx="40" ry="20"/><ellipse cx="470" cy="120" rx="55" ry="18"/><ellipse cx="505" cy="108" rx="35" ry="16"/></g>
+<path d="M0 270 Q200 190 420 260 T800 240 V500 H0Z" fill="#8bd46e"/><path d="M0 340 Q250 290 520 340 T800 320 V500 H0Z" fill="#67bd57"/><path d="M0 420 Q300 380 800 430 V500 H0Z" fill="#4fa84a"/>
+<rect x="90" y="215" width="150" height="110" fill="#d9382f"/><polygon points="75,220 165,150 255,220" fill="#a82822"/><rect x="140" y="260" width="50" height="65" fill="#fff"/><path d="M140 260L190 325M190 260L140 325" stroke="#d9382f" stroke-width="5"/>
+<g fill="#fff"><rect x="300" y="300" width="8" height="45"/><rect x="340" y="300" width="8" height="45"/><rect x="380" y="300" width="8" height="45"/><rect x="420" y="300" width="8" height="45"/><rect x="295" y="312" width="140" height="7"/><rect x="295" y="330" width="140" height="7"/></g>
+<rect x="640" y="250" width="16" height="70" fill="#7a4b22"/><circle cx="648" cy="230" r="50" fill="#3d9a3f"/>
+<ellipse cx="600" cy="440" rx="90" ry="24" fill="#5ab4e8"/></svg>`,
+sea:`<svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="wt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fd6ff"/><stop offset=".6" stop-color="#1b7fd1"/><stop offset="1" stop-color="#0a3f86"/></linearGradient></defs>
+<rect width="800" height="500" fill="url(#wt)"/>
+<g fill="#fff" fill-opacity=".14"><polygon points="150,0 230,0 330,500 120,500"/><polygon points="460,0 520,0 650,500 480,500"/></g>
+<path d="M0 300 Q90 250 190 295 Q290 235 400 292 Q510 240 620 295 Q720 255 800 300 V500H0Z" fill="#0d4f9a" fill-opacity=".55"/>
+<g fill="#1a6fb8" fill-opacity=".8"><rect x="60" y="270" width="16" height="60" rx="8"/><rect x="80" y="285" width="16" height="45" rx="8"/><circle cx="730" cy="290" r="26"/><circle cx="760" cy="300" r="18"/><rect x="300" y="262" width="14" height="60" rx="7"/><rect x="520" y="268" width="14" height="55" rx="7"/></g>
+<path d="M0 360 Q200 320 400 355 T800 335 V500H0Z" fill="#e9cf8e"/>
+<g fill="none" stroke="#ff5d8f" stroke-width="16" stroke-linecap="round"><path d="M210 410 V320 M210 365 L170 320 M210 345 L252 300 M170 320 V280 M252 300 V262 M210 320 V290"/></g>
+<path d="M300 415 Q245 340 268 270 Q300 315 328 255 Q362 330 345 415Z" fill="#ff9f43"/><path d="M300 400 Q282 340 292 300 M326 400 Q332 340 328 290" stroke="#e67e22" stroke-width="4" fill="none"/>
+<g fill="#a55eea"><rect x="395" y="335" width="22" height="85" rx="11"/><rect x="422" y="315" width="22" height="105" rx="11"/><rect x="449" y="345" width="22" height="75" rx="11"/></g>
+<g fill="none" stroke="#ff6b6b" stroke-width="16" stroke-linecap="round"><path d="M560 410 V325 M560 365 L525 325 M560 350 L598 310 M525 325 V288 M598 310 V272"/></g>
+<path d="M625 415 Q585 345 600 285 Q625 320 645 270 Q675 340 662 415Z" fill="#c56cf0"/>
+<g fill="none" stroke="#2fb35a" stroke-width="14" stroke-linecap="round"><path class="sway" d="M90 450 Q60 380 95 320 Q125 260 90 190"/><path class="sway" d="M130 455 Q155 400 125 350 Q105 315 125 280" stroke="#3ecf6e"/><path class="sway" d="M730 450 Q765 380 730 320 Q700 260 735 180"/><path class="sway" d="M690 455 Q665 405 695 355" stroke="#3ecf6e"/></g>
+<path d="M0 420 Q220 385 440 418 T800 400 V500H0Z" fill="#f3d9a0"/><path d="M0 462 Q260 438 520 466 T800 452 V500H0Z" fill="#e8c880"/>
+<ellipse cx="250" cy="440" rx="58" ry="34" fill="#ffa8b5"/><path d="M205 436 Q225 418 245 436 T285 436 M212 452 Q232 434 252 452 T292 450" stroke="#e8708a" stroke-width="4" fill="none"/>
+<g stroke="#ff7ac8" stroke-width="7" stroke-linecap="round" fill="none"><path class="sway" d="M455 448 Q445 420 458 400"/><path class="sway" d="M468 448 V396"/><path class="sway" d="M481 448 Q490 420 478 400"/><path class="sway" d="M494 448 Q508 425 500 405"/></g>
+<ellipse cx="474" cy="450" rx="34" ry="11" fill="#e84393"/>
+<rect x="580" y="425" width="62" height="34" rx="5" fill="#8d5524"/><path d="M580 428 Q611 396 642 428Z" fill="#a8662c"/><rect x="605" y="428" width="12" height="15" fill="#ffd93b"/>
+<ellipse cx="130" cy="462" rx="38" ry="19" fill="#8a8f9c"/><ellipse cx="156" cy="470" rx="26" ry="12" fill="#a3a8b5"/>
+<g fill="#ffd93b"><rect x="690" y="425" width="16" height="42" rx="8"/><rect x="710" y="440" width="16" height="27" rx="8"/></g>
+<polygon points="380,452 385,464 398,464 388,472 392,485 380,478 368,485 372,472 362,464 375,464" fill="#ff9f43"/>
+<ellipse cx="175" cy="482" rx="13" ry="9" fill="#fff4e0"/><ellipse cx="540" cy="484" rx="11" ry="8" fill="#ffd6e0"/>${bub}</svg>`,
+town:`<svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="ts" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6cc6ff"/><stop offset="1" stop-color="#d9f2ff"/></linearGradient><pattern id="win" width="26" height="32" patternUnits="userSpaceOnUse"><rect x="6" y="7" width="14" height="18" rx="2" fill="#d8f0ff"/></pattern></defs>
+<rect width="800" height="500" fill="url(#ts)"/><circle cx="700" cy="70" r="40" fill="#ffd93b"/>
+<g fill="#fff"><ellipse cx="140" cy="60" rx="58" ry="20"/><ellipse cx="178" cy="48" rx="38" ry="18"/><ellipse cx="450" cy="85" rx="50" ry="16"/></g>
+<g><rect x="20" y="130" width="120" height="170" fill="#c0504d"/><rect x="150" y="180" width="90" height="120" fill="#f2c94c"/><rect x="250" y="100" width="130" height="200" fill="#7f8fa6"/><rect x="390" y="160" width="100" height="140" fill="#f78fb3"/><rect x="500" y="110" width="120" height="190" fill="#f39c12"/><rect x="630" y="150" width="150" height="150" fill="#1abc9c"/></g>
+<g fill="url(#win)"><rect x="20" y="130" width="120" height="130"/><rect x="150" y="180" width="90" height="80"/><rect x="250" y="100" width="130" height="160"/><rect x="390" y="160" width="100" height="100"/><rect x="500" y="110" width="120" height="150"/><rect x="630" y="150" width="150" height="110"/></g>
+<g fill="#6b4226"><rect x="60" y="268" width="32" height="32"/><rect x="178" y="268" width="32" height="32"/><rect x="299" y="268" width="32" height="32"/><rect x="424" y="268" width="32" height="32"/><rect x="545" y="268" width="32" height="32"/><rect x="690" y="268" width="32" height="32"/></g>
+<polygon points="240,100 315,60 390,100" fill="#575f6d"/><rect x="540" y="80" width="40" height="30" fill="#c0392b"/>
+<rect y="300" width="800" height="44" fill="#d0d4da"/><rect y="340" width="800" height="6" fill="#aab0b8"/>
+<rect y="346" width="800" height="104" fill="#4a4f57"/>
+<g fill="#fff"><rect x="10" y="395" width="60" height="7"/><rect x="100" y="395" width="60" height="7"/><rect x="190" y="395" width="60" height="7"/><rect x="280" y="395" width="60" height="7"/><rect x="460" y="395" width="60" height="7"/><rect x="550" y="395" width="60" height="7"/><rect x="640" y="395" width="60" height="7"/><rect x="730" y="395" width="60" height="7"/><rect x="365" y="350" width="70" height="8"/><rect x="365" y="366" width="70" height="8"/><rect x="365" y="382" width="70" height="8"/><rect x="365" y="406" width="70" height="8"/><rect x="365" y="422" width="70" height="8"/><rect x="365" y="438" width="70" height="8"/></g>
+<rect y="450" width="800" height="50" fill="#dfe3e8"/><rect y="450" width="800" height="6" fill="#aab0b8"/>
+<g><rect x="55" y="262" width="12" height="42" fill="#7a4b22"/><circle cx="61" cy="245" r="32" fill="#3d9a3f"/><rect x="214" y="268" width="12" height="36" fill="#7a4b22"/><circle cx="220" cy="252" r="26" fill="#4fb04f"/><rect x="494" y="268" width="12" height="36" fill="#7a4b22"/><circle cx="500" cy="252" r="26" fill="#4fb04f"/><rect x="624" y="262" width="12" height="42" fill="#7a4b22"/><circle cx="630" cy="245" r="32" fill="#3d9a3f"/></g>
+<g><rect x="745" y="215" width="8" height="90" fill="#3b3f46"/><rect x="738" y="195" width="22" height="48" rx="6" fill="#2c2f36"/><circle cx="749" cy="206" r="6" fill="#ff4d4d"/><circle cx="749" cy="220" r="6" fill="#ffd93b"/><circle cx="749" cy="234" r="6" fill="#3ddc84"/></g>
+<g fill="#ff9f43"><rect x="110" y="470" width="50" height="18" rx="4"/></g><rect x="110" y="488" width="6" height="10" fill="#8d5524"/><rect x="154" y="488" width="6" height="10" fill="#8d5524"/></svg>`,
+shop:`<svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice"><defs><pattern id="tile" width="60" height="40" patternUnits="userSpaceOnUse"><rect width="60" height="40" fill="#f4f1ea"/><rect width="30" height="20" fill="#e2dccd"/><rect x="30" y="20" width="30" height="20" fill="#e2dccd"/></pattern></defs>
+<rect width="800" height="290" fill="#fdf0d5"/><rect width="800" height="34" fill="#e6e8ee"/>
+<g fill="#fff"><rect x="50" y="10" width="100" height="14" rx="4"/><rect x="250" y="10" width="100" height="14" rx="4"/><rect x="450" y="10" width="100" height="14" rx="4"/><rect x="650" y="10" width="100" height="14" rx="4"/></g>
+<rect y="285" width="800" height="215" fill="url(#tile)"/><rect y="285" width="800" height="8" fill="#c9bfa6"/>
+${unit(20,150,112)}${unit(190,160,112)}${unit(570,130,112)}
+<rect x="370" y="112" width="180" height="172" rx="6" fill="#9db4c8"/>
+<g><rect x="376" y="118" width="84" height="160" fill="#eaf7ff"/><rect x="464" y="118" width="80" height="160" fill="#eaf7ff"/></g>
+<g fill="#8fb3cc"><rect x="376" y="157" width="168" height="5"/><rect x="376" y="196" width="168" height="5"/><rect x="376" y="235" width="168" height="5"/></g>
+<g fill="#fff" fill-opacity=".35"><polygon points="376,118 420,118 376,200"/><polygon points="464,118 508,118 464,200"/></g>
+<g fill="#5d7a92"><rect x="452" y="170" width="5" height="50" rx="2"/><rect x="467" y="170" width="5" height="50" rx="2"/></g>
+<g stroke="#555" stroke-width="2"><path d="M120 34 V52 M240 34 V52 M300 34 V52 M440 34 V52 M480 34 V52 M620 34 V52 M670 34 V52"/></g>
+<g font-family="Comic Sans MS,system-ui,sans-serif" font-size="17" font-weight="bold" fill="#fff" text-anchor="middle"><rect x="60" y="52" width="120" height="30" rx="8" fill="#e74c3c"/><text x="120" y="74">Fruit</text><rect x="240" y="52" width="120" height="30" rx="8" fill="#27ae60"/><text x="300" y="74">Food</text><rect x="420" y="52" width="120" height="30" rx="8" fill="#2e86de"/><text x="480" y="74">Frozen</text><rect x="580" y="52" width="110" height="30" rx="8" fill="#e67e22"/><text x="635" y="74">Snacks</text></g>
+<rect x="213" y="338" width="164" height="9" rx="3" fill="#dfe6ee"/><path d="M222 347 H368 L374 372 H216Z" fill="#bfe3f5"/><rect x="213" y="368" width="164" height="52" rx="6" fill="#f2f6fa" stroke="#aab7c4" stroke-width="3"/><rect x="226" y="380" width="60" height="16" rx="4" fill="#2e86de"/><text x="256" y="393" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle" font-family="system-ui,sans-serif">FROZEN</text>
+${till(30,1)}${till(440,2)}${till(630,3)}
+${trolley(250,425)}${trolley(335,425)}
+</svg>`,
+centre:`<svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="cs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fcdf5"/><stop offset="1" stop-color="#e6f4fb"/></linearGradient><pattern id="slab" width="50" height="30" patternUnits="userSpaceOnUse"><rect width="50" height="30" fill="#d3d3d8"/><path d="M0 0H50M0 0V30" stroke="#b9b9c0" stroke-width="2"/></pattern></defs>
+<rect width="800" height="500" fill="url(#cs)"/><g fill="#fff"><ellipse cx="90" cy="50" rx="55" ry="18"/><ellipse cx="125" cy="40" rx="35" ry="16"/><ellipse cx="650" cy="70" rx="60" ry="18"/><ellipse cx="690" cy="58" rx="38" ry="16"/></g>
+${shopf(0,110,145,"#c26a4a","#d62828","Butcher","#5b2c2c")}${shopf(110,105,130,"#f2e3b3","#e9a13b","Baker","#8b5a2b")}${shopf(215,105,150,"#e8d9a8","#d62828","Post Office","#d62828")}
+${shopf(480,105,135,"#8fa6c9","#345c9c","Bank","#234a7a")}${shopf(585,110,150,"#2f5d3a","#c9a227","The Crown","#5a3a12","#ffd966")}${shopf(695,105,130,"#f7c6d4","#e75480","Café","#e75480")}
+<rect x="320" y="150" width="160" height="180" fill="#ddd2b8"/><rect x="310" y="138" width="180" height="16" fill="#8d8a94"/><rect x="370" y="30" width="60" height="110" fill="#d0c5aa"/><polygon points="360,34 400,2 440,34" fill="#4b4f5c"/>
+<circle cx="400" cy="74" r="21" fill="#fff" stroke="#555" stroke-width="3"/><path d="M400 74 V59 M400 74 L411 80" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+<g fill="#f4efe2"><rect x="334" y="170" width="14" height="152"/><rect x="362" y="170" width="14" height="152"/><rect x="424" y="170" width="14" height="152"/><rect x="452" y="170" width="14" height="152"/></g>
+<path d="M382 322 V285 Q400 262 418 285 V322Z" fill="#5b3a21"/><rect x="326" y="322" width="148" height="8" fill="#bdb6a6"/>
+<text x="400" y="164" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle" font-family="system-ui,sans-serif">TOWN HALL</text>
+<rect y="330" width="800" height="98" fill="url(#slab)"/><rect y="424" width="800" height="9" fill="#9a9aa2"/><rect y="433" width="800" height="67" fill="#4a4f57"/>
+<g fill="#fff"><rect x="20" y="464" width="60" height="6"/><rect x="120" y="464" width="60" height="6"/><rect x="220" y="464" width="60" height="6"/><rect x="320" y="464" width="60" height="6"/><rect x="420" y="464" width="60" height="6"/><rect x="520" y="464" width="60" height="6"/><rect x="620" y="464" width="60" height="6"/><rect x="720" y="464" width="60" height="6"/></g>
+<rect x="200" y="265" width="30" height="65" fill="#d62828"/><rect x="204" y="272" width="22" height="40" fill="#cfeaff"/><path d="M215 272 V312 M204 292 H226" stroke="#d62828" stroke-width="2"/><rect x="198" y="260" width="34" height="7" fill="#b21f1f"/>
+<rect x="556" y="292" width="26" height="40" rx="10" fill="#d62828"/><rect x="560" y="302" width="18" height="4" fill="#222"/>
+<g stroke="#222" stroke-width="5"><path d="M262 332 V240"/><path d="M535 332 V240"/></g><g fill="#ffe08a" stroke="#222" stroke-width="3"><circle cx="262" cy="232" r="9"/><circle cx="535" cy="232" r="9"/></g></svg>`
+};
+let scene="farm",sel=null,drag=null,tp=null;
+let data={farm:[],sea:[],town:[],shop:[],centre:[]};
+try{const d=JSON.parse(localStorage.getItem("stickerbook"));if(d&&d.farm&&d.sea)data={farm:d.farm,sea:d.sea,town:d.town||[],shop:d.shop||[],centre:d.centre||[]}}catch(e){}
+const save=()=>{try{localStorage.setItem("stickerbook",JSON.stringify(data))}catch(e){}};
+const $=id=>document.getElementById(id),sc=$("scene"),layer=$("layer"),tray=$("tray");
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function size(){const r=sc.getBoundingClientRect();sc.style.setProperty("--u",Math.min(r.width,r.height*1.4)*.13+"px")}
+function place(el,o){el.style.left=o.x+"%";el.style.top=o.y+"%";el.style.setProperty("--s",o.s);el.style.transform=`translate(-50%,-50%) scaleX(${o.f?-1:1})`}
+function mark(){[...layer.children].forEach(c=>c.classList.toggle("sel",c._o===sel));["sm","bg2","fl","del"].forEach(i=>$(i).disabled=!sel)}
+function fill(el,o){
+ if(!o.c){el.textContent=o.e;return}
+ el.classList.add("pp");const k=o.c[0],t=o.c[1];
+ el.innerHTML=`<b>${o.e}</b><svg viewBox="0 0 60 74"><rect x="4" y="2" width="9" height="34" rx="4" fill="${k}"/><rect x="47" y="2" width="9" height="34" rx="4" fill="${k}"/><circle cx="8.5" cy="38" r="5" fill="#f1c27d"/><circle cx="51.5" cy="38" r="5" fill="#f1c27d"/><rect x="12" y="0" width="36" height="42" rx="8" fill="${k}"/><rect x="14" y="38" width="15" height="30" rx="4" fill="${t}"/><rect x="31" y="38" width="15" height="30" rx="4" fill="${t}"/><ellipse cx="21" cy="70" rx="10" ry="4.5" fill="#222"/><ellipse cx="39" cy="70" rx="10" ry="4.5" fill="#222"/></svg>`+(o.p?`<i class="pr">${o.p}</i>`:"");
+}
+function mk(o){
+ const el=document.createElement("div");el.className="st";fill(el,o);el._o=o;place(el,o);
+ el.addEventListener("pointerdown",ev=>{
+  ev.preventDefault();sel=o;const a=data[scene];a.splice(a.indexOf(o),1);a.push(o);layer.appendChild(el);mark();
+  const r=sc.getBoundingClientRect();
+  drag={o,el,dx:o.x-(ev.clientX-r.left)/r.width*100,dy:o.y-(ev.clientY-r.top)/r.height*100};
+ });
+ return el;
+}
+function add(e,x,y,m){const o={e,x,y,s:1,f:false,...m};data[scene].push(o);const el=mk(o);layer.appendChild(el);sel=o;mark();save();return el}
+function render(){
+ $("bg").innerHTML=BG[scene];layer.innerHTML="";sel=null;
+ data[scene].forEach(o=>layer.appendChild(mk(o)));
+ tray.innerHTML="";
+ SETS[scene].forEach(it=>{const A=Array.isArray(it),e=A?it[0]:it,meta=A?{c:[it[1],it[2]],p:it[3]}:{};
+  const b=document.createElement("button");b.className="ti";if(A){b.classList.add("pt");fill(b,{e,...meta})}else b.textContent=e;
+  b.addEventListener("pointerdown",ev=>{tp={e,meta,x:ev.clientX,y:ev.clientY}});tray.appendChild(b)});
+ document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.s===scene));
+ mark();size();
+}
+const overTray=ev=>ev.clientY>tray.getBoundingClientRect().top;
+addEventListener("pointermove",ev=>{
+ if(tp&&!drag&&tp.y-ev.clientY>14){
+  const r=sc.getBoundingClientRect();
+  const o={e:tp.e,...tp.meta,x:clamp((ev.clientX-r.left)/r.width*100,0,100),y:clamp((ev.clientY-r.top)/r.height*100,0,100),s:1,f:false};
+  data[scene].push(o);const el=mk(o);layer.appendChild(el);sel=o;mark();drag={o,el,dx:0,dy:0};tp=null;
+ }
+ if(!drag)return;
+ const r=sc.getBoundingClientRect();
+ drag.o.x=clamp((ev.clientX-r.left)/r.width*100+drag.dx,0,100);
+ drag.o.y=clamp((ev.clientY-r.top)/r.height*100+drag.dy,0,100);
+ place(drag.el,drag.o);tray.classList.toggle("del",overTray(ev));
+});
+addEventListener("pointerup",ev=>{
+ if(drag){
+  if(overTray(ev)){const a=data[scene];a.splice(a.indexOf(drag.o),1);drag.el.remove();sel=null;mark()}
+  save();drag=null;tray.classList.remove("del");
+ }else if(tp){add(tp.e,15+Math.random()*70,25+Math.random()*55,tp.meta)}
+ tp=null;
+});
+addEventListener("pointercancel",()=>{tp=null;drag=null;tray.classList.remove("del")});
+sc.addEventListener("pointerdown",ev=>{if(ev.target===sc||ev.target.closest("#bg")){sel=null;mark()}});
+$("sm").onclick=()=>{if(sel){sel.s=clamp(sel.s/1.25,.4,4);refresh()}};
+$("bg2").onclick=()=>{if(sel){sel.s=clamp(sel.s*1.25,.4,4);refresh()}};
+$("fl").onclick=()=>{if(sel){sel.f=!sel.f;refresh()}};
+$("del").onclick=()=>{if(sel){const a=data[scene];a.splice(a.indexOf(sel),1);sel=null;render();save()}};
+function refresh(){const el=[...layer.children].find(c=>c._o===sel);if(el)place(el,sel);save()}
+let ct;$("clear").onclick=()=>{
+ const b=$("clear");
+ if(b.dataset.sure){data[scene]=[];delete b.dataset.sure;b.textContent="🧹 Clear";clearTimeout(ct);render();save()}
+ else{b.dataset.sure=1;b.textContent="Sure? 🧹";ct=setTimeout(()=>{delete b.dataset.sure;b.textContent="🧹 Clear"},2500)}
+};
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{scene=t.dataset.s;render()});
+addEventListener("resize",size);
+render();
+</script></body></html>
 
