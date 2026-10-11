@@ -180,14 +180,14 @@
     </div>
     <div id="message"></div>
     <div id="ammo-bar"><div id="ammo-fill"></div></div>
-    <div id="instructions">Move mouse / drag to aim the gun • Click / tap to shoot • Lead the fast single target!</div>
+    <div id="instructions">Listen for the animal name → Aim the gun → Shoot! Hit it for a big fanfare!</div>
     <div id="start-screen">
       <h1>🎯 Animal Paintball Challenge</h1>
       <div class="animal-preview">🐯 🦁 🐘 🐻 🦊 🐼 🦓 🦒</div>
       <p><strong>Over 200 different animals!</strong></p>
-      <p>Only <strong>one</strong> animal appears at a time — but it moves very fast!</p>
-      <p>Aim carefully and lead your shot. One good hit is all you need.</p>
-      <p>There's a short cooldown between shots. Good luck!</p>
+      <p>The narrator will tell you which animal is coming…</p>
+      <p><em>“Try and get the frog!”</em></p>
+      <p>Then a fast-moving target appears. Hit it for a big fanfare!</p>
       <button id="start-btn">Start Challenge!</button>
     </div>
   </div>
@@ -288,16 +288,23 @@
     const COOLDOWN_TIME = 0.38; // seconds between shots - makes it harder
     let gunX, gunY;
 
+    // Announcement / round state
+    // "waiting" | "announcing" | "active" | "celebrating"
+    let roundState = "waiting";
+    let pendingAnimal = null; // { name, emoji, color }
+    let announceTimer = 0;
+    let celebrateTimer = 0;
+    let audioCtx = null;
+
     class Target {
-      constructor() {
-        this.reset(true);
+      constructor(animalData) {
+        this.applyAnimal(animalData);
       }
 
-      reset(initial = false) {
-        const name = animalNames[Math.floor(Math.random() * animalNames.length)];
-        this.name = name;
-        this.emoji = getEmoji(name);
-        this.color = targetColors[Math.floor(Math.random() * targetColors.length)];
+      applyAnimal(animalData) {
+        this.name = animalData.name;
+        this.emoji = animalData.emoji;
+        this.color = animalData.color;
         // One fast target – challenging size
         this.radius = 28 + Math.random() * 12;
         this.x = this.radius + Math.random() * (canvas.width - this.radius * 2);
@@ -312,16 +319,16 @@
         this.scale = 1;
         this.rotation = 0;
         this.wobble = Math.random() * Math.PI * 2;
-        this.lifetime = 12 + Math.random() * 8; // a bit longer so you get a chance
+        this.lifetime = 12 + Math.random() * 8;
         this.age = 0;
       }
 
       update(dt) {
         if (this.hit) {
           this.hitTime += dt;
-          this.scale = Math.max(0, 1 - this.hitTime / 0.45);
+          this.scale = Math.max(0, 1 - this.hitTime / 0.55);
           this.rotation += dt * 14;
-          if (this.hitTime > 0.45) this.reset();
+          // Celebration is handled by round state, not auto-reset here
           return;
         }
 
@@ -329,7 +336,9 @@
         if (this.age > this.lifetime) {
           missed++;
           missedEl.textContent = missed;
-          this.reset();
+          targets = []; // clear expired target
+          // Start next round after miss
+          startNextRound();
           return;
         }
 
@@ -495,40 +504,148 @@
       }
     }
 
-    function spawnTargets(n = 1) {
-      targets = [];
-      for (let i = 0; i < n; i++) targets.push(new Target());
+    function pickRandomAnimal() {
+      const name = animalNames[Math.floor(Math.random() * animalNames.length)];
+      return {
+        name: name,
+        emoji: getEmoji(name),
+        color: targetColors[Math.floor(Math.random() * targetColors.length)]
+      };
     }
 
-    function showMessage(text) {
+    function showMessage(text, duration = 1600) {
       messageEl.textContent = text;
       messageEl.classList.add("show");
-      setTimeout(() => messageEl.classList.remove("show"), 1400);
+      clearTimeout(messageEl._hideTimer);
+      messageEl._hideTimer = setTimeout(() => messageEl.classList.remove("show"), duration);
     }
 
-    function speak(text) {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.rate = 0.95;
-        u.pitch = 1.15;
-        u.volume = 1;
-        const voices = window.speechSynthesis.getVoices();
-        const preferred = voices.find(v =>
-          v.name.includes("Google") || v.name.includes("Samantha") ||
-          v.name.includes("Female") || (v.lang && v.lang.startsWith("en"))
-        );
-        if (preferred) u.voice = preferred;
-        window.speechSynthesis.speak(u);
+    function speak(text, onEnd) {
+      if (!("speechSynthesis" in window)) {
+        if (onEnd) setTimeout(onEnd, 1800);
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.92;
+      u.pitch = 1.1;
+      u.volume = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v =>
+        v.name.includes("Google") || v.name.includes("Samantha") ||
+        v.name.includes("Female") || (v.lang && v.lang.startsWith("en"))
+      );
+      if (preferred) u.voice = preferred;
+      if (onEnd) {
+        u.onend = onEnd;
+        // Safety timeout in case onend doesn't fire
+        setTimeout(() => { if (roundState === "announcing") onEnd(); }, 3500);
+      }
+      window.speechSynthesis.speak(u);
+    }
+
+    // Big triumphant fanfare using Web Audio API
+    function playFanfare() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const ctx = audioCtx;
+        const now = ctx.currentTime;
+
+        // Triumphant ascending notes
+        const notes = [
+          { f: 523.25, t: 0.00, d: 0.18 }, // C5
+          { f: 659.25, t: 0.15, d: 0.18 }, // E5
+          { f: 783.99, t: 0.30, d: 0.18 }, // G5
+          { f: 1046.50, t: 0.45, d: 0.45 }, // C6
+          { f: 783.99, t: 0.70, d: 0.15 }, // G5
+          { f: 1046.50, t: 0.85, d: 0.55 }  // C6 long
+        ];
+
+        notes.forEach(n => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "square";
+          osc.frequency.value = n.f;
+          gain.gain.setValueAtTime(0, now + n.t);
+          gain.gain.linearRampToValueAtTime(0.18, now + n.t + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + n.t);
+          osc.stop(now + n.t + n.d + 0.05);
+        });
+
+        // Extra sparkle (higher triangle notes)
+        [1318.5, 1568, 2093].forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.value = f;
+          const t = now + 0.5 + i * 0.08;
+          gain.gain.setValueAtTime(0, t);
+          gain.gain.linearRampToValueAtTime(0.12, t + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.4);
+        });
+      } catch (e) {
+        console.warn("Fanfare audio failed", e);
       }
     }
 
     function createExplosion(x, y, color) {
-      for (let i = 0; i < 16; i++) particles.push(new Particle(x, y, color));
+      for (let i = 0; i < 28; i++) particles.push(new Particle(x, y, color));
+      // Extra burst of particles for big fanfare feel
+      for (let i = 0; i < 12; i++) {
+        const p = new Particle(x, y, "#FFE66D");
+        p.vx *= 1.4;
+        p.vy *= 1.4;
+        particles.push(p);
+      }
+    }
+
+    function startNextRound() {
+      targets = [];
+      paintballs = [];
+      pendingAnimal = pickRandomAnimal();
+      roundState = "announcing";
+      announceTimer = 0;
+
+      const article = /^[aeiou]/i.test(pendingAnimal.name) ? "an" : "a";
+      const phrase = `Try and get the ${pendingAnimal.name}!`;
+      showMessage(`🎤 ${phrase}`, 2800);
+      speak(phrase, () => {
+        // After narrator finishes, spawn the animal
+        if (roundState !== "announcing") return;
+        targets = [new Target(pendingAnimal)];
+        roundState = "active";
+        showMessage(`${pendingAnimal.emoji || "🎯"} Here comes the ${pendingAnimal.name}!`, 1200);
+      });
+    }
+
+    function onTargetHit(t, paintColor) {
+      t.hit = true;
+      t.hitTime = 0;
+      score += 15;
+      hits++;
+      scoreEl.textContent = score;
+      hitsEl.textContent = hits;
+
+      createExplosion(t.x, t.y, paintColor);
+      playFanfare();
+
+      const hitPhrase = `I am a ${t.name}. You hit me!`;
+      showMessage(`🎉 ${t.emoji || "🎯"} ${hitPhrase} 🎉`, 2500);
+      speak(hitPhrase);
+
+      roundState = "celebrating";
+      celebrateTimer = 2.8; // wait for fanfare + speech then next round
     }
 
     function shoot() {
-      if (!gameRunning || cooldown > 0) return;
+      if (!gameRunning || cooldown > 0 || roundState !== "active") return;
       cooldown = COOLDOWN_TIME;
       const muzzleX = gunX + Math.cos(aimAngle) * 55;
       const muzzleY = gunY + Math.sin(aimAngle) * 55;
@@ -694,24 +811,23 @@
           paintballs.splice(i, 1);
           continue;
         }
-        for (const t of targets) {
-          if (t.checkHit(p.x, p.y, p.radius)) {
-            t.hit = true;
-            t.hitTime = 0;
-            p.alive = false;
-            paintballs.splice(i, 1);
-
-            score += 15;
-            hits++;
-            scoreEl.textContent = score;
-            hitsEl.textContent = hits;
-
-            createExplosion(t.x, t.y, p.color);
-            const phrase = `I am a ${t.name}. You hit me!`;
-            showMessage(`${t.emoji || "🎯"} ${phrase}`);
-            speak(phrase);
-            break;
+        if (roundState === "active") {
+          for (const t of targets) {
+            if (t.checkHit(p.x, p.y, p.radius)) {
+              p.alive = false;
+              paintballs.splice(i, 1);
+              onTargetHit(t, p.color);
+              break;
+            }
           }
+        }
+      }
+
+      // Celebration timer → next round
+      if (roundState === "celebrating") {
+        celebrateTimer -= dt;
+        if (celebrateTimer <= 0) {
+          startNextRound();
         }
       }
 
@@ -735,13 +851,21 @@
       scoreEl.textContent = hitsEl.textContent = missedEl.textContent = "0";
       paintballs = [];
       particles = [];
+      targets = [];
       cooldown = 0;
-      spawnTargets(1);
+      roundState = "waiting";
       lastTime = performance.now();
       gunX = canvas.width / 2;
       gunY = canvas.height - 25;
       aimAngle = -Math.PI / 2;
+      // Resume audio context on user gesture
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+      } catch (e) {}
       if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
+      // Kick off first announcement
+      startNextRound();
       requestAnimationFrame(gameLoop);
     });
 
