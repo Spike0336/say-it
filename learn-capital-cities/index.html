@@ -1,1 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learn Capital Cities</title>
+<style>
+  :root {
+    --sky: #dff1fb;
+    --ink: #1d3557;
+    --a: #e76f51;
+    --b: #2a9d8f;
+    --paper: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex;
+    flex-direction: column;
+    background: var(--sky);
+    color: var(--ink);
+    font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+  }
+  header {
+    text-align: center;
+    padding: 14px 12px 8px;
+  }
+  h1 { margin: 0; font-size: clamp(1.6rem, 5vw, 2.6rem); }
+  .tabs {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding: 8px 12px 12px;
+  }
+  .tabs button {
+    font: inherit;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    font-weight: bold;
+    color: #fff;
+    border: 0;
+    border-radius: 14px;
+    padding: 12px 28px;
+    cursor: pointer;
+    opacity: 0.6;
+  }
+  .tabs button:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; }
+  #btnAL { background: var(--a); }
+  #btnMZ { background: var(--b); }
+  .tabs button[aria-pressed="true"] { opacity: 1; box-shadow: 0 4px 0 rgba(0,0,0,.25); }
+  main {
+    flex: 1;
+    min-height: 0;
+    padding: 0 12px 8px;
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 12px;
+    background: var(--paper);
+  }
+  footer {
+    text-align: center;
+    padding: 6px 12px 12px;
+    font-size: 1rem;
+  }
+  footer a { color: var(--ink); font-weight: bold; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Learn Capital Cities</h1>
+  </header>
+
+  <div class="tabs">
+    <button id="btnAL" aria-pressed="true">A – L</button>
+    <button id="btnMZ" aria-pressed="false">M – Z</button>
+  </div>
+
+  <main>
+    <iframe id="viewer" title="Capital Cities Book"></iframe>
+  </main>
+
+  <footer>
+    Book not showing? <a id="openLink" href="#" target="_blank" rel="noopener">Open it in a new tab</a>
+  </footer>
+
+<script>
+  var books = {
+    AL: "Capital%20Cities%20Book%20-%20A-L.pdf",
+    MZ: "Capital%20Cities%20Book%20-M-Z.pdf"
+  };
+  var viewer = document.getElementById("viewer");
+  var link = document.getElementById("openLink");
+  var btnAL = document.getElementById("btnAL");
+  var btnMZ = document.getElementById("btnMZ");
+
+  function show(key) {
+    viewer.src = books[key];
+    link.href = books[key];
+    btnAL.setAttribute("aria-pressed", key === "AL");
+    btnMZ.setAttribute("aria-pressed", key === "MZ");
+  }
+
+  btnAL.addEventListener("click", function () { show("AL"); });
+  btnMZ.addEventListener("click", function () { show("MZ"); });
+  show("AL");
+</script>
+</body>
+</html>
 
