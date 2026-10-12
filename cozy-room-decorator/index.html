@@ -22,51 +22,60 @@
       position: relative;
     }
 
-    /* ========== REALISTIC ROOM ========== */
+    /* ========== REALISTIC ROOM MATCHING THE PHOTO ========== */
     .room {
       position: absolute;
       inset: 0;
       overflow: hidden;
+      background: #e8d9c4;
     }
 
-    /* Walls with subtle paper texture */
+    /* Cream walls matching the photo */
     .walls {
       position: absolute;
       inset: 0;
-      background-color: var(--wall-color, #f3e5d0);
+      background-color: var(--wall-color, #e8d9c4);
       transition: background-color 0.5s ease;
     }
 
+    /* Subtle wall texture */
     .walls::before {
       content: '';
       position: absolute;
       inset: 0;
-      background-image:
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
       pointer-events: none;
-      opacity: 0.7;
     }
 
-    /* Soft ceiling */
+    /* Ceiling */
     .ceiling {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 14%;
-      background: linear-gradient(180deg, rgba(0,0,0,0.12) 0%, transparent 100%);
-      pointer-events: none;
-      z-index: 2;
+      height: 11%;
+      background: linear-gradient(180deg, #f5f0e6 0%, #ebe2d3 100%);
+      z-index: 1;
     }
 
-    /* Wooden floor – more realistic planks */
+    .ceiling::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.06));
+    }
+
+    /* Carpet floor matching the photo */
     .floor {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      height: 32%;
-      background: linear-gradient(180deg, #c9a66b 0%, #b8956a 25%, #a67c4e 60%, #8b6914 100%);
+      height: 36%;
+      background: linear-gradient(180deg, #d4c4a8 0%, #c9b896 40%, #bda87e 100%);
       z-index: 5;
     }
 
@@ -74,155 +83,165 @@
       content: '';
       position: absolute;
       inset: 0;
-      background-image:
-        repeating-linear-gradient(
-          90deg,
-          transparent 0px,
-          transparent 52px,
-          rgba(60,35,15,0.18) 52px,
-          rgba(60,35,15,0.18) 54px
-        ),
-        repeating-linear-gradient(
-          0deg,
-          transparent 0px,
-          transparent 18px,
-          rgba(0,0,0,0.04) 18px,
-          rgba(0,0,0,0.04) 19px
-        );
-      opacity: 0.9;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+      opacity: 0.7;
     }
 
-    /* Baseboard / skirting */
+    /* Skirting board */
     .baseboard {
       position: absolute;
-      bottom: 32%;
+      bottom: 36%;
       left: 0;
       right: 0;
-      height: 14px;
-      background: linear-gradient(180deg, #6d4c41 0%, #4e342e 100%);
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.25);
+      height: 12px;
+      background: linear-gradient(180deg, #c4b59a, #a89478);
+      box-shadow: 0 -1px 4px rgba(0,0,0,0.15);
       z-index: 8;
     }
 
-    .baseboard::after {
-      content: '';
+    /* Large window with vertical blinds (matching photo) */
+    .window-area {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: rgba(255,255,255,0.15);
+      top: 9%;
+      left: 8%;
+      width: min(42vw, 340px);
+      height: min(42vh, 320px);
+      z-index: 3;
     }
 
-    /* Realistic window */
     .window-frame {
-      position: absolute;
-      top: 8%;
-      right: 5%;
-      width: min(20vw, 150px);
-      height: min(28vh, 200px);
-      background: #5d4037;
-      border-radius: 4px;
-      padding: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 0 2px #3e2723;
-      z-index: 4;
-    }
-
-    .window-glass {
       width: 100%;
       height: 100%;
-      background: linear-gradient(180deg, #7ec8e3 0%, #a8d8ea 40%, #d4f1f9 100%);
+      background: #d4c4a8;
+      border: 6px solid #c4b08a;
       border-radius: 2px;
       position: relative;
       overflow: hidden;
-      box-shadow: inset 0 0 30px rgba(255,255,255,0.3);
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
     }
 
-    .window-glass::before {
-      content: '';
+    .blinds {
       position: absolute;
       inset: 0;
-      background:
-        linear-gradient(90deg, transparent 48%, rgba(93,64,55,0.7) 48%, rgba(93,64,55,0.7) 52%, transparent 52%),
-        linear-gradient(180deg, transparent 48%, rgba(93,64,55,0.7) 48%, rgba(93,64,55,0.7) 52%, transparent 52%);
+      background: repeating-linear-gradient(
+        90deg,
+        #f0ebe3 0px,
+        #f0ebe3 14px,
+        #e0d8cc 14px,
+        #e0d8cc 16px
+      );
+      opacity: 0.95;
     }
 
-    .sun {
+    .curtain-top {
       position: absolute;
-      top: 12%;
-      left: 18%;
-      width: 32px;
-      height: 32px;
-      background: radial-gradient(circle, #fffde7 0%, #ffe082 50%, transparent 70%);
-      border-radius: 50%;
-      box-shadow: 0 0 25px 8px rgba(255,235,59,0.5);
+      top: -4%;
+      left: -5%;
+      right: -5%;
+      height: 18%;
+      background: linear-gradient(180deg, #c9b896 0%, #bda87e 50%, #a89478 100%);
+      border-radius: 4px 4px 0 0;
+      z-index: 4;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
     }
 
-    /* Curtains */
-    .curtain {
+    .curtain-top::before {
+      content: '';
       position: absolute;
-      top: 0;
-      width: 28%;
-      height: 100%;
-      background: linear-gradient(90deg, #8d6e63, #a1887f, #8d6e63);
-      opacity: 0.85;
-      z-index: 1;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 18px,
+        rgba(0,0,0,0.08) 18px,
+        rgba(0,0,0,0.08) 20px
+      );
     }
-    .curtain.left { left: 0; border-radius: 0 8px 0 0; }
-    .curtain.right { right: 0; border-radius: 8px 0 0 0; }
 
-    /* Fireplace – more detailed */
+    /* White ornate fireplace matching the photo */
     .fireplace {
       position: absolute;
-      bottom: 32%;
-      left: 2.5%;
-      width: min(18vw, 130px);
-      height: min(26vh, 190px);
+      bottom: 36%;
+      right: 4%;
+      width: min(28vw, 240px);
+      height: min(38vh, 280px);
       z-index: 9;
     }
 
-    .chimney-breast {
+    .fireplace-body {
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, #5d4037 0%, #6d4c41 20%, #5d4037 50%, #6d4c41 80%, #4e342e 100%);
-      border-radius: 6px 6px 0 0;
+      background: linear-gradient(180deg, #f8f4ef 0%, #f0ebe3 40%, #e8e0d5 100%);
+      border-radius: 4px 4px 0 0;
       position: relative;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      box-shadow: 0 0 20px rgba(0,0,0,0.15);
+      border: 1px solid #ddd5c8;
     }
 
-    .chimney-breast::before {
+    /* Decorative moulding */
+    .fireplace-body::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background-image:
-        repeating-linear-gradient(0deg, transparent 0, transparent 16px, rgba(0,0,0,0.22) 16px, rgba(0,0,0,0.22) 18px),
-        repeating-linear-gradient(90deg, transparent 0, transparent 26px, rgba(0,0,0,0.15) 26px, rgba(0,0,0,0.15) 28px);
-      border-radius: 6px 6px 0 0;
+      top: 8%;
+      left: 8%;
+      right: 8%;
+      height: 22%;
+      border: 2px solid #d4c4a8;
+      border-radius: 2px;
       opacity: 0.7;
     }
 
     .mantel {
       position: absolute;
-      top: -10px;
-      left: -8%;
-      width: 116%;
-      height: 16px;
-      background: linear-gradient(180deg, #8d6e63, #5d4037);
-      border-radius: 3px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      top: -8px;
+      left: -6%;
+      width: 112%;
+      height: 14px;
+      background: linear-gradient(180deg, #faf6f0, #e8e0d5);
+      border-radius: 2px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
       z-index: 2;
+    }
+
+    /* Gold ornate mirror above fireplace */
+    .gold-mirror {
+      position: absolute;
+      top: -42%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 85%;
+      height: 38%;
+      background: linear-gradient(135deg, #d4af37 0%, #f0e68c 30%, #b8860b 60%, #d4af37 100%);
+      border-radius: 8px 8px 4px 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gold-mirror::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      background: linear-gradient(180deg, #a8c5d4 0%, #7a9eaf 100%);
+      border-radius: 4px;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
     }
 
     .fire-opening {
       position: absolute;
       bottom: 0;
-      left: 14%;
-      width: 72%;
-      height: 42%;
-      background: #1a0800;
-      border-radius: 6px 6px 0 0;
+      left: 12%;
+      width: 76%;
+      height: 38%;
+      background: #2a1a10;
+      border-radius: 4px 4px 0 0;
       overflow: hidden;
-      box-shadow: inset 0 0 25px rgba(0,0,0,0.8);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.7);
     }
 
     .flame {
@@ -232,51 +251,51 @@
       animation: flicker 0.4s ease-in-out infinite alternate;
       transform-origin: bottom center;
     }
-    .f1 { left: 12%; width: 32%; height: 72%; background: radial-gradient(ellipse at bottom, #ffeb3b, #ff9800 45%, transparent 75%); }
-    .f2 { left: 32%; width: 38%; height: 95%; background: radial-gradient(ellipse at bottom, #fff59d, #ff6f00 40%, #e65100 70%, transparent); animation-delay: 0.12s; }
-    .f3 { left: 55%; width: 30%; height: 68%; background: radial-gradient(ellipse at bottom, #ffecb3, #ff8f00 50%, transparent); animation-delay: 0.22s; }
+    .f1 { left: 15%; width: 30%; height: 70%; background: radial-gradient(ellipse at bottom, #ffeb3b, #ff9800 45%, transparent 75%); }
+    .f2 { left: 35%; width: 36%; height: 92%; background: radial-gradient(ellipse at bottom, #fff59d, #ff6f00 40%, #e65100 70%, transparent); animation-delay: 0.1s; }
+    .f3 { left: 55%; width: 28%; height: 65%; background: radial-gradient(ellipse at bottom, #ffecb3, #ff8f00 50%, transparent); animation-delay: 0.2s; }
 
     @keyframes flicker {
-      0% { transform: scaleY(1) scaleX(1) rotate(-1deg); opacity: 0.9; }
-      100% { transform: scaleY(1.12) scaleX(0.92) rotate(1.5deg); opacity: 1; }
+      0% { transform: scaleY(1) scaleX(1); opacity: 0.9; }
+      100% { transform: scaleY(1.1) scaleX(0.93); opacity: 1; }
     }
 
     .fire-glow {
       position: absolute;
-      bottom: -15px;
+      bottom: -12px;
       left: 50%;
       transform: translateX(-50%);
-      width: 160%;
-      height: 60px;
-      background: radial-gradient(ellipse, rgba(255,120,0,0.4) 0%, transparent 70%);
+      width: 140%;
+      height: 50px;
+      background: radial-gradient(ellipse, rgba(255,140,0,0.35) 0%, transparent 70%);
       pointer-events: none;
-      animation: glowPulse 1.6s ease-in-out infinite alternate;
+      animation: glowPulse 1.5s ease-in-out infinite alternate;
     }
 
     @keyframes glowPulse {
-      from { opacity: 0.55; }
+      from { opacity: 0.5; }
       to { opacity: 1; }
     }
 
     /* Drop zone */
     .drop-zone {
       position: absolute;
-      top: 6%;
+      top: 5%;
       left: 0;
       right: 0;
       bottom: 0;
       z-index: 20;
     }
 
-    /* Placed furniture – NO text labels */
+    /* Placed furniture – no text labels */
     .placed-item {
       position: absolute;
       font-size: 2.6rem;
       cursor: grab;
       z-index: 25;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
       touch-action: none;
-      transition: outline 0.15s, filter 0.2s;
+      transition: outline 0.15s;
       line-height: 1;
       transform-origin: center center;
     }
@@ -284,13 +303,11 @@
     .placed-item.selected {
       outline: 3px solid #ffd700;
       outline-offset: 4px;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)) drop-shadow(0 0 12px rgba(255,215,0,0.7));
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35)) drop-shadow(0 0 12px rgba(255,215,0,0.7));
       z-index: 40;
     }
 
-    .placed-item:active {
-      cursor: grabbing;
-    }
+    .placed-item:active { cursor: grabbing; }
 
     /* ========== UI ========== */
     header {
@@ -299,51 +316,50 @@
       left: 0;
       right: 0;
       text-align: center;
-      padding: 7px 6px 3px;
+      padding: 6px 6px 2px;
       z-index: 60;
-      background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 100%);
+      background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%);
       pointer-events: none;
     }
 
     h1 {
-      font-size: clamp(1.15rem, 3.8vw, 1.7rem);
-      text-shadow: 0 0 10px #ffd700, 0 2px 4px rgba(0,0,0,0.6);
+      font-size: clamp(1.1rem, 3.6vw, 1.6rem);
+      text-shadow: 0 0 10px #ffd700, 0 2px 4px rgba(0,0,0,0.5);
     }
 
     .subtitle {
-      font-size: clamp(0.75rem, 2.2vw, 0.95rem);
+      font-size: clamp(0.7rem, 2vw, 0.9rem);
       opacity: 0.95;
     }
 
     .tip {
       position: absolute;
-      top: 52px;
+      top: 48px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(255, 215, 0, 0.95);
       color: #1a1a2e;
       padding: 5px 12px;
-      border-radius: 18px;
-      font-size: 0.85rem;
+      border-radius: 16px;
+      font-size: 0.82rem;
       font-weight: bold;
       z-index: 65;
       white-space: nowrap;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
       pointer-events: none;
     }
-
     .tip.hidden { display: none; }
 
     .speaking {
       position: absolute;
-      top: 88px;
+      top: 82px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.75);
       color: #fff;
-      padding: 5px 12px;
-      border-radius: 14px;
-      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.78rem;
       z-index: 80;
       display: none;
       max-width: 90%;
@@ -351,103 +367,97 @@
     }
     .speaking.show { display: block; }
 
-    /* ===== COMPACT BOTTOM TRAY ===== */
+    /* Compact bottom tray */
     .tray {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(180deg, rgba(25,15,8,0.92) 0%, rgba(12,8,4,0.98) 100%);
+      background: linear-gradient(180deg, rgba(30,20,12,0.94) 0%, rgba(15,10,6,0.98) 100%);
       border-top: 2px solid rgba(255, 215, 0, 0.3);
       z-index: 70;
-      padding: 6px 6px 8px;
+      padding: 5px 5px 7px;
     }
 
-    /* Colour rows – compact */
     .color-section {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 5px;
+      gap: 5px;
+      margin-bottom: 4px;
       overflow-x: auto;
-      padding-bottom: 2px;
       -webkit-overflow-scrolling: touch;
     }
 
     .color-section label {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: #ffd700;
       white-space: nowrap;
-      min-width: 42px;
+      min-width: 40px;
     }
 
     .color-row {
       display: flex;
-      gap: 5px;
+      gap: 4px;
       flex-shrink: 0;
     }
 
     .color-btn {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      border: 2.5px solid rgba(255,255,255,0.35);
+      border: 2px solid rgba(255,255,255,0.35);
       cursor: pointer;
       flex-shrink: 0;
       transition: transform 0.12s, box-shadow 0.12s;
     }
     .color-btn.selected {
       border-color: #ffd700;
-      box-shadow: 0 0 10px gold;
+      box-shadow: 0 0 8px gold;
       transform: scale(1.15);
     }
 
-    /* Category dropdown + scrollable furniture */
     .furn-section {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .category-select {
-      background: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.1);
       color: #ffd700;
-      border: 2px solid rgba(255,215,0,0.4);
-      border-radius: 10px;
-      padding: 6px 8px;
+      border: 2px solid rgba(255,215,0,0.35);
+      border-radius: 8px;
+      padding: 5px 6px;
       font-family: inherit;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: bold;
-      min-width: 110px;
-      max-width: 130px;
+      min-width: 100px;
+      max-width: 120px;
       cursor: pointer;
     }
 
     .furn-scroll {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       overflow-x: auto;
       flex: 1;
-      padding: 2px 0 4px;
+      padding: 2px 0 3px;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
     }
 
-    .furn-scroll::-webkit-scrollbar {
-      height: 4px;
-    }
+    .furn-scroll::-webkit-scrollbar { height: 3px; }
     .furn-scroll::-webkit-scrollbar-thumb {
       background: rgba(255,215,0,0.4);
-      border-radius: 4px;
+      border-radius: 3px;
     }
 
     .furn-btn {
-      width: 48px;
-      height: 48px;
-      font-size: 1.7rem;
+      width: 44px;
+      height: 44px;
+      font-size: 1.55rem;
       background: rgba(255,255,255,0.1);
       border: 2px solid rgba(255,255,255,0.25);
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -455,77 +465,60 @@
       flex-shrink: 0;
       transition: all 0.12s;
     }
-
     .furn-btn.selected {
       background: rgba(255, 215, 0, 0.35);
       border-color: #ffd700;
-      box-shadow: 0 0 12px gold;
+      box-shadow: 0 0 10px gold;
       transform: scale(1.08);
     }
 
     .counter {
       text-align: center;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #a0e0ff;
-      margin-top: 3px;
+      margin-top: 2px;
     }
     .counter span { color: #ffd700; font-weight: bold; }
 
-    /* ===== ITEM CONTROLS (appear when item selected) ===== */
+    /* Item controls */
     .item-controls {
       position: absolute;
       bottom: 100%;
       left: 0;
       right: 0;
-      background: rgba(30,20,10,0.95);
+      background: rgba(30,20,10,0.96);
       border-top: 2px solid #ffd700;
-      padding: 8px 6px;
+      padding: 7px 5px;
       display: none;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       z-index: 75;
-      animation: slideUp 0.2s ease;
     }
-
-    .item-controls.visible {
-      display: flex;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(10px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
+    .item-controls.visible { display: flex; }
 
     .ctrl-btn {
       background: rgba(255,255,255,0.12);
       border: 2px solid rgba(255,255,255,0.3);
       color: #fff;
-      border-radius: 12px;
-      padding: 8px 12px;
+      border-radius: 10px;
+      padding: 7px 10px;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: bold;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      min-width: 70px;
-      justify-content: center;
-      transition: background 0.15s;
+      min-width: 64px;
+      text-align: center;
     }
-
     .ctrl-btn:active {
       background: rgba(255,215,0,0.35);
       border-color: #ffd700;
     }
-
     .ctrl-btn.delete {
       background: rgba(200,50,50,0.3);
       border-color: #ff6b6b;
     }
 
-    /* Celebration */
     .celebration {
       position: fixed;
       inset: 0;
@@ -545,30 +538,28 @@
     }
 
     .celebration h2 {
-      font-size: clamp(1.7rem, 6vw, 2.8rem);
+      font-size: clamp(1.6rem, 5.5vw, 2.6rem);
       color: #ffd700;
-      text-shadow: 0 0 18px #ff6b6b;
+      text-shadow: 0 0 16px #ff6b6b;
       animation: bounce 0.8s ease infinite;
     }
-
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
+      50% { transform: translateY(-10px); }
     }
-
-    .celebration p { font-size: 1.15rem; margin: 10px 0 18px; }
+    .celebration p { font-size: 1.1rem; margin: 8px 0 16px; }
 
     .play-again {
       background: linear-gradient(135deg, #ff6b6b, #ffd700);
       color: #1a1a2e;
       border: none;
-      padding: 13px 28px;
-      font-size: 1.15rem;
+      padding: 12px 26px;
+      font-size: 1.1rem;
       font-family: inherit;
       font-weight: bold;
       border-radius: 50px;
       cursor: pointer;
-      box-shadow: 0 5px 16px rgba(255,107,107,0.5);
+      box-shadow: 0 4px 14px rgba(255,107,107,0.45);
     }
 
     #confetti {
@@ -584,16 +575,16 @@
     <div class="walls" id="walls"></div>
     <div class="ceiling"></div>
 
-    <div class="window-frame">
-      <div class="curtain left"></div>
-      <div class="curtain right"></div>
-      <div class="window-glass">
-        <div class="sun"></div>
+    <div class="window-area">
+      <div class="curtain-top"></div>
+      <div class="window-frame">
+        <div class="blinds"></div>
       </div>
     </div>
 
     <div class="fireplace">
-      <div class="chimney-breast">
+      <div class="gold-mirror"></div>
+      <div class="fireplace-body">
         <div class="mantel"></div>
         <div class="fire-opening">
           <div class="flame f1"></div>
@@ -620,7 +611,6 @@
   <div class="speaking" id="speaking">🗣️ ...</div>
 
   <div class="tray" id="tray">
-    <!-- Item controls (shown when an item is selected) -->
     <div class="item-controls" id="itemControls">
       <button class="ctrl-btn" id="btnBigger">➕ Bigger</button>
       <button class="ctrl-btn" id="btnSmaller">➖ Smaller</button>
@@ -629,19 +619,16 @@
       <button class="ctrl-btn delete" id="btnDelete">🗑️ Delete</button>
     </div>
 
-    <!-- Wall colours -->
     <div class="color-section">
       <label>Walls</label>
       <div class="color-row" id="wallColors"></div>
     </div>
 
-    <!-- Furniture colours -->
     <div class="color-section">
       <label>Colour</label>
       <div class="color-row" id="furnColors"></div>
     </div>
 
-    <!-- Category + scrollable furniture -->
     <div class="furn-section">
       <select class="category-select" id="categorySelect">
         <option value="all">All items</option>
@@ -660,16 +647,15 @@
   </div>
 
   <div class="celebration" id="celebration">
-    <div style="font-size:3.2rem;">🎉</div>
+    <div style="font-size:3rem;">🎉</div>
     <h2>What a Cozy Room!</h2>
     <p>You made a wonderful home!</p>
     <button class="play-again" id="playAgain">Decorate Again!</button>
   </div>
 
   <script>
-    // ===== DATA =====
     const WALL_COLORS = [
-      { name: 'Warm Cream', hex: '#f3e5d0' },
+      { name: 'Warm Cream', hex: '#e8d9c4' },
       { name: 'Soft Blue', hex: '#b3d4e8' },
       { name: 'Mint Green', hex: '#c8e6c9' },
       { name: 'Blush Pink', hex: '#f8c8d8' },
@@ -698,28 +684,23 @@
     ];
 
     const FURNITURE = [
-      // Seating
       { emoji: '🛋️', name: 'sofa', cat: 'seating' },
       { emoji: '🪑', name: 'chair', cat: 'seating' },
       { emoji: '🛋️', name: 'loveseat', cat: 'seating' },
       { emoji: '🪑', name: 'armchair', cat: 'seating' },
       { emoji: '🪑', name: 'stool', cat: 'seating' },
       { emoji: '🪑', name: 'rocking chair', cat: 'seating' },
-      // Beds
       { emoji: '🛏️', name: 'bed', cat: 'beds' },
       { emoji: '🛏️', name: 'bunk bed', cat: 'beds' },
       { emoji: '🛏️', name: 'cot', cat: 'beds' },
-      // Tables
       { emoji: '🪑', name: 'table', cat: 'tables' },
       { emoji: '🪑', name: 'coffee table', cat: 'tables' },
       { emoji: '🪑', name: 'desk', cat: 'tables' },
       { emoji: '🧺', name: 'side table', cat: 'tables' },
-      // Lights
       { emoji: '🪔', name: 'lamp', cat: 'lights' },
       { emoji: '🪔', name: 'floor lamp', cat: 'lights' },
       { emoji: '🕯️', name: 'candle', cat: 'lights' },
       { emoji: '💡', name: 'ceiling light', cat: 'lights' },
-      // Decor
       { emoji: '🪞', name: 'mirror', cat: 'decor' },
       { emoji: '🖼️', name: 'picture', cat: 'decor' },
       { emoji: '🖼️', name: 'painting', cat: 'decor' },
@@ -730,13 +711,11 @@
       { emoji: '🪟', name: 'curtains', cat: 'decor' },
       { emoji: '🧺', name: 'basket', cat: 'decor' },
       { emoji: '📻', name: 'radio', cat: 'decor' },
-      // Plants
       { emoji: '🪴', name: 'plant', cat: 'plants' },
       { emoji: '🪴', name: 'big plant', cat: 'plants' },
       { emoji: '🪴', name: 'flower pot', cat: 'plants' },
       { emoji: '🌲', name: 'tree', cat: 'plants' },
       { emoji: '🌵', name: 'cactus', cat: 'plants' },
-      // Fun
       { emoji: '🧸', name: 'teddy bear', cat: 'fun' },
       { emoji: '🧸', name: 'toy', cat: 'fun' },
       { emoji: '🎸', name: 'guitar', cat: 'fun' },
@@ -746,7 +725,6 @@
       { emoji: '🧩', name: 'puzzle', cat: 'fun' }
     ];
 
-    // ===== STATE =====
     let selectedFurn = null;
     let selectedFurnColor = FURN_COLORS[0];
     let selectedWallColor = WALL_COLORS[0];
@@ -756,7 +734,6 @@
     let placedElements = [];
     const GOAL = 12;
 
-    // ===== DOM =====
     const walls = document.getElementById('walls');
     const dropZone = document.getElementById('dropZone');
     const tip = document.getElementById('tip');
@@ -770,7 +747,6 @@
     const confettiCanvas = document.getElementById('confetti');
     const ctx = confettiCanvas.getContext('2d');
 
-    // ===== BUILD COLOUR BUTTONS =====
     WALL_COLORS.forEach((c, i) => {
       const btn = document.createElement('button');
       btn.className = 'color-btn' + (i === 0 ? ' selected' : '');
@@ -810,7 +786,6 @@
       document.getElementById('furnColors').appendChild(btn);
     });
 
-    // ===== FURNITURE BUTTONS (scrollable) =====
     function renderFurniture(cat = 'all') {
       furnScroll.innerHTML = '';
       const list = cat === 'all' ? FURNITURE : FURNITURE.filter(f => f.cat === cat);
@@ -837,7 +812,6 @@
       selectedFurn = null;
     });
 
-    // ===== SPEECH =====
     function speak(text) {
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
@@ -857,7 +831,6 @@
       window.speechSynthesis.onvoiceschanged = () => {};
     }
 
-    // ===== PLACE ITEM =====
     function placeAt(clientX, clientY) {
       if (!selectedFurn || isCelebrating) return;
       const rect = dropZone.getBoundingClientRect();
@@ -877,7 +850,7 @@
       el.dataset.flip = '1';
 
       if (selectedFurnColor.filter && selectedFurnColor.filter !== 'none') {
-        el.style.filter = selectedFurnColor.filter + ' drop-shadow(0 4px 6px rgba(0,0,0,0.4))';
+        el.style.filter = selectedFurnColor.filter + ' drop-shadow(0 4px 6px rgba(0,0,0,0.35))';
       }
 
       el.addEventListener('click', (e) => {
@@ -909,25 +882,18 @@
 
     dropZone.addEventListener('click', e => {
       if (e.target.closest('.placed-item')) return;
-      if (selectedFurn) {
-        placeAt(e.clientX, e.clientY);
-      } else {
-        deselectItem();
-      }
+      if (selectedFurn) placeAt(e.clientX, e.clientY);
+      else deselectItem();
     });
 
     dropZone.addEventListener('touchend', e => {
       if (e.target.closest('.placed-item')) return;
       e.preventDefault();
       const t = e.changedTouches[0];
-      if (selectedFurn) {
-        placeAt(t.clientX, t.clientY);
-      } else {
-        deselectItem();
-      }
+      if (selectedFurn) placeAt(t.clientX, t.clientY);
+      else deselectItem();
     }, { passive: false });
 
-    // ===== SELECT / DESELECT =====
     function selectItem(el) {
       deselectItem();
       selectedItem = el;
@@ -945,7 +911,6 @@
       itemControls.classList.remove('visible');
     }
 
-    // ===== TRANSFORM HELPERS =====
     function applyTransform(el) {
       const scale = parseFloat(el.dataset.scale) || 1;
       const rotate = parseFloat(el.dataset.rotate) || 0;
@@ -953,7 +918,6 @@
       el.style.transform = `scale(${scale * flip}, ${scale}) rotate(${rotate}deg)`;
     }
 
-    // ===== CONTROL BUTTONS =====
     document.getElementById('btnBigger').addEventListener('click', () => {
       if (!selectedItem) return;
       let s = parseFloat(selectedItem.dataset.scale) || 1;
@@ -1000,7 +964,6 @@
       speak(`Removed the ${name}`);
     });
 
-    // ===== DRAGGABLE =====
     function makeDraggable(el) {
       let startX, startY, origX, origY, dragging = false;
 
@@ -1048,7 +1011,6 @@
       });
     }
 
-    // ===== CELEBRATION =====
     function startCelebration() {
       if (isCelebrating) return;
       isCelebrating = true;
@@ -1073,7 +1035,6 @@
       document.querySelectorAll('.furn-btn').forEach(b => b.classList.remove('selected'));
     });
 
-    // ===== CONFETTI =====
     let confettiParticles = [];
     let confettiAnimId = null;
 
@@ -1129,7 +1090,6 @@
       confettiCanvas.height = window.innerHeight;
     });
 
-    // Init
     walls.style.backgroundColor = selectedWallColor.hex;
   </script>
 </body>
