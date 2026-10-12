@@ -26,6 +26,20 @@
     padding: 14px 12px 8px;
   }
   h1 { margin: 0; font-size: clamp(1.6rem, 5vw, 2.6rem); }
+  .back {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--ink);
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 8px 16px;
+    border-radius: 12px;
+  }
+  .back:focus-visible { outline: 4px solid var(--a); outline-offset: 2px; }
+  header { position: relative; }
   .tabs {
     display: flex;
     gap: 12px;
@@ -69,6 +83,7 @@
 </head>
 <body>
   <header>
+    <a class="back" href="../">&larr; Back</a>
     <h1>Learn Capital Cities</h1>
   </header>
 
@@ -108,4 +123,3 @@
 </script>
 </body>
 </html>
-
