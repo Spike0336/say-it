@@ -1,1 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Count with Me! - Fun Counting Game for Little Ones</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 40%, #90EE90 40%, #228B22 100%);
+      position: relative;
+      user-select: none;
+    }
+
+    /* Countryside elements */
+    .sky {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 40%;
+      background: linear-gradient(to bottom, #4FC3F7, #81D4FA);
+      z-index: 0;
+    }
+
+    .sun {
+      position: absolute;
+      top: 5%;
+      right: 10%;
+      width: 80px;
+      height: 80px;
+      background: #FFD54F;
+      border-radius: 50%;
+      box-shadow: 0 0 40px #FFEB3B, 0 0 80px #FFC107;
+      z-index: 1;
+      animation: pulse-sun 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-sun {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .cloud {
+      position: absolute;
+      background: white;
+      border-radius: 50px;
+      opacity: 0.9;
+      z-index: 1;
+    }
+
+    .cloud:before, .cloud:after {
+      content: '';
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .cloud1 {
+      width: 120px;
+      height: 40px;
+      top: 10%;
+      left: 15%;
+      animation: float 20s linear infinite;
+    }
+    .cloud1:before { width: 50px; height: 50px; top: -25px; left: 15px; }
+    .cloud1:after { width: 60px; height: 40px; top: -15px; left: 50px; }
+
+    .cloud2 {
+      width: 100px;
+      height: 35px;
+      top: 18%;
+      left: 60%;
+      animation: float 25s linear infinite reverse;
+    }
+    .cloud2:before { width: 40px; height: 40px; top: -20px; left: 10px; }
+    .cloud2:after { width: 50px; height: 35px; top: -12px; left: 40px; }
+
+    @keyframes float {
+      from { transform: translateX(-50px); }
+      to { transform: translateX(calc(100vw + 50px)); }
+    }
+
+    .hills {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 65%;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .hill {
+      position: absolute;
+      bottom: 0;
+      border-radius: 50% 50% 0 0;
+      background: linear-gradient(to bottom, #66BB6A, #2E7D32);
+    }
+
+    .hill1 { width: 80%; height: 40%; left: -20%; }
+    .hill2 { width: 70%; height: 50%; right: -15%; background: linear-gradient(to bottom, #81C784, #388E3C); }
+    .hill3 { width: 50%; height: 30%; left: 30%; background: linear-gradient(to bottom, #A5D6A7, #43A047); }
+
+    /* Game UI */
+    .game-container {
+      position: relative;
+      z-index: 10;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      margin-top: 10px;
+    }
+
+    .header h1 {
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      margin-bottom: 5px;
+    }
+
+    .score {
+      font-size: 1.4rem;
+      background: rgba(255,255,255,0.3);
+      padding: 8px 20px;
+      border-radius: 30px;
+      display: inline-block;
+    }
+
+    .scene-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+      position: relative;
+    }
+
+    .prompt {
+      font-size: clamp(1.5rem, 5vw, 2.2rem);
+      color: #fff;
+      background: rgba(33, 150, 243, 0.85);
+      padding: 15px 30px;
+      border-radius: 25px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      max-width: 90%;
+      line-height: 1.3;
+    }
+
+    .items-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      min-height: 200px;
+      padding: 20px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 30px;
+      border: 4px solid rgba(255,255,255,0.5);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      max-width: 95%;
+      position: relative;
+    }
+
+    .item {
+      font-size: clamp(3.5rem, 12vw, 6rem);
+      transition: all 0.3s ease;
+      cursor: default;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+      animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+
+    .item:nth-child(1) { animation-delay: 0.1s; }
+    .item:nth-child(2) { animation-delay: 0.2s; }
+    .item:nth-child(3) { animation-delay: 0.3s; }
+    .item:nth-child(4) { animation-delay: 0.4s; }
+    .item:nth-child(5) { animation-delay: 0.5s; }
+
+    @keyframes pop-in {
+      0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    .item.explode {
+      animation: explode 0.8s forwards;
+    }
+
+    @keyframes explode {
+      0% { transform: scale(1); opacity: 1; }
+      30% { transform: scale(1.4) rotate(15deg); }
+      100% { transform: scale(0) rotate(45deg); opacity: 0; }
+    }
+
+    /* Mic indicator */
+    .mic-area {
+      text-align: center;
+      margin: 15px 0;
+    }
+
+    .mic-button {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(145deg, #FF5252, #D32F2F);
+      color: white;
+      font-size: 2.5rem;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(211, 47, 47, 0.4);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .mic-button.listening {
+      background: linear-gradient(145deg, #4CAF50, #2E7D32);
+      animation: pulse-mic 1s infinite;
+      box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+
+    @keyframes pulse-mic {
+      0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+      70% { box-shadow: 0 0 0 20px rgba(76, 175, 80, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+    }
+
+    .mic-status {
+      margin-top: 10px;
+      font-size: 1.3rem;
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+      min-height: 1.5em;
+    }
+
+    .feedback {
+      font-size: 1.8rem;
+      font-weight: bold;
+      min-height: 2em;
+      text-align: center;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .feedback.correct {
+      color: #FFEB3B;
+      animation: bounce 0.6s;
+    }
+
+    .feedback.wrong {
+      color: #FF8A80;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 50px;
+      background: #FF9800;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transition: transform 0.15s, background 0.2s;
+      font-family: inherit;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn.secondary {
+      background: #5C6BC0;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Start screen */
+    .start-screen, .end-screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .start-screen h1, .end-screen h1 {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      margin-bottom: 20px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+    }
+
+    .start-screen p {
+      font-size: 1.4rem;
+      max-width: 500px;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    .big-btn {
+      padding: 20px 50px;
+      font-size: 1.8rem;
+      background: linear-gradient(145deg, #4CAF50, #2E7D32);
+      border: none;
+      border-radius: 60px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      font-family: inherit;
+      transition: transform 0.2s;
+    }
+
+    .big-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Particles for explosion */
+    .particle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* Confetti */
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      z-index: 60;
+      pointer-events: none;
+    }
+
+    /* Level indicator */
+    .level {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    /* Hidden number for accessibility / debugging */
+    .hidden-answer {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-height: 600px) {
+      .item { font-size: 3rem; }
+      .mic-button { width: 70px; height: 70px; font-size: 2rem; }
+      .prompt { font-size: 1.3rem; padding: 10px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sky"></div>
+  <div class="sun"></div>
+  <div class="cloud cloud1"></div>
+  <div class="cloud cloud2"></div>
+  <div class="hills">
+    <div class="hill hill1"></div>
+    <div class="hill hill2"></div>
+    <div class="hill hill3"></div>
+  </div>
+
+  <div class="game-container">
+    <div class="header">
+      <h1>🌟 Count with Me! 🌟</h1>
+      <div class="score">Score: <span id="score">0</span> &nbsp;|&nbsp; Level <span id="level">1</span></div>
+    </div>
+
+    <div class="scene-area">
+      <div class="prompt" id="prompt">Get ready to count!</div>
+      <div class="items-container" id="items"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="mic-area">
+      <button class="mic-button" id="micBtn" title="Microphone">🎤</button>
+      <div class="mic-status" id="micStatus">Tap the mic or wait for it to listen!</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn secondary" id="speakBtn">🔊 Hear Question</button>
+      <button class="btn" id="nextBtn" disabled>Next →</button>
+      <button class="btn secondary" id="skipBtn">Skip</button>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div class="start-screen" id="startScreen">
+    <h1>🐄 Count with Me! 🚗</h1>
+    <p>
+      Look at the picture and say how many things you see!<br>
+      The microphone will listen when the picture appears.<br>
+      Get it right and watch them explode with a fanfare! 🎉
+    </p>
+    <button class="big-btn" id="startBtn">Let's Play! 🎤</button>
+    <p style="margin-top:20px; font-size:1rem; opacity:0.8;">
+      Best with Chrome or Edge • Allow microphone access
+    </p>
+  </div>
+
+  <!-- Celebration overlay (particles) -->
+  <div id="celebration" style="position:fixed; inset:0; pointer-events:none; z-index:200;"></div>
+
+  <script>
+    // ========== DATA ==========
+    const CATEGORIES = {
+      animals: {
+        items: ['🐄', '🐷', '🐑', '🐔', '🐴', '🐕', '🐈', '🦆', '🐇', '🐐'],
+        names: ['cows', 'pigs', 'sheep', 'chickens', 'horses', 'dogs', 'cats', 'ducks', 'rabbits', 'goats'],
+        singular: ['cow', 'pig', 'sheep', 'chicken', 'horse', 'dog', 'cat', 'duck', 'rabbit', 'goat']
+      },
+      vehicles: {
+        items: ['🚗', '🚌', '🚜', '🚲', '🚒', '🚑', '🛵', '🛻', '🚂', '✈️'],
+        names: ['cars', 'buses', 'tractors', 'bicycles', 'fire trucks', 'ambulances', 'scooters', 'trucks', 'trains', 'airplanes'],
+        singular: ['car', 'bus', 'tractor', 'bicycle', 'fire truck', 'ambulance', 'scooter', 'truck', 'train', 'airplane']
+      },
+      people: {
+        items: ['👧', '👦', '👩', '👨', '👵', '👴', '🧒', '👶', '🧑', '🦸'],
+        names: ['girls', 'boys', 'women', 'men', 'grandmas', 'grandpas', 'kids', 'babies', 'people', 'heroes'],
+        singular: ['girl', 'boy', 'woman', 'man', 'grandma', 'grandpa', 'kid', 'baby', 'person', 'hero']
+      },
+      objects: {
+        items: ['🍎', '🍌', '🍉', '🌸', '🎈', '⚽', '🎁', '📚', '🧸', '⭐'],
+        names: ['apples', 'bananas', 'watermelons', 'flowers', 'balloons', 'balls', 'presents', 'books', 'teddy bears', 'stars'],
+        singular: ['apple', 'banana', 'watermelon', 'flower', 'balloon', 'ball', 'present', 'book', 'teddy bear', 'star']
+      }
+    };
+
+    const NUMBER_WORDS = {
+      'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+      '1': 1, '2': 2, '3': 3, '4': 4, '5': 5,
+      'won': 1, 'to': 2, 'too': 2, 'tree': 3, 'for': 4, 'fore': 4, 'fife': 5
+    };
+
+    // ========== STATE ==========
+    let score = 0;
+    let level = 1;
+    let currentAnswer = 0;
+    let currentCategory = '';
+    let currentName = '';
+    let isListening = false;
+    let recognition = null;
+    let gameStarted = false;
+    let canListen = false;
+
+    // ========== DOM ==========
+    const itemsEl = document.getElementById('items');
+    const promptEl = document.getElementById('prompt');
+    const feedbackEl = document.getElementById('feedback');
+    const micBtn = document.getElementById('micBtn');
+    const micStatus = document.getElementById('micStatus');
+    const scoreEl = document.getElementById('score');
+    const levelEl = document.getElementById('level');
+    const nextBtn = document.getElementById('nextBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const speakBtn = document.getElementById('speakBtn');
+    const startScreen = document.getElementById('startScreen');
+    const startBtn = document.getElementById('startBtn');
+    const celebrationEl = document.getElementById('celebration');
+
+    // ========== SPEECH RECOGNITION ==========
+    function initSpeech() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        micStatus.textContent = "Speech not supported. Use Chrome or Edge!";
+        return false;
+      }
+      recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 3;
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        isListening = true;
+        micBtn.classList.add('listening');
+        micStatus.textContent = "I'm listening... say the number!";
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        if (canListen && gameStarted) {
+          // Auto-restart if still waiting for answer
+          setTimeout(() => {
+            if (canListen && !isListening) startListening();
+          }, 600);
+        } else {
+          micStatus.textContent = "Tap the mic to try again";
+        }
+      };
+
+      recognition.onerror = (e) => {
+        console.log('Speech error:', e.error);
+        isListening = false;
+        micBtn.classList.remove('listening');
+        if (e.error === 'no-speech') {
+          micStatus.textContent = "I didn't hear anything. Try again!";
+        } else if (e.error === 'not-allowed') {
+          micStatus.textContent = "Please allow microphone access!";
+        } else {
+          micStatus.textContent = "Hmm, try again!";
+        }
+      };
+
+      recognition.onresult = (event) => {
+        const results = event.results[0];
+        let heard = '';
+        for (let i = 0; i < results.length; i++) {
+          heard += results[i].transcript.toLowerCase() + ' ';
+        }
+        heard = heard.trim();
+        console.log('Heard:', heard);
+        processAnswer(heard);
+      };
+
+      return true;
+    }
+
+    function startListening() {
+      if (!recognition || isListening || !canListen) return;
+      try {
+        recognition.start();
+      } catch (e) {
+        console.log('Start error', e);
+      }
+    }
+
+    function stopListening() {
+      canListen = false;
+      if (recognition && isListening) {
+        try { recognition.stop(); } catch(e) {}
+      }
+    }
+
+    // ========== NUMBER PARSING ==========
+    function extractNumber(text) {
+      text = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
+      // Direct digits
+      const digitMatch = text.match(/\b([1-5])\b/);
+      if (digitMatch) return parseInt(digitMatch[1]);
+
+      // Word numbers
+      for (const [word, num] of Object.entries(NUMBER_WORDS)) {
+        if (text.includes(word)) return num;
+      }
+
+      // "I see three" etc
+      const words = text.split(/\s+/);
+      for (const w of words) {
+        if (NUMBER_WORDS[w]) return NUMBER_WORDS[w];
+      }
+      return null;
+    }
+
+    // ========== GAME LOGIC ==========
+    function getMaxNumber() {
+      // Progressive difficulty for 3yo: start easy
+      if (level <= 3) return 3;
+      if (level <= 6) return 4;
+      return 5;
+    }
+
+    function newRound() {
+      stopListening();
+      feedbackEl.textContent = '';
+      feedbackEl.className = 'feedback';
+      nextBtn.disabled = true;
+      itemsEl.innerHTML = '';
+
+      const maxN = getMaxNumber();
+      currentAnswer = Math.floor(Math.random() * maxN) + 1;
+
+      // Pick random category and item type
+      const catKeys = Object.keys(CATEGORIES);
+      currentCategory = catKeys[Math.floor(Math.random() * catKeys.length)];
+      const cat = CATEGORIES[currentCategory];
+      const idx = Math.floor(Math.random() * cat.items.length);
+      const emoji = cat.items[idx];
+      currentName = currentAnswer === 1 ? cat.singular[idx] : cat.names[idx];
+
+      // Build prompt
+      const question = `How many ${currentName} do you see?`;
+      promptEl.textContent = question;
+
+      // Create items with slight random rotation for fun
+      for (let i = 0; i < currentAnswer; i++) {
+        const span = document.createElement('span');
+        span.className = 'item';
+        span.textContent = emoji;
+        span.style.transform = `rotate(${(Math.random() - 0.5) * 20}deg)`;
+        itemsEl.appendChild(span);
+      }
+
+      // Speak the question after a short delay
+      setTimeout(() => {
+        speak(question);
+        // Then start listening
+        setTimeout(() => {
+          canListen = true;
+          startListening();
+        }, 1500);
+      }, 400);
+    }
+
+    function processAnswer(heard) {
+      const num = extractNumber(heard);
+      if (num === null) {
+        feedbackEl.textContent = "I heard: \"" + heard + "\". Say a number like 'three'!";
+        feedbackEl.className = 'feedback wrong';
+        // Keep listening
+        return;
+      }
+
+      if (num === currentAnswer) {
+        // CORRECT!
+        canListen = false;
+        stopListening();
+        score += 10 * level;
+        scoreEl.textContent = score;
+        feedbackEl.textContent = `Yes! ${currentAnswer} ${currentName}! 🎉`;
+        feedbackEl.className = 'feedback correct';
+
+        // Explode items
+        explodeItems();
+
+        // Fanfare + celebration
+        playFanfare();
+        launchConfetti();
+
+        nextBtn.disabled = false;
+
+        // Auto advance after a bit
+        setTimeout(() => {
+          if (!nextBtn.disabled) {
+            level++;
+            levelEl.textContent = level;
+            newRound();
+          }
+        }, 3500);
+      } else {
+        feedbackEl.textContent = `You said ${num}. Try again! Count carefully 👀`;
+        feedbackEl.className = 'feedback wrong';
+        // Keep listening
+        setTimeout(() => {
+          if (canListen) startListening();
+        }, 800);
+      }
+    }
+
+    // ========== ANIMATIONS & SOUND ==========
+    function explodeItems() {
+      const items = itemsEl.querySelectorAll('.item');
+      items.forEach((item, i) => {
+        setTimeout(() => {
+          item.classList.add('explode');
+          // Create particles
+          createParticles(item);
+        }, i * 80);
+      });
+    }
+
+    function createParticles(el) {
+      const rect = el.getBoundingClientRect();
+      const colors = ['#FF5252', '#FFEB3B', '#69F0AE', '#40C4FF', '#FF80AB', '#EA80FC', '#FFD740'];
+      for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.left = rect.left + rect.width / 2 + 'px';
+        p.style.top = rect.top + rect.height / 2 + 'px';
+        document.body.appendChild(p);
+
+        const angle = (Math.PI * 2 * i) / 12;
+        const dist = 80 + Math.random() * 60;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+
+        p.animate([
+          { transform: 'translate(0,0) scale(1)', opacity: 1 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0)`, opacity: 0 }
+        ], {
+          duration: 700 + Math.random() * 300,
+          easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
+        }).onfinish = () => p.remove();
+      }
+    }
+
+    function launchConfetti() {
+      const colors = ['#FF5252', '#FFEB3B', '#69F0AE', '#40C4FF', '#FF80AB', '#EA80FC', '#FFFFFF'];
+      for (let i = 0; i < 60; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-20px';
+        c.style.width = (6 + Math.random() * 10) + 'px';
+        c.style.height = (6 + Math.random() * 10) + 'px';
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        celebrationEl.appendChild(c);
+
+        const duration = 2000 + Math.random() * 2000;
+        const xMove = (Math.random() - 0.5) * 200;
+        c.animate([
+          { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+          { transform: `translateY(100vh) translateX(${xMove}px) rotate(${Math.random()*720}deg)`, opacity: 0.3 }
+        ], {
+          duration,
+          easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        }).onfinish = () => c.remove();
+      }
+    }
+
+    // Simple synthesized fanfare using Web Audio API
+    function playFanfare() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [
+          {f: 523.25, t: 0.0, d: 0.15}, // C5
+          {f: 659.25, t: 0.15, d: 0.15}, // E5
+          {f: 783.99, t: 0.3, d: 0.15}, // G5
+          {f: 1046.50, t: 0.45, d: 0.4}, // C6
+          {f: 783.99, t: 0.7, d: 0.12},
+          {f: 1046.50, t: 0.85, d: 0.5}
+        ];
+
+        notes.forEach(n => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.value = n.f;
+          gain.gain.setValueAtTime(0.15, ctx.currentTime + n.t);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + n.t + n.d);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + n.t);
+          osc.stop(ctx.currentTime + n.t + n.d + 0.05);
+        });
+
+        // Add a little "sparkle" high notes
+        setTimeout(() => {
+          for (let i = 0; i < 5; i++) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 1200 + Math.random() * 800;
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + i * 0.08);
+            osc.stop(ctx.currentTime + i * 0.08 + 0.3);
+          }
+        }, 400);
+      } catch (e) {
+        console.log('Audio error', e);
+      }
+    }
+
+    // Text to speech
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate = 0.9;
+      utt.pitch = 1.1;
+      utt.volume = 1;
+      // Prefer a friendly voice
+      const voices = speechSynthesis.getVoices();
+      const preferred = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
+                       voices.find(v => v.lang.startsWith('en') && v.name.includes('Female')) ||
+                       voices.find(v => v.lang.startsWith('en'));
+      if (preferred) utt.voice = preferred;
+      speechSynthesis.speak(utt);
+    }
+
+    // ========== EVENT HANDLERS ==========
+    startBtn.addEventListener('click', () => {
+      startScreen.style.display = 'none';
+      gameStarted = true;
+      initSpeech();
+      // Load voices
+      speechSynthesis.getVoices();
+      newRound();
+    });
+
+    micBtn.addEventListener('click', () => {
+      if (!gameStarted) return;
+      if (isListening) {
+        stopListening();
+        micStatus.textContent = "Mic stopped. Tap to listen again.";
+      } else {
+        canListen = true;
+        startListening();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      level++;
+      levelEl.textContent = level;
+      newRound();
+    });
+
+    skipBtn.addEventListener('click', () => {
+      newRound();
+    });
+
+    speakBtn.addEventListener('click', () => {
+      const q = promptEl.textContent;
+      if (q) speak(q);
+    });
+
+    // Preload voices
+    if (window.speechSynthesis) {
+      speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    }
+
+    // Prevent zoom on double tap etc on mobile
+    document.addEventListener('gesturestart', e => e.preventDefault());
+  </script>
+</body>
+</html>
 
