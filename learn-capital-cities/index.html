@@ -44,6 +44,7 @@
     display: flex;
     gap: 12px;
     justify-content: center;
+    flex-wrap: wrap;
     padding: 8px 12px 12px;
   }
   .tabs button {
@@ -58,6 +59,18 @@
     opacity: 0.6;
   }
   .tabs button:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; }
+  .quiz-link {
+    font: inherit;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    font-weight: bold;
+    color: #fff;
+    background: var(--ink);
+    text-decoration: none;
+    border-radius: 14px;
+    padding: 12px 28px;
+    box-shadow: 0 4px 0 rgba(0,0,0,.25);
+  }
+  .quiz-link:focus-visible { outline: 4px solid var(--a); outline-offset: 2px; }
   #btnAL { background: var(--a); }
   #btnMZ { background: var(--b); }
   .tabs button[aria-pressed="true"] { opacity: 1; box-shadow: 0 4px 0 rgba(0,0,0,.25); }
@@ -90,6 +103,7 @@
   <div class="tabs">
     <button id="btnAL" aria-pressed="true">A – L</button>
     <button id="btnMZ" aria-pressed="false">M – Z</button>
+    <a class="quiz-link" href="Quiz.html">🎤 Take the Quiz</a>
   </div>
 
   <main>
