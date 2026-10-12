@@ -1,1 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cozy Room Decorator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+      background: #1a120b;
+      min-height: 100vh;
+      overflow: hidden;
+      color: #fff;
+      position: relative;
+    }
+
+    /* ===== ROOM ===== */
+    .room {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      transition: background 0.6s ease;
+    }
+
+    /* Walls – colour controlled by CSS variable */
+    .walls {
+      position: absolute;
+      inset: 0;
+      background: var(--wall-color, #f5e6d3);
+      transition: background 0.5s ease;
+    }
+
+    /* Subtle wall texture */
+    .walls::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 60px,
+          rgba(0,0,0,0.03) 60px,
+          rgba(0,0,0,0.03) 62px
+        );
+      pointer-events: none;
+    }
+
+    /* Ceiling */
+    .ceiling {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 12%;
+      background: linear-gradient(180deg, #e8d9c8 0%, transparent 100%);
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Floor */
+    .floor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 28%;
+      background: linear-gradient(180deg, #c4a574 0%, #a67c52 40%, #8b6914 100%);
+      z-index: 5;
+    }
+
+    .floor::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 48px,
+        rgba(0,0,0,0.12) 48px,
+        rgba(0,0,0,0.12) 50px
+      );
+      opacity: 0.7;
+    }
+
+    /* Baseboard */
+    .baseboard {
+      position: absolute;
+      bottom: 28%;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: linear-gradient(180deg, #5c4033, #3e2723);
+      z-index: 6;
+    }
+
+    /* Window */
+    .window {
+      position: absolute;
+      top: 10%;
+      right: 6%;
+      width: min(18vw, 140px);
+      height: min(26vh, 180px);
+      background: linear-gradient(180deg, #87ceeb 0%, #b0e0e6 70%, #e0f7fa 100%);
+      border: 7px solid #5d4037;
+      border-radius: 4px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.25);
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .window::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 47%, #5d4037 47%, #5d4037 53%, transparent 53%),
+        linear-gradient(180deg, transparent 47%, #5d4037 47%, #5d4037 53%, transparent 53%);
+      z-index: 2;
+    }
+
+    .window-sky {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, #87ceeb, #e0f7fa);
+    }
+
+    .window-sun {
+      position: absolute;
+      top: 15%;
+      left: 20%;
+      width: 28px;
+      height: 28px;
+      background: radial-gradient(circle, #fff9c4 0%, #ffeb3b 60%, transparent 70%);
+      border-radius: 50%;
+      box-shadow: 0 0 20px #ffeb3b;
+    }
+
+    /* Simple fireplace on left */
+    .fireplace {
+      position: absolute;
+      bottom: 28%;
+      left: 3%;
+      width: min(16vw, 120px);
+      height: min(22vh, 160px);
+      background: linear-gradient(90deg, #5d4037, #6d4c41, #5d4037);
+      border-radius: 6px 6px 0 0;
+      z-index: 8;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+
+    .fireplace::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(0,0,0,0.2) 14px, rgba(0,0,0,0.2) 16px),
+        repeating-linear-gradient(90deg, transparent, transparent 22px, rgba(0,0,0,0.12) 22px, rgba(0,0,0,0.12) 24px);
+      border-radius: 6px 6px 0 0;
+      opacity: 0.6;
+    }
+
+    .fire-box {
+      position: absolute;
+      bottom: 0;
+      left: 15%;
+      width: 70%;
+      height: 45%;
+      background: #1a0a00;
+      border-radius: 4px 4px 0 0;
+      overflow: hidden;
+    }
+
+    .flame {
+      position: absolute;
+      bottom: 0;
+      border-radius: 50% 50% 20% 20%;
+      animation: flicker 0.45s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+    }
+    .f1 { left: 15%; width: 30%; height: 70%; background: radial-gradient(ellipse at bottom, #ff0, #f80 50%, transparent); }
+    .f2 { left: 35%; width: 35%; height: 90%; background: radial-gradient(ellipse at bottom, #ff4, #f60 50%, #c00 80%, transparent); animation-delay: 0.1s; }
+    .f3 { left: 55%; width: 28%; height: 65%; background: radial-gradient(ellipse at bottom, #ff8, #f90 50%, transparent); animation-delay: 0.2s; }
+
+    @keyframes flicker {
+      0% { transform: scaleY(1) scaleX(1); opacity: 0.85; }
+      100% { transform: scaleY(1.12) scaleX(0.92); opacity: 1; }
+    }
+
+    /* Drop zone = whole room floor + lower walls */
+    .drop-zone {
+      position: absolute;
+      top: 8%;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      cursor: pointer;
+    }
+
+    /* Placed furniture */
+    .placed-item {
+      position: absolute;
+      font-size: 2.4rem;
+      cursor: grab;
+      z-index: 25;
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.35));
+      touch-action: none;
+      transition: transform 0.15s ease, filter 0.3s;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .placed-item:active {
+      cursor: grabbing;
+      transform: scale(1.2);
+    }
+
+    .placed-item .label {
+      display: block;
+      font-size: 0.55rem;
+      color: #333;
+      background: rgba(255,255,255,0.85);
+      border-radius: 6px;
+      padding: 1px 4px;
+      margin-top: 2px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* Colour tint overlay for furniture */
+    .placed-item.tinted {
+      /* filter applied via JS */
+    }
+
+    /* ===== UI ===== */
+    header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding: 8px 6px 4px;
+      z-index: 60;
+      background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%);
+    }
+
+    h1 {
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      text-shadow: 0 0 10px #ffd700, 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .subtitle {
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      opacity: 0.95;
+    }
+
+    .tip {
+      position: absolute;
+      top: 58px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 215, 0, 0.95);
+      color: #1a1a2e;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      z-index: 65;
+      white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+      animation: tipPulse 2s ease infinite;
+    }
+
+    @keyframes tipPulse {
+      0%, 100% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.04); }
+    }
+
+    .tip.hidden { display: none; }
+
+    /* Bottom tray */
+    .tray {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, rgba(20,12,8,0.88) 0%, rgba(10,6,4,0.96) 100%);
+      border-top: 3px solid rgba(255, 215, 0, 0.35);
+      z-index: 70;
+      padding: 8px 4px 10px;
+      max-height: 42vh;
+      overflow-y: auto;
+    }
+
+    .tray-section {
+      margin-bottom: 8px;
+    }
+
+    .tray-title {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #ffd700;
+      margin-bottom: 5px;
+    }
+
+    .color-row, .furniture-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 4px;
+    }
+
+    .color-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .color-btn:hover, .color-btn:active {
+      transform: scale(1.18);
+    }
+
+    .color-btn.selected {
+      border-color: #ffd700;
+      box-shadow: 0 0 12px gold;
+      transform: scale(1.12);
+    }
+
+    .furn-btn {
+      width: 52px;
+      height: 52px;
+      font-size: 1.7rem;
+      background: rgba(255,255,255,0.12);
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      touch-action: manipulation;
+      line-height: 1.1;
+    }
+
+    .furn-btn small {
+      font-size: 0.45rem;
+      color: #ccc;
+      max-width: 48px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .furn-btn:hover, .furn-btn:active {
+      transform: scale(1.12);
+      background: rgba(255,255,255,0.25);
+      border-color: #ffd700;
+    }
+
+    .furn-btn.selected {
+      background: rgba(255, 215, 0, 0.35);
+      border-color: #ffd700;
+      box-shadow: 0 0 14px gold;
+      transform: scale(1.08);
+    }
+
+    .counter {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #a0e0ff;
+      margin-top: 4px;
+    }
+
+    .counter span {
+      color: #ffd700;
+      font-weight: bold;
+    }
+
+    /* Celebration */
+    .celebration {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .celebration.active {
+      display: flex;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .celebration h2 {
+      font-size: clamp(1.8rem, 7vw, 3rem);
+      color: #ffd700;
+      text-shadow: 0 0 20px #ff6b6b;
+      animation: bounce 0.8s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .celebration p {
+      font-size: 1.2rem;
+      margin: 12px 0 20px;
+    }
+
+    .play-again {
+      background: linear-gradient(135deg, #ff6b6b, #ffd700);
+      color: #1a1a2e;
+      border: none;
+      padding: 14px 32px;
+      font-size: 1.2rem;
+      font-family: inherit;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 18px rgba(255,107,107,0.5);
+    }
+
+    .play-again:active { transform: scale(1.06); }
+
+    #confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1999;
+    }
+
+    /* Narrator indicator */
+    .speaking {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      z-index: 80;
+      display: none;
+    }
+
+    .speaking.show { display: block; }
+
+    @media (max-height: 700px) {
+      .tray { max-height: 38vh; }
+      .furn-btn { width: 46px; height: 46px; font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="room" id="room">
+    <div class="walls" id="walls"></div>
+    <div class="ceiling"></div>
+    <div class="window">
+      <div class="window-sky"></div>
+      <div class="window-sun"></div>
+    </div>
+    <div class="fireplace">
+      <div class="fire-box">
+        <div class="flame f1"></div>
+        <div class="flame f2"></div>
+        <div class="flame f3"></div>
+      </div>
+    </div>
+    <div class="floor"></div>
+    <div class="baseboard"></div>
+    <div class="drop-zone" id="dropZone"></div>
+  </div>
+
+  <canvas id="confetti"></canvas>
+
+  <header>
+    <h1>🏠 Cozy Room Decorator 🏠</h1>
+    <p class="subtitle">Pick furniture & colours, then tap the room!</p>
+  </header>
+
+  <div class="tip" id="tip">👆 Choose a colour or furniture below!</div>
+  <div class="speaking" id="speaking">🗣️ ...</div>
+
+  <div class="tray">
+    <!-- Wall colours -->
+    <div class="tray-section">
+      <div class="tray-title">🎨 Paint the Walls</div>
+      <div class="color-row" id="wallColors"></div>
+    </div>
+
+    <!-- Furniture colours -->
+    <div class="tray-section">
+      <div class="tray-title">🖌️ Furniture Colour</div>
+      <div class="color-row" id="furnColors"></div>
+    </div>
+
+    <!-- Furniture items -->
+    <div class="tray-section">
+      <div class="tray-title">🛋️ Furniture & Fun Things</div>
+      <div class="furniture-row" id="furnGrid"></div>
+    </div>
+
+    <div class="counter">Items placed: <span id="count">0</span> · Make it cozy!</div>
+  </div>
+
+  <div class="celebration" id="celebration">
+    <div style="font-size:3.5rem;">🎉</div>
+    <h2>What a Cozy Room!</h2>
+    <p>You made a wonderful home! 🌟</p>
+    <button class="play-again" id="playAgain">Decorate Again! 🔄</button>
+  </div>
+
+  <script>
+    // ===== DATA =====
+    const WALL_COLORS = [
+      { name: 'Warm Cream', hex: '#f5e6d3' },
+      { name: 'Soft Blue', hex: '#b3d4e8' },
+      { name: 'Mint Green', hex: '#c8e6c9' },
+      { name: 'Blush Pink', hex: '#f8c8d8' },
+      { name: 'Sunny Yellow', hex: '#fff3b0' },
+      { name: 'Lavender', hex: '#d4c4e8' },
+      { name: 'Peach', hex: '#ffccbc' },
+      { name: 'Sky Blue', hex: '#a8d8ea' },
+      { name: 'Sage', hex: '#b2c9ab' },
+      { name: 'Light Grey', hex: '#e0e0e0' }
+    ];
+
+    const FURN_COLORS = [
+      { name: 'Natural', hex: null, filter: 'none' },
+      { name: 'Red', hex: '#e53935', filter: 'sepia(0.4) saturate(3) hue-rotate(-20deg)' },
+      { name: 'Blue', hex: '#1e88e5', filter: 'sepia(0.5) saturate(2.5) hue-rotate(170deg)' },
+      { name: 'Green', hex: '#43a047', filter: 'sepia(0.4) saturate(2.5) hue-rotate(70deg)' },
+      { name: 'Yellow', hex: '#fdd835', filter: 'sepia(0.6) saturate(2) hue-rotate(5deg)' },
+      { name: 'Purple', hex: '#8e24aa', filter: 'sepia(0.5) saturate(2.5) hue-rotate(250deg)' },
+      { name: 'Orange', hex: '#fb8c00', filter: 'sepia(0.5) saturate(3) hue-rotate(350deg)' },
+      { name: 'Pink', hex: '#ec407a', filter: 'sepia(0.4) saturate(2.5) hue-rotate(300deg)' },
+      { name: 'Brown', hex: '#6d4c41', filter: 'sepia(0.8) saturate(1.2)' },
+      { name: 'White', hex: '#fafafa', filter: 'brightness(1.4) contrast(0.9)' }
+    ];
+
+    const FURNITURE = [
+      { emoji: '🛋️', name: 'sofa' },
+      { emoji: '🪑', name: 'chair' },
+      { emoji: '🛏️', name: 'bed' },
+      { emoji: '🪞', name: 'mirror' },
+      { emoji: '🖼️', name: 'picture' },
+      { emoji: '🪴', name: 'plant' },
+      { emoji: '🪔', name: 'lamp' },
+      { emoji: '🕰️', name: 'clock' },
+      { emoji: '📺', name: 'television' },
+      { emoji: '📚', name: 'bookshelf' },
+      { emoji: '🧸', name: 'teddy bear' },
+      { emoji: '🧺', name: 'basket' },
+      { emoji: '🪟', name: 'curtains' },
+      { emoji: '🪔', name: 'floor lamp' },
+      { emoji: '🪑', name: 'stool' },
+      { emoji: '🛋️', name: 'loveseat' },
+      { emoji: '🪴', name: 'flower pot' },
+      { emoji: '🖼️', name: 'painting' },
+      { emoji: '🧸', name: 'toy' },
+      { emoji: '🕯️', name: 'candle' },
+      { emoji: '🧵', name: 'cushion' },
+      { emoji: '🧺', name: 'laundry basket' },
+      { emoji: '📻', name: 'radio' },
+      { emoji: '🎸', name: 'guitar' },
+      { emoji: '🖼️', name: 'wall art' },
+      { emoji: '🪴', name: 'big plant' },
+      { emoji: '🛏️', name: 'bunk bed' },
+      { emoji: '🪑', name: 'rocking chair' },
+      { emoji: '🪞', name: 'full-length mirror' },
+      { emoji: '📚', name: 'book stack' },
+      { emoji: '🧸', name: 'stuffed animal' },
+      { emoji: '🪔', name: 'table lamp' },
+      { emoji: '🧺', name: 'toy box' },
+      { emoji: '🕰️', name: 'wall clock' },
+      { emoji: '🪴', name: 'hanging plant' },
+      { emoji: '🖼️', name: 'family photo' }
+    ];
+
+    // ===== STATE =====
+    let selectedFurn = null;
+    let selectedFurnColor = FURN_COLORS[0];
+    let selectedWallColor = WALL_COLORS[0];
+    let placedCount = 0;
+    let isCelebrating = false;
+    let placedElements = [];
+    const GOAL = 15;
+
+    // ===== DOM =====
+    const walls = document.getElementById('walls');
+    const dropZone = document.getElementById('dropZone');
+    const tip = document.getElementById('tip');
+    const speakingEl = document.getElementById('speaking');
+    const countEl = document.getElementById('count');
+    const celebration = document.getElementById('celebration');
+    const playAgainBtn = document.getElementById('playAgain');
+    const confettiCanvas = document.getElementById('confetti');
+    const ctx = confettiCanvas.getContext('2d');
+
+    // ===== BUILD UI =====
+    // Wall colours
+    WALL_COLORS.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'color-btn' + (i === 0 ? ' selected' : '');
+      btn.style.background = c.hex;
+      btn.title = c.name;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#wallColors .color-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedWallColor = c;
+        walls.style.setProperty('--wall-color', c.hex);
+        walls.style.background = c.hex;
+        speak(`Walls painted ${c.name}`);
+        tip.textContent = 'Walls changed! Now pick furniture 👆';
+        tip.classList.remove('hidden');
+      });
+      document.getElementById('wallColors').appendChild(btn);
+    });
+
+    // Furniture colours
+    FURN_COLORS.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'color-btn' + (i === 0 ? ' selected' : '');
+      btn.style.background = c.hex || '#d7ccc8';
+      btn.title = c.name;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#furnColors .color-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedFurnColor = c;
+        tip.textContent = `Furniture colour: ${c.name}. Pick an item!`;
+        tip.classList.remove('hidden');
+      });
+      document.getElementById('furnColors').appendChild(btn);
+    });
+
+    // Furniture buttons
+    FURNITURE.forEach((item, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'furn-btn';
+      btn.innerHTML = `${item.emoji}<small>${item.name}</small>`;
+      btn.title = item.name;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.furn-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedFurn = item;
+        tip.textContent = `Tap the room to place the ${item.name}!`;
+        tip.classList.remove('hidden');
+      });
+      document.getElementById('furnGrid').appendChild(btn);
+    });
+
+    // ===== SPEECH =====
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.95;
+      utter.pitch = 1.1;
+      utter.volume = 1;
+      // Prefer a friendly voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => /en-GB|en-US|female|samantha|karen|moira/i.test(v.name)) || voices[0];
+      if (preferred) utter.voice = preferred;
+
+      speakingEl.textContent = '🗣️ ' + text;
+      speakingEl.classList.add('show');
+      utter.onend = () => speakingEl.classList.remove('show');
+      window.speechSynthesis.speak(utter);
+    }
+
+    // Load voices (some browsers need this)
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = () => {};
+      speechSynthesis.getVoices();
+    }
+
+    // ===== PLACE ITEM =====
+    function placeAt(clientX, clientY) {
+      if (!selectedFurn || isCelebrating) return;
+      const rect = dropZone.getBoundingClientRect();
+      let x = clientX - rect.left;
+      let y = clientY - rect.top;
+
+      // Keep roughly inside room (not too high into ceiling)
+      if (y < 30) y = 30;
+
+      const el = document.createElement('div');
+      el.className = 'placed-item';
+      el.innerHTML = `${selectedFurn.emoji}<span class="label">${selectedFurn.name}</span>`;
+      el.style.left = (x - 24) + 'px';
+      el.style.top = (y - 24) + 'px';
+      if (selectedFurnColor.filter && selectedFurnColor.filter !== 'none') {
+        el.style.filter = selectedFurnColor.filter + ' drop-shadow(0 3px 5px rgba(0,0,0,0.35))';
+      }
+
+      makeDraggable(el);
+      dropZone.appendChild(el);
+      placedElements.push(el);
+      placedCount++;
+      countEl.textContent = placedCount;
+
+      // Narrate
+      const colorPart = selectedFurnColor.name === 'Natural' ? '' : selectedFurnColor.name + ' ';
+      speak(`You placed a ${colorPart}${selectedFurn.name}`);
+
+      // Clear selection
+      selectedFurn = null;
+      document.querySelectorAll('.furn-btn').forEach(b => b.classList.remove('selected'));
+      tip.classList.add('hidden');
+
+      // Pop animation
+      el.style.transform = 'scale(0)';
+      requestAnimationFrame(() => {
+        el.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        el.style.transform = 'scale(1)';
+      });
+
+      if (placedCount >= GOAL) {
+        setTimeout(startCelebration, 800);
+      }
+    }
+
+    dropZone.addEventListener('click', e => {
+      if (e.target.closest('.placed-item')) return;
+      placeAt(e.clientX, e.clientY);
+    });
+
+    dropZone.addEventListener('touchend', e => {
+      if (e.target.closest('.placed-item')) return;
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      placeAt(t.clientX, t.clientY);
+    }, { passive: false });
+
+    function makeDraggable(el) {
+      let startX, startY, origX, origY;
+      const onStart = (cx, cy) => {
+        if (isCelebrating) return;
+        startX = cx; startY = cy;
+        origX = parseFloat(el.style.left);
+        origY = parseFloat(el.style.top);
+      };
+      const onMove = (cx, cy) => {
+        if (isCelebrating) return;
+        el.style.left = (origX + (cx - startX)) + 'px';
+        el.style.top = (origY + (cy - startY)) + 'px';
+      };
+
+      el.addEventListener('touchstart', e => {
+        const t = e.touches[0];
+        onStart(t.clientX, t.clientY);
+      }, { passive: true });
+      el.addEventListener('touchmove', e => {
+        e.preventDefault();
+        const t = e.touches[0];
+        onMove(t.clientX, t.clientY);
+      }, { passive: false });
+
+      // Also allow mouse drag for desktop
+      el.addEventListener('mousedown', e => {
+        e.preventDefault();
+        onStart(e.clientX, e.clientY);
+        const move = ev => onMove(ev.clientX, ev.clientY);
+        const up = () => {
+          document.removeEventListener('mousemove', move);
+          document.removeEventListener('mouseup', up);
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+      });
+    }
+
+    // ===== CELEBRATION =====
+    function startCelebration() {
+      if (isCelebrating) return;
+      isCelebrating = true;
+      celebration.classList.add('active');
+      speak('What a cozy room! You did an amazing job!');
+      launchConfetti();
+    }
+
+    playAgainBtn.addEventListener('click', () => {
+      isCelebrating = false;
+      placedCount = 0;
+      countEl.textContent = '0';
+      celebration.classList.remove('active');
+      placedElements.forEach(el => el.remove());
+      placedElements = [];
+      stopConfetti();
+      tip.textContent = '👆 Choose a colour or furniture below!';
+      tip.classList.remove('hidden');
+      selectedFurn = null;
+      document.querySelectorAll('.furn-btn').forEach(b => b.classList.remove('selected'));
+    });
+
+    // ===== CONFETTI =====
+    let confettiParticles = [];
+    let confettiAnimId = null;
+
+    function launchConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+      confettiParticles = [];
+      const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa', '#f472b6', '#34d399', '#60a5fa'];
+      for (let i = 0; i < 160; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          w: 6 + Math.random() * 8,
+          h: 4 + Math.random() * 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speed: 2 + Math.random() * 4,
+          rot: Math.random() * 360,
+          rotSpeed: -4 + Math.random() * 8,
+          sway: Math.random() * 2
+        });
+      }
+      animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiParticles.forEach(p => {
+        p.y += p.speed;
+        p.x += Math.sin(p.y * 0.02) * p.sway;
+        p.rot += p.rotSpeed;
+        if (p.y > confettiCanvas.height + 20) {
+          p.y = -20;
+          p.x = Math.random() * confettiCanvas.width;
+        }
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+      confettiAnimId = requestAnimationFrame(animateConfetti);
+    }
+
+    function stopConfetti() {
+      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+      confettiAnimId = null;
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    window.addEventListener('resize', () => {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    });
+
+    // Initial wall colour
+    walls.style.background = selectedWallColor.hex;
+  </script>
+</body>
+</html>
 
