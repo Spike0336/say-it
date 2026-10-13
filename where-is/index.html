@@ -192,7 +192,6 @@
   <h1>Where Is?</h1>
   <p class="subtitle">Look at the picture and tell me where they are!</p>
 
-  <!-- START SCREEN -->
   <div class="card" id="start-screen">
     <p style="font-size:1.2rem; margin-bottom:16px;">
       A fun game for little explorers!<br>
@@ -203,11 +202,10 @@
     <button class="big-btn" id="start-btn">Start Game!</button>
   </div>
 
-  <!-- GAME SCREEN -->
   <div class="card" id="game-screen">
     <div class="score-bar">
       <span>Score: <span id="score">0</span></span>
-      <span><span id="current">1</span> / <span id="total">15</span></span>
+      <span><span id="current">1</span> / <span id="total">56</span></span>
     </div>
     <div class="progress"><div class="progress-fill" id="progress"></div></div>
 
@@ -232,122 +230,84 @@
     <button class="big-btn green" id="next-btn" style="display:none;">Next Picture →</button>
   </div>
 
-  <!-- END SCREEN -->
   <div class="card" id="end-screen" style="display:none;">
     <div class="star">⭐</div>
     <h2 style="margin:12px 0; color:var(--pink);">Well done!</h2>
-    <p style="font-size:1.3rem;">You scored <strong id="final-score">0</strong> out of <span id="final-total">15</span>!</p>
+    <p style="font-size:1.3rem;">You scored <strong id="final-score">0</strong> out of <span id="final-total">56</span>!</p>
     <p id="end-message" style="margin:12px 0;"></p>
     <button class="big-btn" id="replay-btn">Play Again!</button>
   </div>
 
   <footer>
-    Made with ❤️ for curious little minds · British narrator · Works offline after first load
+    Made with ❤️ for curious little minds · British narrator · All 56 pictures included
   </footer>
 
   <script>
-    // ========== GAME DATA ==========
     const rounds = [
-      {
-        img: "images/tiger.jpg",
-        subject: "tiger",
-        question: "Where is the tiger?",
-        answers: ["deck chair", "deckchair", "chair", "cruise ship", "cruise", "ship", "sun lounger", "lounger"]
-      },
-      {
-        img: "images/bear.jpg",
-        subject: "bear",
-        question: "Where is the bear?",
-        answers: ["bed", "in bed", "cuddle corner", "soft play", "sleeping"]
-      },
-      {
-        img: "images/cat.jpg",
-        subject: "cat",
-        question: "Where is the cat?",
-        answers: ["teacup", "tea cup", "cup", "in the cup"]
-      },
-      {
-        img: "images/camel.jpg",
-        subject: "camel",
-        question: "Where is the camel?",
-        answers: ["bath", "kitchen", "pool", "splash", "bathtub", "paddling pool"]
-      },
-      {
-        img: "images/dinosaur.jpg",
-        subject: "dinosaur",
-        question: "Where is the dinosaur?",
-        answers: ["sock", "in the sock", "in a sock", "knitted sock"]
-      },
-      {
-        img: "images/frog.jpg",
-        subject: "frog",
-        question: "Where is the frog?",
-        answers: ["pizza", "on the pizza", "on a pizza"]
-      },
-      {
-        img: "images/giraffe.jpg",
-        subject: "giraffe",
-        question: "Where is the giraffe?",
-        answers: ["bath", "bathtub", "tub", "in the bath"]
-      },
-      {
-        img: "images/ghost.jpg",
-        subject: "ghost",
-        question: "Where is the ghost?",
-        answers: ["cookie jar", "jar", "biscuit jar", "cooky jar"]
-      },
-      {
-        img: "images/unicorn.jpg",
-        subject: "unicorn",
-        question: "Where is the unicorn?",
-        answers: ["toast", "peanut butter", "jam", "bread", "on the toast"]
-      },
-      {
-        img: "images/vampire.jpg",
-        subject: "vampire",
-        question: "Where is the vampire?",
-        answers: ["bathroom", "brushing", "teeth", "sink", "mirror"]
-      },
-      {
-        img: "images/elephant.jpg",
-        subject: "elephant",
-        question: "Where is the elephant?",
-        answers: ["shoe", "in the shoe", "in a shoe", "trainer", "sneaker"]
-      },
-      {
-        img: "images/bunny.jpg",
-        subject: "bunny",
-        question: "Where is the bunny?",
-        answers: ["hat", "magic hat", "top hat", "coming out of the hat"]
-      },
-      {
-        img: "images/monkey.jpg",
-        subject: "monkey",
-        question: "Where is the monkey?",
-        answers: ["under the bed", "under bed", "beneath the bed"]
-      },
-      {
-        img: "images/flamingo.jpg",
-        subject: "flamingo",
-        question: "Where is the flamingo?",
-        answers: ["ice", "skating", "ice skating", "frozen", "pond", "ice rink"]
-      },
-      {
-        img: "images/zebra.jpg",
-        subject: "zebra",
-        question: "Where is the zebra?",
-        answers: ["underwater", "under water", "sea", "ocean", "tennis", "playing tennis"]
-      }
+      { img: "images/alien.jpg", subject: "alien", question: "Where is the alien?", answers: ["watermelon", "in the watermelon", "in a watermelon", "melon"] },
+      { img: "images/anteater.jpg", subject: "anteater", question: "Where is the anteater?", answers: ["story", "reading", "library", "book", "termite town", "with the babies"] },
+      { img: "images/bear_bed.jpg", subject: "bear", question: "Where is the bear?", answers: ["bed", "in bed", "cuddle corner", "soft play", "sleeping", "asleep"] },
+      { img: "images/bear_bike.jpg", subject: "bear", question: "Where is the bear?", answers: ["bike", "bicycle", "on the bike", "campfire", "forest", "adventure"] },
+      { img: "images/beetles.jpg", subject: "beetles", question: "Where are the beetles?", answers: ["zebra crossing", "crossing", "road", "street", "playing guitar", "guitars"] },
+      { img: "images/boy_treasure.jpg", subject: "boy", question: "Where is the boy?", answers: ["treasure", "cave", "egyptian", "pyramid", "gold", "tomb"] },
+      { img: "images/boy_vacuum.jpg", subject: "boy", question: "Where is the boy?", answers: ["hoovering", "vacuum", "carpet", "cleaning", "with the frog", "living room"] },
+      { img: "images/boy_whale.jpg", subject: "boy", question: "Where is the boy?", answers: ["whale", "spout", "on the whale", "water", "sea", "ocean"] },
+      { img: "images/bunny.jpg", subject: "bunny", question: "Where is the bunny?", answers: ["hat", "magic hat", "top hat", "coming out of the hat", "out of the hat"] },
+      { img: "images/camel.jpg", subject: "camel", question: "Where is the camel?", answers: ["bath", "kitchen", "pool", "splash", "bathtub", "paddling pool", "splash zone"] },
+      { img: "images/cat_car.jpg", subject: "cat", question: "Where is the cat?", answers: ["car", "driving", "tunnel", "out of the tunnel", "cattery"] },
+      { img: "images/cat_teacup.jpg", subject: "cat", question: "Where is the cat?", answers: ["teacup", "tea cup", "cup", "in the cup", "in a teacup"] },
+      { img: "images/chicken.jpg", subject: "chicken", question: "Where is the chicken?", answers: ["zoo", "guitar", "playing guitar", "stage", "petting zoo", "music"] },
+      { img: "images/dinosaur.jpg", subject: "dinosaur", question: "Where is the dinosaur?", answers: ["sock", "in the sock", "in a sock", "knitted sock"] },
+      { img: "images/dog_cake.jpg", subject: "dog", question: "Where is the dog?", answers: ["cake", "baking", "museum", "bakery", "cooking"] },
+      { img: "images/dog_pipe.jpg", subject: "dog", question: "Where is the dog?", answers: ["drain pipe", "pipe", "climbing", "up the pipe", "chasing the mouse"] },
+      { img: "images/dog_rainbow.jpg", subject: "dog", question: "Where is the dog?", answers: ["rainbow", "on the rainbow", "running on the rainbow", "sky"] },
+      { img: "images/dolphin.jpg", subject: "dolphin", question: "Where is the dolphin?", answers: ["sea", "ocean", "with the sharks", "underwater", "swimming"] },
+      { img: "images/duck.jpg", subject: "duck", question: "Where is the duck?", answers: ["ambulance", "driving", "snow", "winter", "race rescue"] },
+      { img: "images/elephant_shoe.jpg", subject: "elephant", question: "Where is the elephant?", answers: ["shoe", "in the shoe", "in a shoe", "trainer", "sneaker", "washing"] },
+      { img: "images/elephant_tractor.jpg", subject: "elephant", question: "Where is the elephant?", answers: ["tractor", "driving", "sunflowers", "field", "farm"] },
+      { img: "images/flamingo.jpg", subject: "flamingo", question: "Where is the flamingo?", answers: ["ice", "skating", "ice skating", "frozen", "pond", "ice rink"] },
+      { img: "images/fox_football.jpg", subject: "fox", question: "Where is the fox?", answers: ["island", "football", "playing football", "beach", "soccer"] },
+      { img: "images/fox_police.jpg", subject: "fox", question: "Where is the fox?", answers: ["police", "policeman", "arresting", "pigs", "three little pigs"] },
+      { img: "images/frog_pizza.jpg", subject: "frog", question: "Where is the frog?", answers: ["pizza", "on the pizza", "on a pizza"] },
+      { img: "images/frogs_bump.jpg", subject: "frogs", question: "Where are the frogs?", answers: ["pond", "bumping", "heads", "bumping heads", "lily pad"] },
+      { img: "images/ghost.jpg", subject: "ghost", question: "Where is the ghost?", answers: ["cookie jar", "jar", "biscuit jar", "cooky jar"] },
+      { img: "images/giraffe_bath.jpg", subject: "giraffe", question: "Where is the giraffe?", answers: ["bath", "bathtub", "tub", "in the bath"] },
+      { img: "images/giraffe_golf.jpg", subject: "giraffe", question: "Where is the giraffe?", answers: ["golf", "minigolf", "play park", "playing golf", "park"] },
+      { img: "images/girl_castle.jpg", subject: "girl", question: "Where is the girl?", answers: ["castle", "brushing", "hair", "mirror", "vanity"] },
+      { img: "images/girl_rain.jpg", subject: "girl", question: "Where is the girl?", answers: ["rain", "dancing", "bull", "farm", "puddle"] },
+      { img: "images/gorilla.jpg", subject: "gorilla", question: "Where is the gorilla?", answers: ["moon", "burgers", "cooking", "bbq", "space", "grilling"] },
+      { img: "images/grasshopper.jpg", subject: "grasshopper", question: "Where is the grasshopper?", answers: ["brussels sprout", "sprout", "skateboard", "skateboarding", "bridge"] },
+      { img: "images/hammer.jpg", subject: "hammer", question: "Where is the hammer?", answers: ["tree", "rope", "tying", "park", "playground"] },
+      { img: "images/hippo.jpg", subject: "hippo", question: "Where is the hippo?", answers: ["train", "on the train", "toytown", "railway"] },
+      { img: "images/lady_bathroom.jpg", subject: "lady", question: "Where is the lady?", answers: ["bathroom", "cleaning", "mopping", "floor", "mop"] },
+      { img: "images/lamb_duck.jpg", subject: "lamb", question: "Where is the lamb?", answers: ["toilet", "potty", "duck", "with the duck", "bathroom"] },
+      { img: "images/lion_court.jpg", subject: "lion", question: "Where is the lion?", answers: ["court", "judge", "monkey", "dock", "courtroom"] },
+      { img: "images/lion_book.jpg", subject: "lion", question: "Where is the lion?", answers: ["book", "storybook", "jumping out", "out of the book", "story"] },
+      { img: "images/mermaid.jpg", subject: "mermaid", question: "Where is the mermaid?", answers: ["cactus", "hugging", "desert", "hugging a cactus"] },
+      { img: "images/monkey_dino.jpg", subject: "monkey", question: "Where is the monkey?", answers: ["dinosaur", "on the dinosaur", "riding", "dino"] },
+      { img: "images/monkey_eastbourne.jpg", subject: "monkey", question: "Where is the monkey?", answers: ["eastbourne", "pier", "beach", "sea", "throwing"] },
+      { img: "images/monkey_bed.jpg", subject: "monkey", question: "Where is the monkey?", answers: ["under the bed", "under bed", "beneath the bed"] },
+      { img: "images/penguin.jpg", subject: "penguin", question: "Where is the penguin?", answers: ["cloud", "sliding", "sky", "on a cloud", "planes"] },
+      { img: "images/sailor.jpg", subject: "sailor", question: "Where is the sailor?", answers: ["darts", "barn", "playing darts", "farm"] },
+      { img: "images/skunk.jpg", subject: "skunk", question: "Where is the skunk?", answers: ["slide", "winter", "snow", "on the slide"] },
+      { img: "images/soldier.jpg", subject: "soldier", question: "Where is the soldier?", answers: ["mountain", "comic", "reading", "up a mountain"] },
+      { img: "images/spider.jpg", subject: "spider", question: "Where is the spider?", answers: ["violins", "stage", "playing", "theatre", "concert"] },
+      { img: "images/squirrel.jpg", subject: "squirrel", question: "Where is the squirrel?", answers: ["crocodile", "safari", "throwing", "donut", "park"] },
+      { img: "images/stick_insect.jpg", subject: "stick insect", question: "Where is the stick insect?", answers: ["guitar", "playing guitar", "road", "school"] },
+      { img: "images/superhero.jpg", subject: "superhero", question: "Where is the superhero?", answers: ["moon", "cheese", "eating", "lunar", "space"] },
+      { img: "images/tiger.jpg", subject: "tiger", question: "Where is the tiger?", answers: ["deck chair", "deckchair", "chair", "cruise", "ship", "cruise ship", "lounger"] },
+      { img: "images/unicorn.jpg", subject: "unicorn", question: "Where is the unicorn?", answers: ["toast", "peanut butter", "jam", "bread", "on the toast"] },
+      { img: "images/vampire.jpg", subject: "vampire", question: "Where is the vampire?", answers: ["bathroom", "brushing", "teeth", "sink", "mirror"] },
+      { img: "images/witch.jpg", subject: "witch", question: "Where is the witch?", answers: ["oven", "chicken", "cooking", "kitchen"] },
+      { img: "images/zebra.jpg", subject: "zebra", question: "Where is the zebra?", answers: ["underwater", "under water", "sea", "ocean", "tennis", "playing tennis"] }
     ];
 
-    // ========== STATE ==========
     let currentIndex = 0;
     let score = 0;
     let recognition = null;
     let isListening = false;
     let hasAnswered = false;
 
-    // ========== DOM ==========
     const startScreen = document.getElementById('start-screen');
     const gameScreen = document.getElementById('game-screen');
     const endScreen = document.getElementById('end-screen');
@@ -369,7 +329,6 @@
     totalEl.textContent = rounds.length;
     document.getElementById('final-total').textContent = rounds.length;
 
-    // ========== SPEECH SYNTHESIS (British female narrator) ==========
     function speak(text, onEnd) {
       if (!window.speechSynthesis) {
         if (onEnd) onEnd();
@@ -381,7 +340,6 @@
       u.rate = 0.92;
       u.pitch = 1.05;
 
-      // Prefer a British female voice if available
       const voices = speechSynthesis.getVoices();
       const preferred = voices.find(v =>
         v.lang.startsWith('en-GB') && /female|woman|girl|samantha|karen|moira|fiona|serena|victoria/i.test(v.name)
@@ -394,12 +352,10 @@
       speechSynthesis.speak(u);
     }
 
-    // Load voices (Chrome needs this)
     if (speechSynthesis.onvoiceschanged !== undefined) {
       speechSynthesis.onvoiceschanged = () => {};
     }
 
-    // ========== SPEECH RECOGNITION ==========
     function initRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -444,7 +400,6 @@
       return rec;
     }
 
-    // ========== ANSWER CHECKING ==========
     function normalize(str) {
       return str.toLowerCase()
         .replace(/[^\w\s]/g, ' ')
@@ -471,15 +426,14 @@
           nextBtn.style.display = 'inline-block';
         });
       } else {
-        feedback.innerHTML = `<span class="wrong">Not quite…</span><br><small>The ${round.subject} is ${round.answers[0]}!</small>`;
-        speak(`Not quite. The ${round.subject} is ${round.answers[0]}.`, () => {
+        feedback.innerHTML = '<span class="wrong">Not quite…</span><br><small>Try: ' + round.answers[0] + '</small>';
+        speak("Not quite. The " + round.subject + " is " + round.answers[0] + ".", () => {
           nextBtn.style.display = 'inline-block';
         });
       }
       micStatus.textContent = "";
     }
 
-    // ========== GAME FLOW ==========
     function showRound() {
       hasAnswered = false;
       const round = rounds[currentIndex];
@@ -497,10 +451,8 @@
       currentEl.textContent = currentIndex + 1;
       progress.style.width = ((currentIndex) / rounds.length * 100) + '%';
 
-      // Speak the question after a short delay so the picture is visible
       setTimeout(() => {
         speak(round.question, () => {
-          // Auto-start listening after the question is spoken
           if (recognition && !hasAnswered) {
             try { recognition.start(); } catch(e) {}
           }
@@ -528,7 +480,7 @@
       else if (pct >= 40) msg = "Good try! Keep practising and you'll get even better!";
       else msg = "Nice effort! Have another go and see if you can find more!";
       document.getElementById('end-message').textContent = msg;
-      speak(`You scored ${score} out of ${rounds.length}. ${msg}`);
+      speak("You scored " + score + " out of " + rounds.length + ". " + msg);
     }
 
     function startGame() {
@@ -542,7 +494,6 @@
       showRound();
     }
 
-    // ========== EVENT LISTENERS ==========
     document.getElementById('start-btn').addEventListener('click', startGame);
     document.getElementById('replay-btn').addEventListener('click', startGame);
 
@@ -578,7 +529,6 @@
 
     nextBtn.addEventListener('click', nextRound);
 
-    // Prevent zoom on double-tap etc. for mobile
     document.addEventListener('gesturestart', e => e.preventDefault());
   </script>
 </body>
