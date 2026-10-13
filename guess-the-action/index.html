@@ -1,1 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guess What They're Doing! 🎤</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Comic+Neue:wght@700&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d4fc79 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      color: #333;
+      overflow-x: hidden;
+    }
+    
+    h1 {
+      font-family: 'Comic Neue', cursive;
+      font-size: clamp(1.8rem, 6vw, 3rem);
+      color: #ff6b6b;
+      text-shadow: 3px 3px 0 #fff, 5px 5px 0 rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: #5a5a5a;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+    
+    .toggle-box {
+      background: white;
+      border-radius: 50px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      font-weight: 600;
+    }
+    
+    .toggle {
+      position: relative;
+      width: 56px;
+      height: 30px;
+      background: #ccc;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .toggle.on {
+      background: #4ecdc4;
+    }
+    
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .toggle.on::after {
+      transform: translateX(26px);
+    }
+    
+    .btn {
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(to bottom, #ff9a9e, #fecfef);
+      color: #c44569;
+    }
+    
+    .btn-speak {
+      background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
+      color: #2d6a9f;
+    }
+    
+    .btn-mic {
+      background: linear-gradient(to bottom, #ffecd2, #fcb69f);
+      color: #c44536;
+      font-size: 1.3rem;
+      padding: 18px 36px;
+    }
+    
+    .btn-mic.listening {
+      background: linear-gradient(to bottom, #ff6b6b, #ee5a5a);
+      color: white;
+      animation: pulse 1s infinite;
+    }
+    
+    .btn-next {
+      background: linear-gradient(to bottom, #84fab0, #8fd3f4);
+      color: #0a7a4a;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .picture-card {
+      background: white;
+      border-radius: 30px;
+      padding: 24px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .picture-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,200,200,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    
+    .emoji-scene {
+      font-size: clamp(4rem, 18vw, 7rem);
+      line-height: 1.2;
+      margin: 16px 0;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    
+    .scene-label {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #5a5a5a;
+      margin-top: 8px;
+      min-height: 2.2em;
+    }
+    
+    .hint {
+      font-size: 0.95rem;
+      color: #888;
+      margin-top: 8px;
+    }
+    
+    .feedback {
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-height: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 12px 0;
+      transition: all 0.3s;
+    }
+    
+    .feedback.correct {
+      color: #27ae60;
+      animation: bounce 0.6s;
+    }
+    
+    .feedback.wrong {
+      color: #e74c3c;
+    }
+    
+    .feedback.listening {
+      color: #3498db;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-12px); }
+      60% { transform: translateY(-6px); }
+    }
+    
+    .progress {
+      background: white;
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-weight: 600;
+      color: #666;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+    }
+    
+    .score {
+      font-size: 1.2rem;
+      color: #ff6b6b;
+    }
+    
+    .footer-note {
+      margin-top: auto;
+      padding-top: 20px;
+      font-size: 0.85rem;
+      color: #777;
+      text-align: center;
+      max-width: 500px;
+    }
+    
+    .confetti {
+      position: fixed;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    @media (max-width: 480px) {
+      .btn { padding: 12px 20px; font-size: 1rem; }
+      .btn-mic { padding: 16px 28px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎤 Guess What They're Doing!</h1>
+  <p class="subtitle">Look at the picture • Listen • Say it out loud!</p>
+  
+  <div class="progress">
+    Scene <span id="currentNum">1</span> of <span id="totalNum">50</span> 
+    &nbsp;•&nbsp; Score: <span class="score" id="score">0</span>
+  </div>
+  
+  <div class="controls">
+    <div class="toggle-box">
+      <span>Narrator</span>
+      <div class="toggle on" id="narratorToggle" title="Turn narrator on/off"></div>
+      <span id="narratorLabel">ON</span>
+    </div>
+  </div>
+  
+  <div class="picture-card">
+    <div class="emoji-scene" id="emojiScene">🐵🚲</div>
+    <div class="scene-label" id="sceneLabel">Loading fun...</div>
+    <div class="hint" id="hintText">Tap the speaker to hear, then say it into the mic!</div>
+  </div>
+  
+  <div class="feedback" id="feedback"></div>
+  
+  <div class="controls">
+    <button class="btn btn-speak" id="speakBtn">🔊 Hear Narrator</button>
+    <button class="btn btn-mic" id="micBtn">🎤 Speak Now</button>
+    <button class="btn btn-next" id="nextBtn">Next ➡️</button>
+  </div>
+  
+  <p class="footer-note">
+    Tip: Speak clearly! The narrator can be turned OFF so you can test yourself by only looking at the picture.
+    Works best in Chrome or Edge. Allow microphone access when asked.
+  </p>
+
+  <script>
+    // 55 fun unusual scenes
+    const scenes = [
+      { emoji: "🐵🚲", phrase: "a monkey riding a bike", short: "monkey riding a bike" },
+      { emoji: "👧💇‍♀️", phrase: "a girl brushing her hair", short: "girl brushing her hair" },
+      { emoji: "👩🧹", phrase: "a lady cleaning the floor", short: "lady cleaning the floor" },
+      { emoji: "💃🌧️", phrase: "a woman dancing in the rain", short: "woman dancing in the rain" },
+      { emoji: "🐻🛏️", phrase: "a bear sleeping in a bed", short: "bear sleeping in a bed" },
+      { emoji: "🐱🚗", phrase: "a cat driving a car", short: "cat driving a car" },
+      { emoji: "🐶🎂", phrase: "a dog baking a cake", short: "dog baking a cake" },
+      { emoji: "🐘🎨", phrase: "an elephant painting a picture", short: "elephant painting a picture" },
+      { emoji: "🐧🏄", phrase: "a penguin surfing on a wave", short: "penguin surfing on a wave" },
+      { emoji: "🦁📖", phrase: "a lion reading a book", short: "lion reading a book" },
+      { emoji: "🦒🪁", phrase: "a giraffe flying a kite", short: "giraffe flying a kite" },
+      { emoji: "🐰🍝", phrase: "a rabbit cooking spaghetti", short: "rabbit cooking spaghetti" },
+      { emoji: "🐸🤸", phrase: "a frog jumping on a trampoline", short: "frog jumping on a trampoline" },
+      { emoji: "🦜🎤", phrase: "a parrot singing opera", short: "parrot singing opera" },
+      { emoji: "🦘🥊", phrase: "a kangaroo boxing with gloves", short: "kangaroo boxing with gloves" },
+      { emoji: "🦉👓📚", phrase: "an owl studying with glasses", short: "owl studying with glasses" },
+      { emoji: "🐷🎹", phrase: "a pig playing the piano", short: "pig playing the piano" },
+      { emoji: "🐴🛹", phrase: "a horse skateboarding", short: "horse skateboarding" },
+      { emoji: "🦆🤳", phrase: "a duck taking a selfie", short: "duck taking a selfie" },
+      { emoji: "🐿️🌱", phrase: "a squirrel planting a garden", short: "squirrel planting a garden" },
+      { emoji: "👦🦄", phrase: "a boy riding a unicorn", short: "boy riding a unicorn" },
+      { emoji: "👧✈️", phrase: "a girl flying an airplane", short: "girl flying an airplane" },
+      { emoji: "👨🍌🤹", phrase: "a man juggling bananas", short: "man juggling bananas" },
+      { emoji: "👩🦕", phrase: "a woman walking a dinosaur", short: "woman walking a dinosaur" },
+      { emoji: "👴🎣🌙", phrase: "a grandpa fishing on the moon", short: "grandpa fishing on the moon" },
+      { emoji: "👶🚀", phrase: "a baby driving a spaceship", short: "baby driving a spaceship" },
+      { emoji: "👨‍🍳🎢", phrase: "a chef riding a rollercoaster", short: "chef riding a rollercoaster" },
+      { emoji: "👩‍🏫🤖💃", phrase: "a teacher dancing with robots", short: "teacher dancing with robots" },
+      { emoji: "👨‍⚕️🌌🎨", phrase: "a doctor painting the sky", short: "doctor painting the sky" },
+      { emoji: "👨‍🚒🏄🌋", phrase: "a firefighter surfing on lava", short: "firefighter surfing on lava" },
+      { emoji: "👨‍🚀🦷✨", phrase: "an astronaut brushing teeth in space", short: "astronaut brushing teeth in space" },
+      { emoji: "🏴‍☠️🌊🧹", phrase: "a pirate cleaning the ocean", short: "pirate cleaning the ocean" },
+      { emoji: "🦸☁️😴", phrase: "a superhero sleeping in a cloud", short: "superhero sleeping in a cloud" },
+      { emoji: "🧜‍♀️🚲🌊", phrase: "a mermaid riding a bicycle underwater", short: "mermaid riding a bicycle underwater" },
+      { emoji: "🐉🍪", phrase: "a dragon baking cookies", short: "dragon baking cookies" },
+      { emoji: "🦄💇", phrase: "a unicorn brushing its mane", short: "unicorn brushing its mane" },
+      { emoji: "🧟💃", phrase: "a zombie dancing the tango", short: "zombie dancing the tango" },
+      { emoji: "🤖🏠🧹", phrase: "a robot cleaning the house", short: "robot cleaning the house" },
+      { emoji: "👽🛏️", phrase: "an alien sleeping in a hammock", short: "alien sleeping in a hammock" },
+      { emoji: "👻🛹", phrase: "a ghost riding a skateboard", short: "ghost riding a skateboard" },
+      { emoji: "🧙‍♀️🧹📖", phrase: "a witch reading on a flying broom", short: "witch reading on a flying broom" },
+      { emoji: "🛡️✨", phrase: "a knight brushing his armor", short: "knight brushing his armor" },
+      { emoji: "👸🏰🧹", phrase: "a princess cleaning the castle", short: "princess cleaning the castle" },
+      { emoji: "🤡🎨😊", phrase: "a clown painting a big smile", short: "clown painting a big smile" },
+      { emoji: "🐯⚽", phrase: "a tiger playing soccer", short: "tiger playing soccer" },
+      { emoji: "🦛🛁🫧", phrase: "a hippo taking a bubble bath", short: "hippo taking a bubble bath" },
+      { emoji: "🐨🌈", phrase: "a koala climbing a rainbow", short: "koala climbing a rainbow" },
+      { emoji: "🦩⛸️", phrase: "a flamingo ice skating", short: "flamingo ice skating" },
+      { emoji: "🐙🥁", phrase: "an octopus playing the drums", short: "octopus playing the drums" },
+      { emoji: "🐊🦷🪥", phrase: "a crocodile brushing its teeth", short: "crocodile brushing its teeth" },
+      { emoji: "🦊❄️💃", phrase: "a fox dancing in the snow", short: "fox dancing in the snow" },
+      { emoji: "🐺🪩", phrase: "a wolf howling at a disco ball", short: "wolf howling at a disco ball" },
+      { emoji: "🦫🏖️🏰", phrase: "a beaver building a sandcastle", short: "beaver building a sandcastle" },
+      { emoji: "🦭🐟🤹", phrase: "a seal juggling fish", short: "seal juggling fish" },
+      { emoji: "🐢🎸", phrase: "a turtle playing the guitar", short: "turtle playing the guitar" },
+      { emoji: "🐝🍯🕺", phrase: "a bee dancing with honey", short: "bee dancing with honey" },
+      { emoji: "🦋🌸📸", phrase: "a butterfly taking photos of flowers", short: "butterfly taking photos of flowers" },
+      { emoji: "🦔🚲🍕", phrase: "a hedgehog riding a pizza bike", short: "hedgehog riding a pizza bike" },
+      { emoji: "🦩🌮", phrase: "a flamingo eating a taco", short: "flamingo eating a taco" },
+      { emoji: "🦥🚀", phrase: "a sloth flying a rocket", short: "sloth flying a rocket" }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let narratorOn = true;
+    let recognition = null;
+    let isListening = false;
+    let shuffled = [...scenes];
+
+    // Shuffle once at start
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    shuffled = shuffle(shuffled);
+
+    // DOM elements
+    const emojiScene = document.getElementById('emojiScene');
+    const sceneLabel = document.getElementById('sceneLabel');
+    const hintText = document.getElementById('hintText');
+    const feedback = document.getElementById('feedback');
+    const speakBtn = document.getElementById('speakBtn');
+    const micBtn = document.getElementById('micBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const narratorToggle = document.getElementById('narratorToggle');
+    const narratorLabel = document.getElementById('narratorLabel');
+    const currentNum = document.getElementById('currentNum');
+    const totalNum = document.getElementById('totalNum');
+    const scoreEl = document.getElementById('score');
+
+    totalNum.textContent = shuffled.length;
+
+    // Speech Synthesis
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.9;
+      utter.pitch = 1.1;
+      utter.volume = 1;
+      // Prefer a friendly voice if available
+      const voices = speechSynthesis.getVoices();
+      const preferred = voices.find(v => v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Karen') || v.lang.startsWith('en'));
+      if (preferred) utter.voice = preferred;
+      speechSynthesis.speak(utter);
+    }
+
+    // Load voices
+    if (window.speechSynthesis) {
+      speechSynthesis.onvoiceschanged = () => {};
+    }
+
+    // Speech Recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 3;
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        isListening = true;
+        micBtn.classList.add('listening');
+        micBtn.textContent = '🔴 Listening...';
+        feedback.textContent = 'Listening... say it clearly!';
+        feedback.className = 'feedback listening';
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        checkAnswer(transcript);
+      };
+
+      recognition.onerror = (event) => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micBtn.textContent = '🎤 Speak Now';
+        if (event.error === 'no-speech') {
+          feedback.textContent = "I didn't hear anything. Try again!";
+        } else if (event.error === 'not-allowed') {
+          feedback.textContent = "Please allow microphone access!";
+        } else {
+          feedback.textContent = "Oops, try speaking again!";
+        }
+        feedback.className = 'feedback wrong';
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micBtn.textContent = '🎤 Speak Now';
+      };
+    } else {
+      micBtn.disabled = true;
+      micBtn.textContent = '🎤 Not supported';
+      feedback.textContent = 'Speech recognition needs Chrome or Edge.';
+    }
+
+    function normalize(str) {
+      return str.toLowerCase()
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function checkAnswer(spoken) {
+      const scene = shuffled[currentIndex];
+      const target = normalize(scene.short);
+      const spokenNorm = normalize(spoken);
+
+      // Flexible matching: check if key words are present
+      const targetWords = target.split(' ').filter(w => w.length > 2);
+      const spokenWords = spokenNorm.split(' ');
+      let matches = 0;
+      targetWords.forEach(tw => {
+        if (spokenWords.some(sw => sw.includes(tw) || tw.includes(sw))) matches++;
+      });
+
+      const ratio = matches / targetWords.length;
+      const isCorrect = ratio >= 0.6 || spokenNorm.includes(target) || target.includes(spokenNorm);
+
+      if (isCorrect) {
+        score++;
+        scoreEl.textContent = score;
+        feedback.textContent = '🎉 Awesome! You got it!';
+        feedback.className = 'feedback correct';
+        speak("Yes! That's right! " + scene.phrase);
+        launchConfetti();
+      } else {
+        feedback.textContent = `Hmm... I heard "${spoken}". Try again or hear the narrator!`;
+        feedback.className = 'feedback wrong';
+      }
+    }
+
+    function showScene(index) {
+      const scene = shuffled[index];
+      emojiScene.textContent = scene.emoji;
+      // Hide the text answer if narrator is off (test mode)
+      if (narratorOn) {
+        sceneLabel.textContent = scene.phrase;
+        hintText.textContent = 'Tap Hear Narrator, listen carefully, then say it into the mic!';
+      } else {
+        sceneLabel.textContent = '❓ What is happening here?';
+        hintText.textContent = 'Look at the picture and say what they are doing!';
+      }
+      feedback.textContent = '';
+      feedback.className = 'feedback';
+      currentNum.textContent = index + 1;
+
+      // Auto-speak if narrator is on
+      if (narratorOn) {
+        setTimeout(() => {
+          speak("Look! " + scene.phrase + ". Can you say it?");
+        }, 400);
+      }
+    }
+
+    function nextScene() {
+      currentIndex = (currentIndex + 1) % shuffled.length;
+      showScene(currentIndex);
+    }
+
+    // Event listeners
+    narratorToggle.addEventListener('click', () => {
+      narratorOn = !narratorOn;
+      narratorToggle.classList.toggle('on', narratorOn);
+      narratorLabel.textContent = narratorOn ? 'ON' : 'OFF';
+      showScene(currentIndex); // refresh label
+    });
+
+    speakBtn.addEventListener('click', () => {
+      const scene = shuffled[currentIndex];
+      speak("Look! " + scene.phrase + ". Now you say it!");
+    });
+
+    micBtn.addEventListener('click', () => {
+      if (!recognition) return;
+      if (isListening) {
+        recognition.stop();
+        return;
+      }
+      try {
+        recognition.start();
+      } catch (e) {
+        feedback.textContent = 'Wait a moment and try again.';
+      }
+    });
+
+    nextBtn.addEventListener('click', nextScene);
+
+    // Simple confetti
+    function launchConfetti() {
+      const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#b8f2e6'];
+      for (let i = 0; i < 40; i++) {
+        const conf = document.createElement('div');
+        conf.className = 'confetti';
+        conf.style.cssText = `
+          position: fixed;
+          width: 12px; height: 12px;
+          background: ${colors[Math.floor(Math.random()*colors.length)]};
+          left: ${50 + (Math.random()-0.5)*40}%;
+          top: 40%;
+          border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+          pointer-events: none;
+          z-index: 999;
+          animation: confetti-fall ${1.5 + Math.random()}s ease-out forwards;
+        `;
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 2500);
+      }
+    }
+
+    // Add confetti keyframes
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes confetti-fall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Start
+    showScene(0);
+  </script>
+</body>
+</html>
 
