@@ -1,1 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Where Is...? 🔍</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Comic+Neue:wght@700&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 40%, #fbc2eb 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      color: #333;
+      overflow-x: hidden;
+    }
+    
+    h1 {
+      font-family: 'Comic Neue', cursive;
+      font-size: clamp(1.8rem, 6vw, 3rem);
+      color: #5b86e5;
+      text-shadow: 3px 3px 0 #fff, 5px 5px 0 rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: #5a5a5a;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+    
+    .toggle-box {
+      background: white;
+      border-radius: 50px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      font-weight: 600;
+    }
+    
+    .toggle {
+      position: relative;
+      width: 56px;
+      height: 30px;
+      background: #ccc;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .toggle.on {
+      background: #5b86e5;
+    }
+    
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .toggle.on::after {
+      transform: translateX(26px);
+    }
+    
+    .btn {
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+    }
+    
+    .btn-speak {
+      background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
+      color: #2d6a9f;
+    }
+    
+    .btn-mic {
+      background: linear-gradient(to bottom, #ffecd2, #fcb69f);
+      color: #c44536;
+      font-size: 1.3rem;
+      padding: 18px 36px;
+    }
+    
+    .btn-mic.listening {
+      background: linear-gradient(to bottom, #ff6b6b, #ee5a5a);
+      color: white;
+      animation: pulse 1s infinite;
+    }
+    
+    .btn-next {
+      background: linear-gradient(to bottom, #84fab0, #8fd3f4);
+      color: #0a7a4a;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .picture-card {
+      background: white;
+      border-radius: 30px;
+      padding: 24px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .picture-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(162,210,255,0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    
+    .emoji-scene {
+      font-size: clamp(4rem, 18vw, 7rem);
+      line-height: 1.2;
+      margin: 16px 0;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    
+    .scene-label {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #5a5a5a;
+      margin-top: 8px;
+      min-height: 2.2em;
+    }
+    
+    .hint {
+      font-size: 0.95rem;
+      color: #888;
+      margin-top: 8px;
+    }
+    
+    .feedback {
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-height: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 12px 0;
+      transition: all 0.3s;
+    }
+    
+    .feedback.correct {
+      color: #27ae60;
+      animation: bounce 0.6s;
+    }
+    
+    .feedback.wrong {
+      color: #e74c3c;
+    }
+    
+    .feedback.listening {
+      color: #3498db;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-12px); }
+      60% { transform: translateY(-6px); }
+    }
+    
+    .progress {
+      background: white;
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-weight: 600;
+      color: #666;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+    }
+    
+    .score {
+      font-size: 1.2rem;
+      color: #5b86e5;
+    }
+    
+    .footer-note {
+      margin-top: auto;
+      padding-top: 20px;
+      font-size: 0.85rem;
+      color: #777;
+      text-align: center;
+      max-width: 500px;
+    }
+    
+    @media (max-width: 480px) {
+      .btn { padding: 12px 20px; font-size: 1rem; }
+      .btn-mic { padding: 16px 28px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Where Is...?</h1>
+  <p class="subtitle">Look at the picture • Listen • Say where they are!</p>
+  
+  <div class="progress">
+    Scene <span id="currentNum">1</span> of <span id="totalNum">100</span> 
+    &nbsp;•&nbsp; Score: <span class="score" id="score">0</span>
+  </div>
+  
+  <div class="controls">
+    <div class="toggle-box">
+      <span>Narrator</span>
+      <div class="toggle on" id="narratorToggle" title="Turn narrator on/off"></div>
+      <span id="narratorLabel">ON</span>
+    </div>
+  </div>
+  
+  <div class="picture-card">
+    <div class="emoji-scene" id="emojiScene">🐯🌳</div>
+    <div class="scene-label" id="sceneLabel">Loading fun...</div>
+    <div class="hint" id="hintText">Tap the speaker to hear, then say it into the mic!</div>
+  </div>
+  
+  <div class="feedback" id="feedback"></div>
+  
+  <div class="controls">
+    <button class="btn btn-speak" id="speakBtn">🔊 Hear Narrator</button>
+    <button class="btn btn-mic" id="micBtn">🎤 Speak Now</button>
+    <button class="btn btn-next" id="nextBtn">Next ➡️</button>
+  </div>
+  
+  <p class="footer-note">
+    Tip: Speak clearly! Turn the narrator OFF to test yourself by only looking at the picture.
+    Works best in Chrome or Edge. Allow microphone access when asked.
+  </p>
+
+  <script>
+    // 110+ fun unusual "Where is...?" scenes
+    const scenes = [
+      { emoji: "🐯🌳", subject: "the tiger", place: "in the tree", full: "the tiger is in the tree" },
+      { emoji: "🐵🛏️", subject: "the monkey", place: "under the bed", full: "the monkey is under the bed" },
+      { emoji: "🐻🌙", subject: "the bear", place: "on the moon", full: "the bear is on the moon" },
+      { emoji: "🐱🍵", subject: "the cat", place: "in a teacup", full: "the cat is in a teacup" },
+      { emoji: "🐶🌈", subject: "the dog", place: "on a rainbow", full: "the dog is on a rainbow" },
+      { emoji: "🐘👟", subject: "the elephant", place: "inside a shoe", full: "the elephant is inside a shoe" },
+      { emoji: "🐧☁️", subject: "the penguin", place: "on a cloud", full: "the penguin is on a cloud" },
+      { emoji: "🦁📚", subject: "the lion", place: "inside a book", full: "the lion is inside a book" },
+      { emoji: "🦒🛁", subject: "the giraffe", place: "in the bathtub", full: "the giraffe is in the bathtub" },
+      { emoji: "🐰🎩", subject: "the rabbit", place: "in a magic hat", full: "the rabbit is in a magic hat" },
+      { emoji: "🐸🍕", subject: "the frog", place: "on a pizza", full: "the frog is on a pizza" },
+      { emoji: "🦜🕰️", subject: "the parrot", place: "inside a clock", full: "the parrot is inside a clock" },
+      { emoji: "🦘🧺", subject: "the kangaroo", place: "in a picnic basket", full: "the kangaroo is in a picnic basket" },
+      { emoji: "🦉🎃", subject: "the owl", place: "inside a pumpkin", full: "the owl is inside a pumpkin" },
+      { emoji: "🐷🎈", subject: "the pig", place: "on a balloon", full: "the pig is on a balloon" },
+      { emoji: "🐴🌊", subject: "the horse", place: "under the sea", full: "the horse is under the sea" },
+      { emoji: "🦆🛸", subject: "the duck", place: "in a flying saucer", full: "the duck is in a flying saucer" },
+      { emoji: "🐿️🌋", subject: "the squirrel", place: "on a volcano", full: "the squirrel is on a volcano" },
+      { emoji: "👦🍦", subject: "the boy", place: "inside an ice cream cone", full: "the boy is inside an ice cream cone" },
+      { emoji: "👧🚀", subject: "the girl", place: "on a rocket", full: "the girl is on a rocket" },
+      { emoji: "👨🌵", subject: "the man", place: "on a cactus", full: "the man is on a cactus" },
+      { emoji: "👩🪞", subject: "the woman", place: "inside a mirror", full: "the woman is inside a mirror" },
+      { emoji: "👴🐋", subject: "the grandpa", place: "on a whale", full: "the grandpa is on a whale" },
+      { emoji: "👶🍯", subject: "the baby", place: "in a honey pot", full: "the baby is in a honey pot" },
+      { emoji: "👨‍🍳☁️", subject: "the chef", place: "on a fluffy cloud", full: "the chef is on a fluffy cloud" },
+      { emoji: "👩‍🏫🍄", subject: "the teacher", place: "under a giant mushroom", full: "the teacher is under a giant mushroom" },
+      { emoji: "👨‍⚕️🧊", subject: "the doctor", place: "inside an ice cube", full: "the doctor is inside an ice cube" },
+      { emoji: "👨‍🚒🌸", subject: "the firefighter", place: "in a flower", full: "the firefighter is in a flower" },
+      { emoji: "👨‍🚀🐚", subject: "the astronaut", place: "inside a seashell", full: "the astronaut is inside a seashell" },
+      { emoji: "🏴‍☠️🛁", subject: "the pirate", place: "in a bubble bath", full: "the pirate is in a bubble bath" },
+      { emoji: "🦸🧀", subject: "the superhero", place: "on a cheese moon", full: "the superhero is on a cheese moon" },
+      { emoji: "🧜‍♀️🌵", subject: "the mermaid", place: "on a desert cactus", full: "the mermaid is on a desert cactus" },
+      { emoji: "🐉🧦", subject: "the dragon", place: "inside a sock", full: "the dragon is inside a sock" },
+      { emoji: "🦄🍞", subject: "the unicorn", place: "on a slice of toast", full: "the unicorn is on a slice of toast" },
+      { emoji: "🧟🛋️", subject: "the zombie", place: "under the sofa", full: "the zombie is under the sofa" },
+      { emoji: "🤖🪺", subject: "the robot", place: "in a bird nest", full: "the robot is in a bird nest" },
+      { emoji: "👽🍉", subject: "the alien", place: "inside a watermelon", full: "the alien is inside a watermelon" },
+      { emoji: "👻🍪", subject: "the ghost", place: "in a cookie jar", full: "the ghost is in a cookie jar" },
+      { emoji: "🧙‍♀️🫧", subject: "the witch", place: "inside a soap bubble", full: "the witch is inside a soap bubble" },
+      { emoji: "🛡️🌴", subject: "the knight", place: "in a palm tree", full: "the knight is in a palm tree" },
+      { emoji: "👸🐝", subject: "the princess", place: "on a beehive", full: "the princess is on a beehive" },
+      { emoji: "🤡🌋", subject: "the clown", place: "inside a volcano", full: "the clown is inside a volcano" },
+      { emoji: "🐯🚢", subject: "the tiger", place: "on a pirate ship", full: "the tiger is on a pirate ship" },
+      { emoji: "🦛🎂", subject: "the hippo", place: "inside a birthday cake", full: "the hippo is inside a birthday cake" },
+      { emoji: "🐨🪁", subject: "the koala", place: "on a flying kite", full: "the koala is on a flying kite" },
+      { emoji: "🦩🏠", subject: "the flamingo", place: "on the roof", full: "the flamingo is on the roof" },
+      { emoji: "🐙🎒", subject: "the octopus", place: "in a school backpack", full: "the octopus is in a school backpack" },
+      { emoji: "🐊🎠", subject: "the crocodile", place: "on a carousel horse", full: "the crocodile is on a carousel horse" },
+      { emoji: "🦊📦", subject: "the fox", place: "inside a cardboard box", full: "the fox is inside a cardboard box" },
+      { emoji: "🐺🎠", subject: "the wolf", place: "on a merry-go-round", full: "the wolf is on a merry-go-round" },
+      { emoji: "🦫🚽", subject: "the beaver", place: "in the toilet", full: "the beaver is in the toilet" },
+      { emoji: "🦭🎹", subject: "the seal", place: "on a piano", full: "the seal is on a piano" },
+      { emoji: "🐢🎢", subject: "the turtle", place: "on a rollercoaster", full: "the turtle is on a rollercoaster" },
+      { emoji: "🐝👑", subject: "the bee", place: "on a king's crown", full: "the bee is on a king's crown" },
+      { emoji: "🦋🧊", subject: "the butterfly", place: "inside an ice cream", full: "the butterfly is inside an ice cream" },
+      { emoji: "🦔🛸", subject: "the hedgehog", place: "in a spaceship", full: "the hedgehog is in a spaceship" },
+      { emoji: "🦥🏰", subject: "the sloth", place: "on a castle tower", full: "the sloth is on a castle tower" },
+      { emoji: "🐼🌂", subject: "the panda", place: "under an umbrella", full: "the panda is under an umbrella" },
+      { emoji: "🦝🧺", subject: "the raccoon", place: "in a laundry basket", full: "the raccoon is in a laundry basket" },
+      { emoji: "🦚🪞", subject: "the peacock", place: "in front of a mirror", full: "the peacock is in front of a mirror" },
+      { emoji: "🐪🧊", subject: "the camel", place: "on an iceberg", full: "the camel is on an iceberg" },
+      { emoji: "🦞🛏️", subject: "the lobster", place: "in a bunk bed", full: "the lobster is in a bunk bed" },
+      { emoji: "🐐🚀", subject: "the goat", place: "on a spaceship", full: "the goat is on a spaceship" },
+      { emoji: "🫎🎠", subject: "the moose", place: "on a swing", full: "the moose is on a swing" },
+      { emoji: "🦢🛁", subject: "the swan", place: "in a hot tub", full: "the swan is in a hot tub" },
+      { emoji: "🦔🎪", subject: "the porcupine", place: "in a circus tent", full: "the porcupine is in a circus tent" },
+      { emoji: "🦎🎩", subject: "the chameleon", place: "on a top hat", full: "the chameleon is on a top hat" },
+      { emoji: "🦭🍦", subject: "the walrus", place: "on an ice cream truck", full: "the walrus is on an ice cream truck" },
+      { emoji: "🐿️🥞", subject: "the meerkat", place: "under a pancake stack", full: "the meerkat is under a pancake stack" },
+      { emoji: "🦔🎳", subject: "the armadillo", place: "inside a bowling ball", full: "the armadillo is inside a bowling ball" },
+      { emoji: "🦆🫧", subject: "the platypus", place: "in a bubble", full: "the platypus is in a bubble" },
+      { emoji: "🦜🎪", subject: "the toucan", place: "on a circus trapeze", full: "the toucan is on a circus trapeze" },
+      { emoji: "🦙🌮", subject: "the llama", place: "inside a taco", full: "the llama is inside a taco" },
+      { emoji: "🦬☁️", subject: "the bison", place: "on a fluffy cloud", full: "the bison is on a fluffy cloud" },
+      { emoji: "🦦🍵", subject: "the otter", place: "in a giant teacup", full: "the otter is in a giant teacup" },
+      { emoji: "🦀📸", subject: "the crab", place: "on a camera", full: "the crab is on a camera" },
+      { emoji: "🦎🏖️", subject: "the iguana", place: "on a beach towel", full: "the iguana is on a beach towel" },
+      { emoji: "🦡💎", subject: "the mole", place: "in a treasure chest", full: "the mole is in a treasure chest" },
+      { emoji: "🦇📚", subject: "the bat", place: "inside a comic book", full: "the bat is inside a comic book" },
+      { emoji: "🐆🏎️", subject: "the cheetah", place: "in a race car", full: "the cheetah is in a race car" },
+      { emoji: "🦏🌸", subject: "the rhino", place: "in a flower bed", full: "the rhino is in a flower bed" },
+      { emoji: "🦓🛣️", subject: "the zebra", place: "on the crosswalk", full: "the zebra is on the crosswalk" },
+      { emoji: "👦☁️", subject: "the boy", place: "inside a cloud", full: "the boy is inside a cloud" },
+      { emoji: "👧🐌", subject: "the girl", place: "on a giant snail", full: "the girl is on a giant snail" },
+      { emoji: "👨⚽", subject: "the man", place: "on a beach ball", full: "the man is on a beach ball" },
+      { emoji: "👩🧣", subject: "the woman", place: "inside a scarf", full: "the woman is inside a scarf" },
+      { emoji: "👵🍪", subject: "the grandma", place: "in a cookie jar", full: "the grandma is in a cookie jar" },
+      { emoji: "👴🌟", subject: "the grandpa", place: "on a shooting star", full: "the grandpa is on a shooting star" },
+      { emoji: "👶🐉", subject: "the baby", place: "on a dragon's back", full: "the baby is on a dragon's back" },
+      { emoji: "👨‍🍳🍉", subject: "the chef", place: "inside a watermelon", full: "the chef is inside a watermelon" },
+      { emoji: "👩‍⚕️🎈", subject: "the nurse", place: "on a bunch of balloons", full: "the nurse is on a bunch of balloons" },
+      { emoji: "👮🦒", subject: "the policeman", place: "on a giraffe's head", full: "the policeman is on a giraffe's head" },
+      { emoji: "👩‍🏫📚", subject: "the librarian", place: "on a stack of books", full: "the librarian is on a stack of books" },
+      { emoji: "👨‍🌾🐄", subject: "the farmer", place: "on a purple cow", full: "the farmer is on a purple cow" },
+      { emoji: "👨‍✈️🛋️", subject: "the pilot", place: "under the airplane wing", full: "the pilot is under the airplane wing" },
+      { emoji: "🤿🐴", subject: "the diver", place: "on a seahorse", full: "the diver is on a seahorse" },
+      { emoji: "⛷️❄️", subject: "the skier", place: "inside a snowflake", full: "the skier is inside a snowflake" },
+      { emoji: "🏄‍♂️🐟", subject: "the surfer", place: "on a flying fish", full: "the surfer is on a flying fish" },
+      { emoji: "👑✨", subject: "the king", place: "inside his crown", full: "the king is inside his crown" },
+      { emoji: "👸🦄", subject: "the queen", place: "on a roller-skating unicorn", full: "the queen is on a roller-skating unicorn" },
+      { emoji: "🧙‍♂️🍕", subject: "the wizard", place: "inside a magic pizza", full: "the wizard is inside a magic pizza" },
+      { emoji: "🧚‍♀️🌲", subject: "the fairy", place: "under a forest leaf", full: "the fairy is under a forest leaf" },
+      { emoji: "🧛‍♂️🦷", subject: "the vampire", place: "in a toothpaste tube", full: "the vampire is in a toothpaste tube" },
+      { emoji: "🐺🎤", subject: "the werewolf", place: "on a karaoke stage", full: "the werewolf is on a karaoke stage" },
+      { emoji: "🤖🐕", subject: "the robot dog", place: "on a human's shoulder", full: "the robot dog is on a human's shoulder" },
+      { emoji: "🦕🛹", subject: "the dinosaur", place: "on a city skateboard", full: "the dinosaur is on a city skateboard" },
+      { emoji: "🐧❄️", subject: "the penguin", place: "in a snow fort", full: "the penguin is in a snow fort" },
+      { emoji: "🦋🎩", subject: "the butterfly", place: "on a magician's hat", full: "the butterfly is on a magician's hat" },
+      { emoji: "🦔🛵", subject: "the hedgehog", place: "on a pizza scooter", full: "the hedgehog is on a pizza scooter" },
+      { emoji: "🐙🎨", subject: "the octopus", place: "in an underwater art gallery", full: "the octopus is in an underwater art gallery" },
+      { emoji: "🦥🎸", subject: "the sloth", place: "in a hammock with a guitar", full: "the sloth is in a hammock with a guitar" },
+      { emoji: "🦒🛼", subject: "the giraffe", place: "on roller skates", full: "the giraffe is on roller skates" },
+      { emoji: "🐯🎪", subject: "the tiger", place: "in a circus tent", full: "the tiger is in a circus tent" },
+      { emoji: "🐵🍌", subject: "the monkey", place: "inside a banana", full: "the monkey is inside a banana" },
+      { emoji: "🐻🍯", subject: "the bear", place: "in a honey jar", full: "the bear is in a honey jar" },
+      { emoji: "🐱🧶", subject: "the cat", place: "inside a ball of yarn", full: "the cat is inside a ball of yarn" },
+      { emoji: "🐶🦴", subject: "the dog", place: "on a giant bone", full: "the dog is on a giant bone" },
+      { emoji: "🐘💧", subject: "the elephant", place: "in a water droplet", full: "the elephant is in a water droplet" },
+      { emoji: "🐧❄️🏠", subject: "the penguin", place: "in an igloo", full: "the penguin is in an igloo" },
+      { emoji: "🦁👑", subject: "the lion", place: "on a golden throne", full: "the lion is on a golden throne" },
+      { emoji: "🦒🌅", subject: "the giraffe", place: "on a sunrise cloud", full: "the giraffe is on a sunrise cloud" },
+      { emoji: "🐰🥕", subject: "the rabbit", place: "inside a carrot", full: "the rabbit is inside a carrot" },
+      { emoji: "🐸☔", subject: "the frog", place: "under an umbrella", full: "the frog is under an umbrella" },
+      { emoji: "🦜🌴", subject: "the parrot", place: "in a coconut tree", full: "the parrot is in a coconut tree" },
+      { emoji: "🦘🥊", subject: "the kangaroo", place: "in a boxing ring", full: "the kangaroo is in a boxing ring" },
+      { emoji: "🦉🌙", subject: "the owl", place: "on a crescent moon", full: "the owl is on a crescent moon" },
+      { emoji: "🐷💦", subject: "the pig", place: "in a mud puddle", full: "the pig is in a mud puddle" },
+      { emoji: "🐴🎠", subject: "the horse", place: "on a carousel", full: "the horse is on a carousel" },
+      { emoji: "🦆🌧️", subject: "the duck", place: "in a rain puddle", full: "the duck is in a rain puddle" },
+      { emoji: "🐿️🌰", subject: "the squirrel", place: "inside an acorn", full: "the squirrel is inside an acorn" },
+      { emoji: "👦🎸", subject: "the boy", place: "on a giant guitar", full: "the boy is on a giant guitar" },
+      { emoji: "👧🦋", subject: "the girl", place: "on a butterfly's wing", full: "the girl is on a butterfly's wing" },
+      { emoji: "👨🎩", subject: "the man", place: "inside a top hat", full: "the man is inside a top hat" },
+      { emoji: "👩🌹", subject: "the woman", place: "in a rose garden", full: "the woman is in a rose garden" },
+      { emoji: "👴🎣", subject: "the grandpa", place: "on a fishing boat", full: "the grandpa is on a fishing boat" },
+      { emoji: "👶🍼", subject: "the baby", place: "inside a bottle", full: "the baby is inside a bottle" },
+      { emoji: "👨‍🍳🔥", subject: "the chef", place: "on a giant frying pan", full: "the chef is on a giant frying pan" },
+      { emoji: "👩‍🏫🍎", subject: "the teacher", place: "inside an apple", full: "the teacher is inside an apple" },
+      { emoji: "👨‍⚕️💊", subject: "the doctor", place: "in a medicine bottle", full: "the doctor is in a medicine bottle" },
+      { emoji: "👨‍🚒🚒", subject: "the firefighter", place: "on a fire truck ladder", full: "the firefighter is on a fire truck ladder" },
+      { emoji: "👨‍🚀🪐", subject: "the astronaut", place: "on planet Saturn", full: "the astronaut is on planet Saturn" },
+      { emoji: "🏴‍☠️🦜", subject: "the pirate", place: "on a parrot's shoulder", full: "the pirate is on a parrot's shoulder" },
+      { emoji: "🦸🦇", subject: "the superhero", place: "on a bat signal", full: "the superhero is on a bat signal" },
+      { emoji: "🧜‍♀️🪸", subject: "the mermaid", place: "in a coral reef", full: "the mermaid is in a coral reef" },
+      { emoji: "🐉💎", subject: "the dragon", place: "on a pile of jewels", full: "the dragon is on a pile of jewels" },
+      { emoji: "🦄🌈", subject: "the unicorn", place: "at the end of a rainbow", full: "the unicorn is at the end of a rainbow" },
+      { emoji: "🧟🧠", subject: "the zombie", place: "in a brain museum", full: "the zombie is in a brain museum" },
+      { emoji: "🤖⚡", subject: "the robot", place: "inside a power socket", full: "the robot is inside a power socket" },
+      { emoji: "👽🛸", subject: "the alien", place: "in a flying saucer", full: "the alien is in a flying saucer" },
+      { emoji: "👻🕯️", subject: "the ghost", place: "inside a candle", full: "the ghost is inside a candle" },
+      { emoji: "🧙‍♀️🧪", subject: "the witch", place: "in a potion bottle", full: "the witch is in a potion bottle" },
+      { emoji: "🛡️⚔️", subject: "the knight", place: "on a sword", full: "the knight is on a sword" },
+      { emoji: "👸🪞", subject: "the princess", place: "inside a magic mirror", full: "the princess is inside a magic mirror" },
+      { emoji: "🤡🎪", subject: "the clown", place: "in a circus cannon", full: "the clown is in a circus cannon" },
+      { emoji: "🦛💧", subject: "the hippo", place: "in a water fountain", full: "the hippo is in a water fountain" },
+      { emoji: "🐨🎋", subject: "the koala", place: "in a bamboo forest", full: "the koala is in a bamboo forest" },
+      { emoji: "🦩🦩", subject: "the flamingo", place: "on one leg in a pond", full: "the flamingo is on one leg in a pond" },
+      { emoji: "🐙🎁", subject: "the octopus", place: "inside a gift box", full: "the octopus is inside a gift box" },
+      { emoji: "🐊🕶️", subject: "the crocodile", place: "wearing sunglasses on a beach", full: "the crocodile is wearing sunglasses on a beach" },
+      { emoji: "🦊🍇", subject: "the fox", place: "in a grape vineyard", full: "the fox is in a grape vineyard" },
+      { emoji: "🐺🌲", subject: "the wolf", place: "howling on a mountain peak", full: "the wolf is howling on a mountain peak" },
+      { emoji: "🦫🪵", subject: "the beaver", place: "in a wooden dam", full: "the beaver is in a wooden dam" },
+      { emoji: "🦭❄️", subject: "the seal", place: "on an ice floe", full: "the seal is on an ice floe" },
+      { emoji: "🐢🏝️", subject: "the turtle", place: "on a desert island", full: "the turtle is on a desert island" },
+      { emoji: "🐝🌸", subject: "the bee", place: "inside a flower", full: "the bee is inside a flower" },
+      { emoji: "🦋🌺", subject: "the butterfly", place: "on a hibiscus flower", full: "the butterfly is on a hibiscus flower" },
+      { emoji: "🦔🍂", subject: "the hedgehog", place: "under autumn leaves", full: "the hedgehog is under autumn leaves" },
+      { emoji: "🦥🌳", subject: "the sloth", place: "hanging from a tree branch", full: "the sloth is hanging from a tree branch" },
+      { emoji: "🐼🎋", subject: "the panda", place: "eating bamboo in the forest", full: "the panda is eating bamboo in the forest" },
+      { emoji: "🦝🗑️", subject: "the raccoon", place: "in a trash can", full: "the raccoon is in a trash can" },
+      { emoji: "🦚🦚", subject: "the peacock", place: "displaying feathers in a park", full: "the peacock is displaying feathers in a park" },
+      { emoji: "🐪🏜️", subject: "the camel", place: "crossing the desert", full: "the camel is crossing the desert" },
+      { emoji: "🦞🌊", subject: "the lobster", place: "on the ocean floor", full: "the lobster is on the ocean floor" },
+      { emoji: "🐐⛰️", subject: "the goat", place: "on a mountain cliff", full: "the goat is on a mountain cliff" },
+      { emoji: "🫎🍁", subject: "the moose", place: "in a maple forest", full: "the moose is in a maple forest" },
+      { emoji: "🦢💧", subject: "the swan", place: "gliding on a lake", full: "the swan is gliding on a lake" },
+      { emoji: "🦔🛡️", subject: "the porcupine", place: "curled up in a ball", full: "the porcupine is curled up in a ball" },
+      { emoji: "🦎🌿", subject: "the chameleon", place: "camouflaged on a leaf", full: "the chameleon is camouflaged on a leaf" },
+      { emoji: "🦭🐟", subject: "the walrus", place: "on a rocky beach with fish", full: "the walrus is on a rocky beach with fish" },
+      { emoji: "🐿️🕳️", subject: "the meerkat", place: "standing on a lookout rock", full: "the meerkat is standing on a lookout rock" },
+      { emoji: "🦔⚽", subject: "the armadillo", place: "rolled up like a soccer ball", full: "the armadillo is rolled up like a soccer ball" },
+      { emoji: "🦆🌊", subject: "the platypus", place: "swimming in a river", full: "the platypus is swimming in a river" },
+      { emoji: "🦜🌴", subject: "the toucan", place: "perched on a tropical branch", full: "the toucan is perched on a tropical branch" },
+      { emoji: "🦙🏔️", subject: "the llama", place: "on a mountain trail", full: "the llama is on a mountain trail" },
+      { emoji: "🦬🌾", subject: "the bison", place: "in a grassy plain", full: "the bison is in a grassy plain" },
+      { emoji: "🦦🌊", subject: "the otter", place: "floating on its back in the water", full: "the otter is floating on its back in the water" },
+      { emoji: "🦀🏖️", subject: "the crab", place: "scuttling on the sand", full: "the crab is scuttling on the sand" },
+      { emoji: "🦎☀️", subject: "the iguana", place: "basking on a sunny rock", full: "the iguana is basking on a sunny rock" },
+      { emoji: "🦡🕳️", subject: "the mole", place: "in an underground tunnel", full: "the mole is in an underground tunnel" },
+      { emoji: "🦇🦇", subject: "the bat", place: "hanging in a dark cave", full: "the bat is hanging in a dark cave" },
+      { emoji: "🐆🌳", subject: "the cheetah", place: "resting under a tree", full: "the cheetah is resting under a tree" },
+      { emoji: "🦏💧", subject: "the rhino", place: "at a watering hole", full: "the rhino is at a watering hole" },
+      { emoji: "🦓🌿", subject: "the zebra", place: "grazing in the savanna", full: "the zebra is grazing in the savanna" }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let narratorOn = true;
+    let recognition = null;
+    let isListening = false;
+    let shuffled = [...scenes];
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    shuffled = shuffle(shuffled);
+
+    const emojiScene = document.getElementById('emojiScene');
+    const sceneLabel = document.getElementById('sceneLabel');
+    const hintText = document.getElementById('hintText');
+    const feedback = document.getElementById('feedback');
+    const speakBtn = document.getElementById('speakBtn');
+    const micBtn = document.getElementById('micBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const narratorToggle = document.getElementById('narratorToggle');
+    const narratorLabel = document.getElementById('narratorLabel');
+    const currentNum = document.getElementById('currentNum');
+    const totalNum = document.getElementById('totalNum');
+    const scoreEl = document.getElementById('score');
+
+    totalNum.textContent = shuffled.length;
+
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.9;
+      utter.pitch = 1.1;
+      utter.volume = 1;
+      const voices = speechSynthesis.getVoices();
+      const preferred = voices.find(v => v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Karen') || v.lang.startsWith('en'));
+      if (preferred) utter.voice = preferred;
+      speechSynthesis.speak(utter);
+    }
+
+    if (window.speechSynthesis) {
+      speechSynthesis.onvoiceschanged = () => {};
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 3;
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        isListening = true;
+        micBtn.classList.add('listening');
+        micBtn.textContent = '🔴 Listening...';
+        feedback.textContent = 'Listening... say where they are!';
+        feedback.className = 'feedback listening';
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        checkAnswer(transcript);
+      };
+
+      recognition.onerror = (event) => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micBtn.textContent = '🎤 Speak Now';
+        if (event.error === 'no-speech') {
+          feedback.textContent = "I didn't hear anything. Try again!";
+        } else if (event.error === 'not-allowed') {
+          feedback.textContent = "Please allow microphone access!";
+        } else {
+          feedback.textContent = "Oops, try speaking again!";
+        }
+        feedback.className = 'feedback wrong';
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micBtn.textContent = '🎤 Speak Now';
+      };
+    } else {
+      micBtn.disabled = true;
+      micBtn.textContent = '🎤 Not supported';
+      feedback.textContent = 'Speech recognition needs Chrome or Edge.';
+    }
+
+    function normalize(str) {
+      return str.toLowerCase()
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function checkAnswer(spoken) {
+      const scene = shuffled[currentIndex];
+      const targetPlace = normalize(scene.place);
+      const targetFull = normalize(scene.full);
+      const spokenNorm = normalize(spoken);
+
+      // Flexible matching for the place or full sentence
+      const placeWords = targetPlace.split(' ').filter(w => w.length > 2);
+      const spokenWords = spokenNorm.split(' ');
+      let matches = 0;
+      placeWords.forEach(tw => {
+        if (spokenWords.some(sw => sw.includes(tw) || tw.includes(sw))) matches++;
+      });
+
+      const ratio = matches / Math.max(placeWords.length, 1);
+      const isCorrect = ratio >= 0.5 || 
+                        spokenNorm.includes(targetPlace) || 
+                        targetPlace.includes(spokenNorm) ||
+                        spokenNorm.includes(targetFull) ||
+                        targetFull.includes(spokenNorm);
+
+      if (isCorrect) {
+        score++;
+        scoreEl.textContent = score;
+        feedback.textContent = '🎉 Yes! That\'s right!';
+        feedback.className = 'feedback correct';
+        speak("Yes! " + scene.full + "!");
+        launchConfetti();
+      } else {
+        feedback.textContent = `Hmm... I heard "${spoken}". Try again or hear the narrator!`;
+        feedback.className = 'feedback wrong';
+      }
+    }
+
+    function showScene(index) {
+      const scene = shuffled[index];
+      emojiScene.textContent = scene.emoji;
+      
+      if (narratorOn) {
+        sceneLabel.textContent = scene.full;
+        hintText.textContent = 'Tap Hear Narrator, listen carefully, then say where they are!';
+      } else {
+        sceneLabel.textContent = `Where is ${scene.subject}?`;
+        hintText.textContent = 'Look at the picture and say where they are!';
+      }
+      feedback.textContent = '';
+      feedback.className = 'feedback';
+      currentNum.textContent = index + 1;
+
+      if (narratorOn) {
+        setTimeout(() => {
+          speak("Where is " + scene.subject + "? " + scene.full + ". Can you say it?");
+        }, 400);
+      }
+    }
+
+    function nextScene() {
+      currentIndex = (currentIndex + 1) % shuffled.length;
+      showScene(currentIndex);
+    }
+
+    narratorToggle.addEventListener('click', () => {
+      narratorOn = !narratorOn;
+      narratorToggle.classList.toggle('on', narratorOn);
+      narratorLabel.textContent = narratorOn ? 'ON' : 'OFF';
+      showScene(currentIndex);
+    });
+
+    speakBtn.addEventListener('click', () => {
+      const scene = shuffled[currentIndex];
+      speak("Where is " + scene.subject + "? " + scene.full + ". Now you say it!");
+    });
+
+    micBtn.addEventListener('click', () => {
+      if (!recognition) return;
+      if (isListening) {
+        recognition.stop();
+        return;
+      }
+      try {
+        recognition.start();
+      } catch (e) {
+        feedback.textContent = 'Wait a moment and try again.';
+      }
+    });
+
+    nextBtn.addEventListener('click', nextScene);
+
+    function launchConfetti() {
+      const colors = ['#5b86e5', '#a1c4fd', '#fbc2eb', '#84fab0', '#ffe66d', '#ff9a9e'];
+      for (let i = 0; i < 40; i++) {
+        const conf = document.createElement('div');
+        conf.style.cssText = `
+          position: fixed;
+          width: 12px; height: 12px;
+          background: ${colors[Math.floor(Math.random()*colors.length)]};
+          left: ${50 + (Math.random()-0.5)*40}%;
+          top: 40%;
+          border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+          pointer-events: none;
+          z-index: 999;
+          animation: confetti-fall ${1.5 + Math.random()}s ease-out forwards;
+        `;
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 2500);
+      }
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes confetti-fall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    showScene(0);
+  </script>
+</body>
+</html>
 
