@@ -1,1 +1,541 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Where Is? – Fun Guessing Game for Kids</title>
+  <style>
+    :root {
+      --pink: #ff6b9d;
+      --blue: #4ecdc4;
+      --yellow: #ffe66d;
+      --purple: #a78bfa;
+      --orange: #ff9f43;
+      --green: #26de81;
+      --bg: #fff8f0;
+      --card: #ffffff;
+      --text: #2d3436;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #a29bfe 100%);
+      min-height: 100vh;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+      overflow-x: hidden;
+    }
+    h1 {
+      font-size: clamp(1.8rem, 6vw, 2.6rem);
+      color: #fff;
+      text-shadow: 2px 2px 0 #ff6b9d, 4px 4px 0 rgba(0,0,0,0.1);
+      margin: 8px 0 4px;
+      text-align: center;
+    }
+    .subtitle {
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      text-align: center;
+      opacity: 0.95;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+      padding: 20px;
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+      position: relative;
+    }
+    #start-screen, #end-screen { display: block; }
+    #game-screen { display: none; }
+    .big-btn {
+      background: linear-gradient(135deg, var(--pink), var(--orange));
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 16px 36px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #e17055;
+      transition: transform 0.1s, box-shadow 0.1s;
+      margin: 12px 6px;
+    }
+    .big-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #e17055;
+    }
+    .big-btn.green {
+      background: linear-gradient(135deg, var(--green), #20bf6b);
+      box-shadow: 0 6px 0 #0b9a4a;
+    }
+    .big-btn.blue {
+      background: linear-gradient(135deg, var(--blue), #00b894);
+      box-shadow: 0 6px 0 #008f7a;
+    }
+    .big-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    #picture-container {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #f1f2f6;
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 12px 0;
+      position: relative;
+      border: 4px solid var(--yellow);
+    }
+    #picture {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #fff;
+    }
+    #question {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--purple);
+      margin: 10px 0;
+      min-height: 2.2em;
+    }
+    #mic-status {
+      font-size: 1.1rem;
+      margin: 8px 0;
+      min-height: 1.5em;
+      color: #636e72;
+    }
+    .listening {
+      color: var(--pink) !important;
+      font-weight: 700;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    #feedback {
+      font-size: 1.3rem;
+      font-weight: 700;
+      min-height: 2em;
+      margin: 8px 0;
+    }
+    .correct { color: var(--green); }
+    .wrong { color: #e74c3c; }
+    .score-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .progress {
+      background: #dfe6e9;
+      border-radius: 10px;
+      height: 12px;
+      margin: 8px 0 16px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    .hint {
+      font-size: 0.9rem;
+      color: #636e72;
+      margin-top: 8px;
+    }
+    #answer-input {
+      width: 90%;
+      padding: 12px;
+      font-size: 1.1rem;
+      border: 3px solid var(--purple);
+      border-radius: 12px;
+      margin: 8px 0;
+      text-align: center;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .star {
+      font-size: 2rem;
+      animation: bounce 0.6s ease;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+    }
+    footer {
+      margin-top: 16px;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Where Is?</h1>
+  <p class="subtitle">Look at the picture and tell me where they are!</p>
 
+  <div class="card" id="start-screen">
+    <p style="font-size:1.2rem; margin-bottom:16px;">
+      A fun game for little explorers!<br>
+      The narrator will ask a question.<br>
+      Use your voice (or type) to answer.
+    </p>
+    <p class="hint">Best with Chrome or Edge on phone or computer.<br>
+Allow microphone access when asked.<br><br>
+<strong>Important:</strong> Extract the whole zip folder first.<br>
+Keep the <code>images</code> folder next to <code>index.html</code>.<br>
+For phones, the easiest way is to put it on GitHub Pages.</p>
+    <button class="big-btn" id="start-btn">Start Game!</button>
+  </div>
+
+  <div class="card" id="game-screen">
+    <div class="score-bar">
+      <span>Score: <span id="score">0</span></span>
+      <span><span id="current">1</span> / <span id="total">56</span></span>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progress"></div></div>
+
+    <div id="picture-container">
+      <img id="picture" src="" alt="Guess where they are!" 
+         onerror="this.style.background='#fee'; this.alt='Image missing – make sure the images folder is next to this file'; 
+         document.getElementById('mic-status').textContent='⚠️ Image could not load. Extract the whole folder and keep images/ next to index.html';" />
+    </div>
+
+    <div id="question">Where is the …?</div>
+    <div id="mic-status">Tap the microphone button when ready</div>
+    <div id="feedback"></div>
+
+    <div class="controls">
+      <button class="big-btn blue" id="mic-btn">🎤 Speak Answer</button>
+      <button class="big-btn" id="type-btn">⌨️ Type Answer</button>
+    </div>
+
+    <div id="type-area" style="display:none;">
+      <input type="text" id="answer-input" placeholder="Type your answer here…" autocomplete="off" />
+      <button class="big-btn green" id="submit-btn">Check!</button>
+    </div>
+
+    <button class="big-btn green" id="next-btn" style="display:none;">Next Picture →</button>
+  </div>
+
+  <div class="card" id="end-screen" style="display:none;">
+    <div class="star">⭐</div>
+    <h2 style="margin:12px 0; color:var(--pink);">Well done!</h2>
+    <p style="font-size:1.3rem;">You scored <strong id="final-score">0</strong> out of <span id="final-total">56</span>!</p>
+    <p id="end-message" style="margin:12px 0;"></p>
+    <button class="big-btn" id="replay-btn">Play Again!</button>
+  </div>
+
+  <footer>
+    Made with ❤️ for curious little minds · British narrator · All 56 pictures included
+  </footer>
+
+  <script>
+    const rounds = [
+      { img: "images/alien.jpg", subject: "alien", question: "Where is the alien?", answers: ["watermelon", "in the watermelon", "in a watermelon", "melon"] },
+      { img: "images/anteater.jpg", subject: "anteater", question: "Where is the anteater?", answers: ["story", "reading", "library", "book", "termite town", "with the babies"] },
+      { img: "images/bear_bed.jpg", subject: "bear", question: "Where is the bear?", answers: ["bed", "in bed", "cuddle corner", "soft play", "sleeping", "asleep"] },
+      { img: "images/bear_bike.jpg", subject: "bear", question: "Where is the bear?", answers: ["bike", "bicycle", "on the bike", "campfire", "forest", "adventure"] },
+      { img: "images/beetles.jpg", subject: "beetles", question: "Where are the beetles?", answers: ["zebra crossing", "crossing", "road", "street", "playing guitar", "guitars"] },
+      { img: "images/boy_treasure.jpg", subject: "boy", question: "Where is the boy?", answers: ["treasure", "cave", "egyptian", "pyramid", "gold", "tomb"] },
+      { img: "images/boy_vacuum.jpg", subject: "boy", question: "Where is the boy?", answers: ["hoovering", "vacuum", "carpet", "cleaning", "with the frog", "living room"] },
+      { img: "images/boy_whale.jpg", subject: "boy", question: "Where is the boy?", answers: ["whale", "spout", "on the whale", "water", "sea", "ocean"] },
+      { img: "images/bunny.jpg", subject: "bunny", question: "Where is the bunny?", answers: ["hat", "magic hat", "top hat", "coming out of the hat", "out of the hat"] },
+      { img: "images/camel.jpg", subject: "camel", question: "Where is the camel?", answers: ["bath", "kitchen", "pool", "splash", "bathtub", "paddling pool", "splash zone"] },
+      { img: "images/cat_car.jpg", subject: "cat", question: "Where is the cat?", answers: ["car", "driving", "tunnel", "out of the tunnel", "cattery"] },
+      { img: "images/cat_teacup.jpg", subject: "cat", question: "Where is the cat?", answers: ["teacup", "tea cup", "cup", "in the cup", "in a teacup"] },
+      { img: "images/chicken.jpg", subject: "chicken", question: "Where is the chicken?", answers: ["zoo", "guitar", "playing guitar", "stage", "petting zoo", "music"] },
+      { img: "images/dinosaur.jpg", subject: "dinosaur", question: "Where is the dinosaur?", answers: ["sock", "in the sock", "in a sock", "knitted sock"] },
+      { img: "images/dog_cake.jpg", subject: "dog", question: "Where is the dog?", answers: ["cake", "baking", "museum", "bakery", "cooking"] },
+      { img: "images/dog_pipe.jpg", subject: "dog", question: "Where is the dog?", answers: ["drain pipe", "pipe", "climbing", "up the pipe", "chasing the mouse"] },
+      { img: "images/dog_rainbow.jpg", subject: "dog", question: "Where is the dog?", answers: ["rainbow", "on the rainbow", "running on the rainbow", "sky"] },
+      { img: "images/dolphin.jpg", subject: "dolphin", question: "Where is the dolphin?", answers: ["sea", "ocean", "with the sharks", "underwater", "swimming"] },
+      { img: "images/duck.jpg", subject: "duck", question: "Where is the duck?", answers: ["ambulance", "driving", "snow", "winter", "race rescue"] },
+      { img: "images/elephant_shoe.jpg", subject: "elephant", question: "Where is the elephant?", answers: ["shoe", "in the shoe", "in a shoe", "trainer", "sneaker", "washing"] },
+      { img: "images/elephant_tractor.jpg", subject: "elephant", question: "Where is the elephant?", answers: ["tractor", "driving", "sunflowers", "field", "farm"] },
+      { img: "images/flamingo.jpg", subject: "flamingo", question: "Where is the flamingo?", answers: ["ice", "skating", "ice skating", "frozen", "pond", "ice rink"] },
+      { img: "images/fox_football.jpg", subject: "fox", question: "Where is the fox?", answers: ["island", "football", "playing football", "beach", "soccer"] },
+      { img: "images/fox_police.jpg", subject: "fox", question: "Where is the fox?", answers: ["police", "policeman", "arresting", "pigs", "three little pigs"] },
+      { img: "images/frog_pizza.jpg", subject: "frog", question: "Where is the frog?", answers: ["pizza", "on the pizza", "on a pizza"] },
+      { img: "images/frogs_bump.jpg", subject: "frogs", question: "Where are the frogs?", answers: ["pond", "bumping", "heads", "bumping heads", "lily pad"] },
+      { img: "images/ghost.jpg", subject: "ghost", question: "Where is the ghost?", answers: ["cookie jar", "jar", "biscuit jar", "cooky jar"] },
+      { img: "images/giraffe_bath.jpg", subject: "giraffe", question: "Where is the giraffe?", answers: ["bath", "bathtub", "tub", "in the bath"] },
+      { img: "images/giraffe_golf.jpg", subject: "giraffe", question: "Where is the giraffe?", answers: ["golf", "minigolf", "play park", "playing golf", "park"] },
+      { img: "images/girl_castle.jpg", subject: "girl", question: "Where is the girl?", answers: ["castle", "brushing", "hair", "mirror", "vanity"] },
+      { img: "images/girl_rain.jpg", subject: "girl", question: "Where is the girl?", answers: ["rain", "dancing", "bull", "farm", "puddle"] },
+      { img: "images/gorilla.jpg", subject: "gorilla", question: "Where is the gorilla?", answers: ["moon", "burgers", "cooking", "bbq", "space", "grilling"] },
+      { img: "images/grasshopper.jpg", subject: "grasshopper", question: "Where is the grasshopper?", answers: ["brussels sprout", "sprout", "skateboard", "skateboarding", "bridge"] },
+      { img: "images/hammer.jpg", subject: "hammer", question: "Where is the hammer?", answers: ["tree", "rope", "tying", "park", "playground"] },
+      { img: "images/hippo.jpg", subject: "hippo", question: "Where is the hippo?", answers: ["train", "on the train", "toytown", "railway"] },
+      { img: "images/lady_bathroom.jpg", subject: "lady", question: "Where is the lady?", answers: ["bathroom", "cleaning", "mopping", "floor", "mop"] },
+      { img: "images/lamb_duck.jpg", subject: "lamb", question: "Where is the lamb?", answers: ["toilet", "potty", "duck", "with the duck", "bathroom"] },
+      { img: "images/lion_court.jpg", subject: "lion", question: "Where is the lion?", answers: ["court", "judge", "monkey", "dock", "courtroom"] },
+      { img: "images/lion_book.jpg", subject: "lion", question: "Where is the lion?", answers: ["book", "storybook", "jumping out", "out of the book", "story"] },
+      { img: "images/mermaid.jpg", subject: "mermaid", question: "Where is the mermaid?", answers: ["cactus", "hugging", "desert", "hugging a cactus"] },
+      { img: "images/monkey_dino.jpg", subject: "monkey", question: "Where is the monkey?", answers: ["dinosaur", "on the dinosaur", "riding", "dino"] },
+      { img: "images/monkey_eastbourne.jpg", subject: "monkey", question: "Where is the monkey?", answers: ["eastbourne", "pier", "beach", "sea", "throwing"] },
+      { img: "images/monkey_bed.jpg", subject: "monkey", question: "Where is the monkey?", answers: ["under the bed", "under bed", "beneath the bed"] },
+      { img: "images/penguin.jpg", subject: "penguin", question: "Where is the penguin?", answers: ["cloud", "sliding", "sky", "on a cloud", "planes"] },
+      { img: "images/sailor.jpg", subject: "sailor", question: "Where is the sailor?", answers: ["darts", "barn", "playing darts", "farm"] },
+      { img: "images/skunk.jpg", subject: "skunk", question: "Where is the skunk?", answers: ["slide", "winter", "snow", "on the slide"] },
+      { img: "images/soldier.jpg", subject: "soldier", question: "Where is the soldier?", answers: ["mountain", "comic", "reading", "up a mountain"] },
+      { img: "images/spider.jpg", subject: "spider", question: "Where is the spider?", answers: ["violins", "stage", "playing", "theatre", "concert"] },
+      { img: "images/squirrel.jpg", subject: "squirrel", question: "Where is the squirrel?", answers: ["crocodile", "safari", "throwing", "donut", "park"] },
+      { img: "images/stick_insect.jpg", subject: "stick insect", question: "Where is the stick insect?", answers: ["guitar", "playing guitar", "road", "school"] },
+      { img: "images/superhero.jpg", subject: "superhero", question: "Where is the superhero?", answers: ["moon", "cheese", "eating", "lunar", "space"] },
+      { img: "images/tiger.jpg", subject: "tiger", question: "Where is the tiger?", answers: ["deck chair", "deckchair", "chair", "cruise", "ship", "cruise ship", "lounger"] },
+      { img: "images/unicorn.jpg", subject: "unicorn", question: "Where is the unicorn?", answers: ["toast", "peanut butter", "jam", "bread", "on the toast"] },
+      { img: "images/vampire.jpg", subject: "vampire", question: "Where is the vampire?", answers: ["bathroom", "brushing", "teeth", "sink", "mirror"] },
+      { img: "images/witch.jpg", subject: "witch", question: "Where is the witch?", answers: ["oven", "chicken", "cooking", "kitchen"] },
+      { img: "images/zebra.jpg", subject: "zebra", question: "Where is the zebra?", answers: ["underwater", "under water", "sea", "ocean", "tennis", "playing tennis"] }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let recognition = null;
+    let isListening = false;
+    let hasAnswered = false;
+
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+    const picture = document.getElementById('picture');
+    const questionEl = document.getElementById('question');
+    const micStatus = document.getElementById('mic-status');
+    const feedback = document.getElementById('feedback');
+    const scoreEl = document.getElementById('score');
+    const currentEl = document.getElementById('current');
+    const totalEl = document.getElementById('total');
+    const progress = document.getElementById('progress');
+    const micBtn = document.getElementById('mic-btn');
+    const typeBtn = document.getElementById('type-btn');
+    const typeArea = document.getElementById('type-area');
+    const answerInput = document.getElementById('answer-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    totalEl.textContent = rounds.length;
+    document.getElementById('final-total').textContent = rounds.length;
+
+    function speak(text, onEnd) {
+      if (!window.speechSynthesis) {
+        if (onEnd) onEnd();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-GB';
+      u.rate = 0.92;
+      u.pitch = 1.05;
+
+      const voices = speechSynthesis.getVoices();
+      const preferred = voices.find(v =>
+        v.lang.startsWith('en-GB') && /female|woman|girl|samantha|karen|moira|fiona|serena|victoria/i.test(v.name)
+      ) || voices.find(v => v.lang.startsWith('en-GB')) ||
+         voices.find(v => v.lang.startsWith('en') && /female|woman/i.test(v.name));
+
+      if (preferred) u.voice = preferred;
+
+      u.onend = () => { if (onEnd) onEnd(); };
+      speechSynthesis.speak(u);
+    }
+
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = () => {};
+    }
+
+    function initRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        micStatus.textContent = "Voice not supported on this browser – please type your answer.";
+        micBtn.disabled = true;
+        return null;
+      }
+      const rec = new SpeechRecognition();
+      rec.lang = 'en-GB';
+      rec.interimResults = false;
+      rec.maxAlternatives = 3;
+      rec.continuous = false;
+
+      rec.onstart = () => {
+        isListening = true;
+        micStatus.textContent = "🎤 Listening… speak now!";
+        micStatus.classList.add('listening');
+        micBtn.disabled = true;
+      };
+      rec.onend = () => {
+        isListening = false;
+        micStatus.classList.remove('listening');
+        if (!hasAnswered) {
+          micStatus.textContent = "Didn't catch that. Tap the mic and try again!";
+          micBtn.disabled = false;
+        }
+      };
+      rec.onerror = (e) => {
+        isListening = false;
+        micStatus.classList.remove('listening');
+        micBtn.disabled = false;
+        if (e.error === 'not-allowed') {
+          micStatus.textContent = "Microphone blocked. Please allow mic access or type your answer.";
+        } else {
+          micStatus.textContent = "Hmm, try again or type your answer.";
+        }
+      };
+      rec.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        checkAnswer(transcript);
+      };
+      return rec;
+    }
+
+    function normalize(str) {
+      return str.toLowerCase()
+        .replace(/[^\w\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function checkAnswer(userAnswer) {
+      if (hasAnswered) return;
+      hasAnswered = true;
+      micBtn.disabled = true;
+      typeBtn.disabled = true;
+      answerInput.disabled = true;
+
+      const round = rounds[currentIndex];
+      const norm = normalize(userAnswer);
+      const correct = round.answers.some(a => norm.includes(normalize(a)));
+
+      if (correct) {
+        score++;
+        scoreEl.textContent = score;
+        feedback.innerHTML = '<span class="correct">Yes! Well done! 🎉</span>';
+        speak("Yes! Well done!", () => {
+          nextBtn.style.display = 'inline-block';
+        });
+      } else {
+        feedback.innerHTML = '<span class="wrong">Not quite…</span><br><small>Try: ' + round.answers[0] + '</small>';
+        speak("Not quite. The " + round.subject + " is " + round.answers[0] + ".", () => {
+          nextBtn.style.display = 'inline-block';
+        });
+      }
+      micStatus.textContent = "";
+    }
+
+    function showRound() {
+      hasAnswered = false;
+      const round = rounds[currentIndex];
+      picture.src = round.img;
+      questionEl.textContent = round.question;
+      feedback.textContent = "";
+      micStatus.textContent = "Tap the microphone when you're ready!";
+      nextBtn.style.display = 'none';
+      typeArea.style.display = 'none';
+      answerInput.value = '';
+      answerInput.disabled = false;
+      micBtn.disabled = false;
+      typeBtn.disabled = false;
+
+      currentEl.textContent = currentIndex + 1;
+      progress.style.width = ((currentIndex) / rounds.length * 100) + '%';
+
+      setTimeout(() => {
+        speak(round.question, () => {
+          if (recognition && !hasAnswered) {
+            try { recognition.start(); } catch(e) {}
+          }
+        });
+      }, 600);
+    }
+
+    function nextRound() {
+      currentIndex++;
+      if (currentIndex >= rounds.length) {
+        endGame();
+      } else {
+        showRound();
+      }
+    }
+
+    function endGame() {
+      gameScreen.style.display = 'none';
+      endScreen.style.display = 'block';
+      document.getElementById('final-score').textContent = score;
+      const pct = Math.round(score / rounds.length * 100);
+      let msg = "";
+      if (pct === 100) msg = "Perfect score! You're a superstar explorer! 🌟";
+      else if (pct >= 70) msg = "Brilliant job! You found almost everything!";
+      else if (pct >= 40) msg = "Good try! Keep practising and you'll get even better!";
+      else msg = "Nice effort! Have another go and see if you can find more!";
+      document.getElementById('end-message').textContent = msg;
+      speak("You scored " + score + " out of " + rounds.length + ". " + msg);
+    }
+
+    function startGame() {
+      currentIndex = 0;
+      score = 0;
+      scoreEl.textContent = 0;
+      startScreen.style.display = 'none';
+      endScreen.style.display = 'none';
+      gameScreen.style.display = 'block';
+      recognition = initRecognition();
+      showRound();
+    }
+
+    document.getElementById('start-btn').addEventListener('click', startGame);
+    document.getElementById('replay-btn').addEventListener('click', startGame);
+
+    micBtn.addEventListener('click', () => {
+      if (!recognition) {
+        micStatus.textContent = "Voice not available – please type instead.";
+        return;
+      }
+      if (isListening) return;
+      try {
+        recognition.start();
+      } catch (e) {
+        micStatus.textContent = "Please wait a moment and try again.";
+      }
+    });
+
+    typeBtn.addEventListener('click', () => {
+      typeArea.style.display = 'block';
+      answerInput.focus();
+    });
+
+    submitBtn.addEventListener('click', () => {
+      const val = answerInput.value.trim();
+      if (val) checkAnswer(val);
+    });
+
+    answerInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = answerInput.value.trim();
+        if (val) checkAnswer(val);
+      }
+    });
+
+    nextBtn.addEventListener('click', nextRound);
+
+    document.addEventListener('gesturestart', e => e.preventDefault());
+  </script>
+</body>
+</html>
