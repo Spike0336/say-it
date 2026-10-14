@@ -292,9 +292,34 @@ function catchCharacter(character) {
   }, 600);
 }
 
+function getArticle(name) {
+  // Words that don't take "a"
+  const noArticle = new Set(["water", "rain", "toast", "bread"]);
+  if (noArticle.has(name)) return "";
+  // Words that start with a vowel sound
+  const vowelStart = new Set(["ant", "apple"]);
+  if (vowelStart.has(name) || /^[aeiou]/i.test(name)) return "an ";
+  return "a ";
+}
+
+function getDisplayName(name) {
+  // Friendlier names for speech and celebration
+  const special = {
+    water: "water",
+    rain: "rain",
+    toast: "toast",
+    bread: "bread",
+    shorts: "pair of shorts"
+  };
+  return special[name] || name;
+}
+
+
 function showBigCelebration(name) {
+  const article = getArticle(name);
+  const display = getDisplayName(name);
   catchMessage.innerHTML = `
-    <div class="celebrate-title">🎉 You caught a ${name}! 🎉</div>
+    <div class="celebrate-title">🎉 You caught ${article}${display}! 🎉</div>
     <div class="celebrate-sub">Great job!</div>
   `;
   catchMessage.classList.remove("hidden");
@@ -311,17 +336,32 @@ function showBigCelebration(name) {
 function speakCatch(name) {
   if (!voiceEnabled || !window.speechSynthesis) return;
   speechSynthesis.cancel();
+
+  const article = getArticle(name);
+  const display = getDisplayName(name);
+
   const phrases = [
-    `I'm a ${name}. You caught me!`,
-    `I'm a ${name}! You caught me!`,
-    `You got me! I'm a ${name}!`,
-    `I'm a ${name}. Nice catch!`
+    `I'm ${article}${display}. You caught me!`,
+    `I'm ${article}${display}! You caught me!`,
+    `You got me! I'm ${article}${display}!`,
+    `I'm ${article}${display}. Nice catch!`
   ];
+
   const utter = new SpeechSynthesisUtterance(phrases[Math.floor(Math.random() * phrases.length)]);
   utter.rate = 0.92;
-  utter.pitch = 1.1;
+  utter.pitch = 1.05;
+  utter.lang = "en-GB";
+
+  // Prefer British English female voices
   const voices = speechSynthesis.getVoices();
-  const preferred = voices.find(v => v.lang.startsWith("en") && (v.name.includes("Google") || v.name.includes("Samantha") || v.name.includes("Female"))) || voices.find(v => v.lang.startsWith("en"));
+  let preferred =
+    voices.find(v => v.lang === "en-GB" && /female|woman|girl|hazel|susan|serena|google uk english female/i.test(v.name)) ||
+    voices.find(v => v.lang.startsWith("en-GB") && /female|woman|girl|hazel|susan|serena/i.test(v.name)) ||
+    voices.find(v => v.lang === "en-GB") ||
+    voices.find(v => v.lang.startsWith("en-GB")) ||
+    voices.find(v => v.lang.startsWith("en") && /female|woman|girl/i.test(v.name)) ||
+    voices.find(v => v.lang.startsWith("en"));
+
   if (preferred) utter.voice = preferred;
   speechSynthesis.speak(utter);
 }
