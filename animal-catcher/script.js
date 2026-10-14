@@ -1,90 +1,16 @@
 // =====================================================
-// Animal Catcher - Real photos edition (fixed images)
-// One animal at a time • Clear real pictures • Faster
+// Cute Catcher - Local cartoon images edition
+// One character at a time • Local images • Slow display
 // =====================================================
 
-const ALL_ANIMALS = [
-  "pig", "cow", "horse", "sheep", "goat", "chicken", "duck", "goose", "turkey", "donkey",
-  "rabbit", "hamster", "mouse", "dog", "cat", "lion", "tiger", "elephant", "giraffe", "zebra",
-  "hippopotamus", "rhinoceros", "bear", "panda", "koala", "kangaroo", "monkey", "gorilla",
-  "chimpanzee", "orangutan", "deer", "fox", "wolf", "raccoon", "squirrel", "bat", "camel",
-  "eagle", "owl", "penguin", "flamingo", "swan", "peacock", "snake", "lizard", "crocodile",
-  "turtle", "frog", "fish", "shark", "whale", "dolphin", "octopus", "crab", "lobster",
-  "butterfly", "bee", "ant", "spider", "snail"
+// All characters from the provided images
+const CHARACTERS = [
+  "ant", "bee", "bike", "bird", "boat", "bread", "bus", "car", "cat",
+  "chair", "cow", "dog", "dolphin", "fish", "fly", "fork", "fox", "frog",
+  "helicopter", "hippo", "horse", "kettle", "knife", "mug", "pig", "plane",
+  "plate", "rain", "shark", "shirt", "shoe", "shorts", "skunk", "snail",
+  "sock", "spider", "spoon", "toast", "tree", "wasp", "water", "whale"
 ];
-
-const UNIQUE_ANIMALS = [...new Set(ALL_ANIMALS)];
-
-// Correct Wikimedia Commons file names + official redirect URLs (reliable)
-const ANIMAL_FILES = {
-  "pig": "Sus_scrofa_domesticus,_domesticus.jpg",
-  "cow": "Cow_female_black_white.jpg",
-  "horse": "Dapple_grey_horse.jpg",
-  "sheep": "Flock_of_sheep.jpg",
-  "goat": "Hausziege_04.jpg",
-  "chicken": "Female_and_male_chicken_sitting_together.jpg",
-  "duck": "Anas_platyrhynchos_male_female.jpg",
-  "goose": "Domestic_goose.jpg",
-  "turkey": "Male_wild_turkey.jpg",
-  "donkey": "Donkey_1.jpg",
-  "rabbit": "Oryctolagus_cuniculus_Rcdo.jpg",
-  "hamster": "Golden_Hamster.jpg",
-  "mouse": "Mouse_white.jpg",
-  "dog": "YellowLabradorLooking_new.jpg",
-  "cat": "Cat03.jpg",
-  "lion": "Lion_waiting_in_Namibia.jpg",
-  "tiger": "Walking_tiger_female.jpg",
-  "elephant": "African_Bush_Elephant.jpg",
-  "giraffe": "Giraffe_Mikumi_National_Park.jpg",
-  "zebra": "Equus_quagga_burchellii_-_Etosha,_2014.jpg",
-  "hippopotamus": "Hippo_pod_edit.jpg",
-  "rhinoceros": "White_rhino.jpg",
-  "bear": "2010-kodiak-bear-1.jpg",
-  "panda": "Grosser_Panda.JPG",
-  "koala": "Koala_climbing_tree.jpg",
-  "kangaroo": "Kangaroo_and_joey03.jpg",
-  "monkey": "Vervet_monkey_(Chlorocebus_pygerythrus_pygerythrus).jpg",
-  "gorilla": "Gorille_des_plaines_de_l'ouest_au_Zoo_de_la_Palmyre.jpg",
-  "chimpanzee": "Schimpanse_Zoo_Leipzig.jpg",
-  "orangutan": "Orang_Utan,_Semenggok_Forest_Reserve,_Sarawak,_Borneo,_Malaysia.JPG",
-  "deer": "White-tailed_deer.jpg",
-  "fox": "Fox_-_British_Wildlife_Centre_(17427893391).jpg",
-  "wolf": "Kolmården_Wolf.jpg",
-  "raccoon": "Raccoon_in_Central_Park_(2).jpg",
-  "squirrel": "Eastern_Grey_Squirrel_I4.jpg",
-  "bat": "Flying_fox_at_Botanic_Gardens.jpg",
-  "camel": "07._Camel_Profile,_near_Silverton,_NSW,_07.07.2007.jpg",
-  "eagle": "About_to_Launch_(cropped).jpg",
-  "owl": "Great_Horned_Owl.jpg",
-  "penguin": "Emperor_Penguin_Manchot_empereur.jpg",
-  "flamingo": "Caribbean_flamingo.jpg",
-  "swan": "Swan_on_Lake_Geneva.jpg",
-  "peacock": "Peacock_Plumage.jpg",
-  "snake": "Python_molurus_molurus_2.jpg",
-  "lizard": "Emerald_Swift_Lizard.jpg",
-  "crocodile": "Nile_crocodile_head.jpg",
-  "turtle": "Turtle1.jpg",
-  "frog": "Poison_dart_frog.jpg",
-  "fish": "Goldfish_in_aquarium.jpg",
-  "shark": "White_shark.jpg",
-  "whale": "Humpback_Whale_underwater_shot.jpg",
-  "dolphin": "Tursiops_truncatus_01.jpg",
-  "octopus": "Octopus2.jpg",
-  "crab": "Cancer_pagurus.jpg",
-  "lobster": "Homarus_gammarus.jpg",
-  "butterfly": "Monarch_Butterfly_Danaus_plexippus_Male_2664px.jpg",
-  "bee": "Apis_mellifera_Western_honey_bee.jpg",
-  "ant": "Fire_ants.jpg",
-  "spider": "Spider_February_2008-1.jpg",
-  "snail": "Cornu_aspersum_(Garden_Snail).jpg"
-};
-
-function getImageUrl(name) {
-  const file = ANIMAL_FILES[name];
-  if (!file) return null;
-  // Official Wikimedia redirect – most reliable way
-  return `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${encodeURIComponent(file)}&width=220`;
-}
 
 // ========== GAME STATE ==========
 let score = 0;
@@ -94,7 +20,7 @@ let level = 1;
 let isPlaying = false;
 let isPaused = false;
 let voiceEnabled = true;
-let currentAnimal = null;
+let currentCharacter = null;
 let holes = [];
 let animationId = null;
 let lastSpawn = 0;
@@ -145,7 +71,7 @@ function startGame() {
   caughtCount = 0;
   uniqueCaught.clear();
   level = 1;
-  currentAnimal = null;
+  currentCharacter = null;
   updateHUD();
 
   playArea.querySelectorAll(".hole, .animal").forEach(el => el.remove());
@@ -158,15 +84,15 @@ function startGame() {
 
   lastSpawn = performance.now();
   requestAnimationFrame(gameLoop);
-  setTimeout(() => spawnAnimal(), 500);
+  setTimeout(() => spawnCharacter(), 800);
 }
 
 function restartGame() {
-  if (currentAnimal) {
-    if (currentAnimal.hideTimer) clearTimeout(currentAnimal.hideTimer);
-    if (currentAnimal.el) currentAnimal.el.remove();
+  if (currentCharacter) {
+    if (currentCharacter.hideTimer) clearTimeout(currentCharacter.hideTimer);
+    if (currentCharacter.el) currentCharacter.el.remove();
   }
-  currentAnimal = null;
+  currentCharacter = null;
   startGame();
 }
 
@@ -240,142 +166,130 @@ function updateNetPosition() {
 
 function gameLoop(timestamp) {
   if (!isPlaying || isPaused) return;
-  const gap = Math.max(900, 1800 - level * 80);
-  if (!currentAnimal && timestamp - lastSpawn > gap) {
-    spawnAnimal();
+
+  // Slow spawn rate so images have time to appear and be seen
+  const gap = Math.max(1400, 2400 - level * 60);
+
+  if (!currentCharacter && timestamp - lastSpawn > gap) {
+    spawnCharacter();
     lastSpawn = timestamp;
   }
   if (isNetActive) tryCatch();
   animationId = requestAnimationFrame(gameLoop);
 }
 
-function spawnAnimal() {
-  if (currentAnimal) return;
+function spawnCharacter() {
+  if (currentCharacter) return;
   const freeHoles = holes.filter(h => !h.occupied);
   if (freeHoles.length === 0) return;
 
   const hole = freeHoles[Math.floor(Math.random() * freeHoles.length)];
   hole.occupied = true;
 
-  // Prefer animals that have photo mappings
-  const photoNames = Object.keys(ANIMAL_FILES);
-  const name = Math.random() < 0.9
-    ? photoNames[Math.floor(Math.random() * photoNames.length)]
-    : UNIQUE_ANIMALS[Math.floor(Math.random() * UNIQUE_ANIMALS.length)];
-
+  const name = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
   const size = 160;
+
   const el = document.createElement("div");
   el.className = "animal popping";
   el.style.width = size + "px";
   el.style.height = size + "px";
 
-  const imgUrl = getImageUrl(name);
-  if (imgUrl) {
-    const img = document.createElement("img");
-    img.src = imgUrl;
-    img.alt = name;
-    img.draggable = false;
-    img.loading = "eager";
-    img.onerror = function() {
-      // Nice fallback if image still fails
-      el.innerHTML = "";
-      el.textContent = name;
-      el.style.fontSize = "0.85rem";
-      el.style.fontWeight = "bold";
-      el.style.color = "#3e2723";
-      el.style.background = "#fff9c4";
-      el.style.padding = "4px";
-      el.style.textAlign = "center";
-      el.style.lineHeight = "1.1";
-      el.style.display = "flex";
-      el.style.alignItems = "center";
-      el.style.justifyContent = "center";
-    };
-    el.appendChild(img);
-  } else {
+  // Local image
+  const img = document.createElement("img");
+  img.src = `images/${name}.jpeg`;
+  img.alt = name;
+  img.draggable = false;
+  img.loading = "eager";
+  img.onerror = function() {
+    el.innerHTML = "";
     el.textContent = name;
-    el.style.fontSize = "0.85rem";
+    el.style.fontSize = "1rem";
     el.style.fontWeight = "bold";
     el.style.color = "#3e2723";
     el.style.background = "#fff9c4";
-    el.style.padding = "4px";
+    el.style.display = "flex";
+    el.style.alignItems = "center";
+    el.style.justifyContent = "center";
     el.style.textAlign = "center";
-  }
+    el.style.padding = "8px";
+  };
+  el.appendChild(img);
 
   el.style.left = (hole.x - size / 2) + "px";
   el.style.top = (hole.y - size / 2 - 18) + "px";
   playArea.appendChild(el);
 
-  const stayTime = Math.max(650, 1300 - level * 70) + Math.random() * 180;
+  // Longer display time so the cute pictures can fully render and be enjoyed
+  const stayTime = Math.max(1800, 2800 - level * 50) + Math.random() * 400;
 
-  const animal = { name, el, hole, size, caught: false, hideTimer: null };
+  const character = { name, el, hole, size, caught: false, hideTimer: null };
 
   setTimeout(() => {
-    if (!animal.caught) {
+    if (!character.caught) {
       el.classList.remove("popping");
       el.classList.add("visible");
     }
-  }, 150);
+  }, 200);
 
-  animal.hideTimer = setTimeout(() => {
-    if (!animal.caught) hideAnimal(animal);
+  character.hideTimer = setTimeout(() => {
+    if (!character.caught) hideCharacter(character);
   }, stayTime);
 
-  currentAnimal = animal;
+  currentCharacter = character;
 
   el.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
-    if (!animal.caught) catchAnimal(animal);
+    if (!character.caught) catchCharacter(character);
   });
 }
 
-function hideAnimal(animal) {
-  if (animal.caught || !animal.el) return;
-  animal.el.classList.remove("visible", "popping");
-  animal.el.classList.add("hiding");
+function hideCharacter(character) {
+  if (character.caught || !character.el) return;
+  character.el.classList.remove("visible", "popping");
+  character.el.classList.add("hiding");
   setTimeout(() => {
-    if (animal.el && animal.el.parentNode) animal.el.remove();
-    animal.hole.occupied = false;
-    if (currentAnimal === animal) currentAnimal = null;
+    if (character.el && character.el.parentNode) character.el.remove();
+    character.hole.occupied = false;
+    if (currentCharacter === character) currentCharacter = null;
     lastSpawn = performance.now();
-  }, 250);
+  }, 280);
 }
 
 function tryCatch() {
-  if (!currentAnimal || currentAnimal.caught) return;
-  const netRadius = isNetActive ? 72 : 62;
-  const dist = Math.hypot(currentAnimal.hole.x - netX, currentAnimal.hole.y - netY);
-  if (dist < netRadius + currentAnimal.size * 0.4) {
-    catchAnimal(currentAnimal);
+  if (!currentCharacter || currentCharacter.caught) return;
+  const netRadius = isNetActive ? 75 : 65;
+  const dist = Math.hypot(currentCharacter.hole.x - netX, currentCharacter.hole.y - netY);
+  if (dist < netRadius + currentCharacter.size * 0.4) {
+    catchCharacter(currentCharacter);
   }
 }
 
-function catchAnimal(animal) {
-  if (animal.caught) return;
-  animal.caught = true;
-  if (animal.hideTimer) clearTimeout(animal.hideTimer);
+function catchCharacter(character) {
+  if (character.caught) return;
+  character.caught = true;
+  if (character.hideTimer) clearTimeout(character.hideTimer);
 
-  animal.el.classList.remove("popping", "visible", "hiding");
-  animal.el.classList.add("caught");
+  character.el.classList.remove("popping", "visible", "hiding");
+  character.el.classList.add("caught");
 
-  createBigConfetti(animal.hole.x, animal.hole.y);
+  createBigConfetti(character.hole.x, character.hole.y);
 
   score += 15 + level * 3;
   caughtCount++;
-  uniqueCaught.add(animal.name);
+  uniqueCaught.add(character.name);
   if (caughtCount % 8 === 0) level++;
 
   updateHUD();
-  showBigCelebration(animal.name);
-  speakCatch(animal.name);
+  showBigCelebration(character.name);
+  speakCatch(character.name);
   playFanfare();
 
   setTimeout(() => {
-    if (animal.el && animal.el.parentNode) animal.el.remove();
-    animal.hole.occupied = false;
-    currentAnimal = null;
+    if (character.el && character.el.parentNode) character.el.remove();
+    character.hole.occupied = false;
+    currentCharacter = null;
     lastSpawn = performance.now();
-  }, 550);
+  }, 600);
 }
 
 function showBigCelebration(name) {
@@ -391,7 +305,7 @@ function showBigCelebration(name) {
   setTimeout(() => {
     catchMessage.classList.add("hidden");
     catchMessage.classList.remove("big-celebrate");
-  }, 2200);
+  }, 2400);
 }
 
 function speakCatch(name) {
@@ -404,7 +318,7 @@ function speakCatch(name) {
     `I'm a ${name}. Nice catch!`
   ];
   const utter = new SpeechSynthesisUtterance(phrases[Math.floor(Math.random() * phrases.length)]);
-  utter.rate = 0.93;
+  utter.rate = 0.92;
   utter.pitch = 1.1;
   const voices = speechSynthesis.getVoices();
   const preferred = voices.find(v => v.lang.startsWith("en") && (v.name.includes("Google") || v.name.includes("Samantha") || v.name.includes("Female"))) || voices.find(v => v.lang.startsWith("en"));
