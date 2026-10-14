@@ -5,168 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Animal Paintball Challenge!</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      touch-action: none;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; }
     body {
       background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
-      overflow: hidden;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      overflow: hidden; height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       user-select: none;
     }
     #game-container {
-      position: relative;
-      width: 100%;
-      max-width: 1000px;
-      height: 100vh;
-      max-height: 750px;
+      position: relative; width: 100%; max-width: 1000px;
+      height: 100vh; max-height: 750px;
     }
     canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: 16px;
-      box-shadow: 0 0 40px rgba(0,200,255,0.3);
+      display: block; width: 100%; height: 100%;
+      border-radius: 16px; box-shadow: 0 0 40px rgba(0,200,255,0.3);
       background: linear-gradient(180deg, #0f2027 0%, #203a43 40%, #2c5364 100%);
       cursor: none;
     }
     #ui {
-      position: absolute;
-      top: 12px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: space-between;
-      padding: 0 16px;
-      pointer-events: none;
-      z-index: 10;
-      gap: 8px;
+      position: absolute; top: 12px; left: 0; right: 0;
+      display: flex; justify-content: space-between; padding: 0 16px;
+      pointer-events: none; z-index: 10; gap: 8px;
     }
     .stat-box {
-      background: rgba(0,0,0,0.7);
-      padding: 8px 16px;
-      border-radius: 30px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      border: 2px solid #00d2ff;
+      background: rgba(0,0,0,0.7); padding: 8px 16px; border-radius: 30px;
+      font-size: 18px; font-weight: bold; color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid #00d2ff;
     }
     #message {
-      position: absolute;
-      top: 45%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 28px;
-      font-weight: bold;
-      color: #ff6b6b;
+      position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 26px; font-weight: bold; color: #ff6b6b;
       text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
-      opacity: 0;
-      transition: opacity 0.25s;
-      pointer-events: none;
-      z-index: 20;
-      text-align: center;
-      max-width: 85%;
-      background: rgba(0,0,0,0.6);
-      padding: 12px 24px;
-      border-radius: 16px;
+      opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 20;
+      text-align: center; max-width: 85%;
+      background: rgba(0,0,0,0.65); padding: 14px 28px; border-radius: 16px;
     }
-    #message.show {
-      opacity: 1;
-    }
+    #message.show { opacity: 1; }
     #start-screen {
-      position: absolute;
-      inset: 0;
-      background: rgba(10,20,40,0.97);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 30;
-      border-radius: 16px;
-      text-align: center;
-      padding: 20px;
-      color: #fff;
+      position: absolute; inset: 0; background: rgba(10,20,40,0.97);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 30; border-radius: 16px; text-align: center; padding: 20px; color: #fff;
     }
     #start-screen h1 {
-      font-size: 42px;
-      color: #00d2ff;
-      margin-bottom: 8px;
-      text-shadow: 0 0 20px #00d2ff;
+      font-size: 40px; color: #00d2ff; margin-bottom: 8px; text-shadow: 0 0 20px #00d2ff;
     }
-    #start-screen p {
-      font-size: 17px;
-      color: #bcd;
-      margin: 6px 0;
-      max-width: 420px;
-    }
+    #start-screen p { font-size: 17px; color: #bcd; margin: 6px 0; max-width: 440px; }
     #start-btn {
-      margin-top: 22px;
-      padding: 16px 48px;
-      font-size: 26px;
-      font-weight: bold;
-      background: linear-gradient(180deg, #ff6b6b, #ee5a5a);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
+      margin-top: 22px; padding: 16px 48px; font-size: 26px; font-weight: bold;
+      background: linear-gradient(180deg, #ff6b6b, #ee5a5a); color: white;
+      border: none; border-radius: 50px; cursor: pointer;
       box-shadow: 0 6px 0 #c44545, 0 10px 25px rgba(0,0,0,0.4);
-      transition: transform 0.1s, box-shadow 0.1s;
-      font-family: inherit;
+      transition: transform 0.1s, box-shadow 0.1s; font-family: inherit;
     }
-    #start-btn:hover {
-      transform: translateY(2px);
-      box-shadow: 0 4px 0 #c44545, 0 8px 18px rgba(0,0,0,0.4);
+    #start-btn:hover { transform: translateY(2px); box-shadow: 0 4px 0 #c44545, 0 8px 18px rgba(0,0,0,0.4); }
+    #start-btn:active { transform: translateY(6px); box-shadow: 0 1px 0 #c44545; }
+    .preview-row {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+      margin: 14px 0; max-width: 520px;
     }
-    #start-btn:active {
-      transform: translateY(6px);
-      box-shadow: 0 1px 0 #c44545;
-    }
-    .animal-preview {
-      font-size: 32px;
-      margin: 12px 0;
-      letter-spacing: 6px;
+    .preview-row img {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 2px solid #00d2ff; object-fit: cover; background: #fff;
     }
     #instructions {
-      position: absolute;
-      bottom: 10px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-size: 14px;
-      color: #a0d0ff;
-      background: rgba(0,0,0,0.6);
-      padding: 6px 12px;
-      border-radius: 16px;
-      margin: 0 16px;
-      pointer-events: none;
+      position: absolute; bottom: 10px; left: 0; right: 0; text-align: center;
+      font-size: 14px; color: #a0d0ff; background: rgba(0,0,0,0.6);
+      padding: 6px 12px; border-radius: 16px; margin: 0 16px; pointer-events: none;
     }
     #ammo-bar {
-      position: absolute;
-      bottom: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 180px;
-      height: 12px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid #00d2ff;
-      pointer-events: none;
+      position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+      width: 180px; height: 12px; background: rgba(0,0,0,0.5);
+      border-radius: 6px; overflow: hidden; border: 1px solid #00d2ff; pointer-events: none;
     }
     #ammo-fill {
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(90deg, #00d2ff, #00ff9f);
-      transition: width 0.1s;
+      height: 100%; width: 100%;
+      background: linear-gradient(90deg, #00d2ff, #00ff9f); transition: width 0.1s;
     }
   </style>
 </head>
@@ -183,8 +97,7 @@
     <div id="instructions">Listen for the animal name → Aim the gun → Shoot! Hit it for a big fanfare!</div>
     <div id="start-screen">
       <h1>🎯 Animal Paintball Challenge</h1>
-      <div class="animal-preview">🐯 🦁 🐘 🐻 🦊 🐼 🦓 🦒</div>
-      <p><strong>Over 200 different animals!</strong></p>
+      <div class="preview-row" id="preview-row"></div>
       <p>The narrator will tell you which animal is coming…</p>
       <p><em>“Try and get the frog!”</em></p>
       <p>Then a fast-moving target appears. Hit it for a big fanfare!</p>
@@ -202,6 +115,7 @@
     const startScreen = document.getElementById('start-screen');
     const startBtn = document.getElementById('start-btn');
     const ammoFill = document.getElementById('ammo-fill');
+    const previewRow = document.getElementById('preview-row');
 
     function resize() {
       const container = document.getElementById('game-container');
@@ -211,173 +125,72 @@
     resize();
     window.addEventListener('resize', resize);
 
-    // ========== 220+ ANIMALS ==========
-    const animalNames = [
-      "aardvark","albatross","alligator","alpaca","anaconda","angelfish","ant","anteater","antelope","armadillo",
-      "axolotl","baboon","badger","barracuda","bat","bear","beaver","bee","beetle","bison",
-      "blackbird","boar","bobcat","buffalo","butterfly","camel","capybara","caribou","cassowary","cat",
-      "caterpillar","catfish","centipede","chameleon","cheetah","chicken","chimpanzee","chinchilla","chipmunk","cicada",
-      "clam","clownfish","cobra","cockroach","cod","condor","cougar","cow","coyote","crab",
-      "crane","crayfish","cricket","crocodile","crow","cuckoo","deer","dingo","dinosaur","dog",
-      "dolphin","donkey","dove","dragonfly","duck","dugong","eagle","earthworm","eel","egret",
-      "elephant","elk","emu","falcon","ferret","finch","firefly","flamingo","flea","fly",
-      "fox","frog","gazelle","gecko","gerbil","gibbon","giraffe","goat","goldfish","goose",
-      "gorilla","grasshopper","hamster","hare","hawk","hedgehog","heron","hippopotamus","hornet","horse",
-      "hummingbird","hyena","ibis","iguana","impala","jackal","jaguar","jellyfish","kangaroo","kingfisher",
-      "kiwi","koala","komodo dragon","kookaburra","ladybug","lemur","leopard","lion","lizard","llama",
-      "lobster","lynx","macaw","magpie","manatee","mandrill","manta ray","meerkat","mink","mole",
-      "mongoose","monkey","moose","mosquito","moth","mouse","mule","narwhal","newt","nightingale",
-      "octopus","okapi","opossum","orangutan","orca","ostrich","otter","owl","ox","oyster",
-      "panda","panther","parakeet","parrot","peacock","pelican","penguin","pheasant","pig","pigeon",
-      "piranha","platypus","polar bear","porcupine","possum","prawn","puffin","puma","python","quail",
-      "quokka","rabbit","raccoon","ram","rat","rattlesnake","raven","reindeer","rhinoceros","robin",
-      "rooster","salamander","salmon","sandpiper","scorpion","seahorse","seal","shark","sheep","shrimp",
-      "skunk","sloth","snail","snake","sparrow","spider","squid","squirrel","starfish","stingray",
-      "stork","swan","tamarin","tapir","tarantula","termite","tiger","toad","tortoise","toucan",
-      "trout","turkey","turtle","viper","vulture","wallaby","walrus","wasp","weasel","whale",
-      "wild boar","wolf","wolverine","wombat","woodpecker","worm","yak","zebra","zebu","zorilla"
+    // Only the cute cartoon animals from your attachments
+    const animals = [
+      { name: "ant",     file: "animals/ant.jpeg" },
+      { name: "bee",     file: "animals/bee.jpeg" },
+      { name: "bird",    file: "animals/bird.jpeg" },
+      { name: "cat",     file: "animals/cat.jpeg" },
+      { name: "cow",     file: "animals/cow.jpeg" },
+      { name: "dog",     file: "animals/dog.jpeg" },
+      { name: "dolphin", file: "animals/dolphin.jpeg" },
+      { name: "fish",    file: "animals/fish.jpeg" },
+      { name: "fly",     file: "animals/fly.jpeg" },
+      { name: "fox",     file: "animals/fox.jpeg" },
+      { name: "frog",    file: "animals/frog.jpeg" },
+      { name: "hippo",   file: "animals/hippo.jpeg" },
+      { name: "horse",   file: "animals/horse.jpeg" },
+      { name: "pig",     file: "animals/pig.jpeg" },
+      { name: "shark",   file: "animals/shark.jpeg" },
+      { name: "skunk",   file: "animals/skunk.jpeg" },
+      { name: "snail",   file: "animals/snail.jpeg" },
+      { name: "spider",  file: "animals/spider.jpeg" },
+      { name: "wasp",    file: "animals/wasp.jpeg" },
+      { name: "whale",   file: "animals/whale.jpeg" }
     ];
 
-    // Comprehensive keyword → emoji mapping so almost every animal gets a picture
-    const emojiRules = [
-      ["polar bear", "🐻‍❄️"], ["komodo dragon", "🦎"], ["hippopotamus", "🦛"], ["rhinoceros", "🦏"],
-      ["orangutan", "🦧"], ["chimpanzee", "🐒"], ["gorilla", "🦍"], ["kangaroo", "🦘"], ["wallaby", "🦘"],
-      ["platypus", "🦫"], ["hedgehog", "🦔"], ["porcupine", "🦔"], ["chipmunk", "🐿️"], ["squirrel", "🐿️"],
-      ["raccoon", "🦝"], ["badger", "🦡"], ["skunk", "🦨"], ["otter", "🦦"], ["beaver", "🦫"],
-      ["seal", "🦭"], ["walrus", "🦭"], ["manatee", "🦭"], ["dugong", "🦭"],
-      ["flamingo", "🦩"], ["peacock", "🦚"], ["parrot", "🦜"], ["macaw", "🦜"], ["toucan", "🦜"],
-      ["penguin", "🐧"], ["eagle", "🦅"], ["falcon", "🦅"], ["hawk", "🦅"], ["owl", "🦉"], ["vulture", "🦅"],
-      ["duck", "🦆"], ["swan", "🦢"], ["goose", "🦢"], ["turkey", "🦃"], ["chicken", "🐔"], ["rooster", "🐓"],
-      ["dove", "🕊️"], ["pigeon", "🕊️"], ["butterfly", "🦋"], ["moth", "🦋"], ["bee", "🐝"], ["hornet", "🐝"], ["wasp", "🐝"],
-      ["ant", "🐜"], ["termite", "🐜"], ["ladybug", "🐞"], ["beetle", "🐞"], ["cockroach", "🪳"],
-      ["spider", "🕷️"], ["tarantula", "🕷️"], ["scorpion", "🦂"], ["snail", "🐌"], ["worm", "🪱"], ["earthworm", "🪱"],
-      ["centipede", "🐛"], ["caterpillar", "🐛"], ["grasshopper", "🦗"], ["cricket", "🦗"], ["cicada", "🦗"],
-      ["dragonfly", "🦟"], ["mosquito", "🦟"], ["fly", "🪰"], ["flea", "🪰"],
-      ["crocodile", "🐊"], ["alligator", "🐊"], ["lizard", "🦎"], ["gecko", "🦎"], ["iguana", "🦎"], ["chameleon", "🦎"],
-      ["snake", "🐍"], ["python", "🐍"], ["cobra", "🐍"], ["viper", "🐍"], ["rattlesnake", "🐍"], ["anaconda", "🐍"],
-      ["turtle", "🐢"], ["tortoise", "🐢"], ["frog", "🐸"], ["toad", "🐸"], ["salamander", "🦎"], ["newt", "🦎"], ["axolotl", "🦎"],
-      ["shark", "🦈"], ["whale", "🐋"], ["orca", "🐋"], ["dolphin", "🐬"], ["narwhal", "🐋"],
-      ["salmon", "🐟"], ["trout", "🐟"], ["cod", "🐟"], ["tuna", "🐟"], ["clownfish", "🐠"], ["angelfish", "🐠"],
-      ["goldfish", "🐠"], ["catfish", "🐟"], ["piranha", "🐟"], ["eel", "🐍"], ["jellyfish", "🪼"],
-      ["octopus", "🐙"], ["squid", "🦑"], ["crab", "🦀"], ["lobster", "🦞"], ["shrimp", "🦐"], ["prawn", "🦐"], ["crayfish", "🦞"],
-      ["clam", "🐚"], ["oyster", "🐚"], ["starfish", "⭐"], ["stingray", "🐟"], ["manta ray", "🐟"], ["seahorse", "🐠"],
-      ["tiger", "🐯"], ["lion", "🦁"], ["leopard", "🐆"], ["cheetah", "🐆"], ["jaguar", "🐆"], ["panther", "🐆"],
-      ["cougar", "🐈"], ["puma", "🐈"], ["lynx", "🐈"], ["bobcat", "🐈"], ["cat", "🐱"],
-      ["dog", "🐶"], ["wolf", "🐺"], ["fox", "🦊"], ["jackal", "🐺"], ["coyote", "🐺"], ["dingo", "🐕"], ["hyena", "🐺"],
-      ["bear", "🐻"], ["panda", "🐼"], ["koala", "🐨"], ["elephant", "🐘"], ["mammoth", "🦣"],
-      ["giraffe", "🦒"], ["zebra", "🦓"], ["horse", "🐴"], ["donkey", "🫏"], ["mule", "🫏"],
-      ["camel", "🐪"], ["llama", "🦙"], ["alpaca", "🦙"], ["deer", "🦌"], ["elk", "🦌"], ["moose", "🫎"],
-      ["caribou", "🦌"], ["reindeer", "🦌"], ["antelope", "🦌"], ["gazelle", "🦌"], ["impala", "🦌"],
-      ["bison", "🦬"], ["buffalo", "🐃"], ["ox", "🐂"], ["cow", "🐄"], ["bull", "🐂"],
-      ["pig", "🐷"], ["boar", "🐗"], ["sheep", "🐑"], ["ram", "🐏"], ["goat", "🐐"],
-      ["rabbit", "🐰"], ["hare", "🐰"], ["mouse", "🐭"], ["rat", "🐀"], ["hamster", "🐹"], ["gerbil", "🐹"], ["mole", "🐀"],
-      ["bat", "🦇"], ["monkey", "🐒"], ["baboon", "🐒"], ["mandrill", "🐒"], ["gibbon", "🐒"], ["lemur", "🐒"], ["tamarin", "🐒"],
-      ["ape", "🦍"], ["sloth", "🦥"], ["armadillo", "🦔"], ["anteater", "🦔"], ["aardvark", "🦔"],
-      ["wombat", "🐨"], ["opossum", "🐀"], ["possum", "🐀"], ["mink", "🦦"], ["weasel", "🦦"], ["ferret", "🦦"],
-      ["mongoose", "🦦"], ["meerkat", "🦦"], ["yak", "🐂"], ["zebu", "🐂"], ["tapir", "🐷"], ["okapi", "🦒"],
-      ["quokka", "🦘"], ["capybara", "🦫"], ["chinchilla", "🐹"], ["dinosaur", "🦕"], ["dragon", "🐉"],
-      ["puffin", "🐧"], ["sandpiper", "🐦"], ["nightingale", "🐦"], ["kookaburra", "🐦"], ["pheasant", "🐦"],
-      ["quail", "🐦"], ["parakeet", "🦜"], ["zorilla", "🦨"], ["wolverine", "🦡"], ["wild boar", "🐗"]
-    ];
+    const imageCache = {};
+    animals.forEach(a => {
+      const img = new Image();
+      img.src = a.file;
+      imageCache[a.name] = img;
+      const thumb = document.createElement('img');
+      thumb.src = a.file;
+      thumb.alt = a.name;
+      previewRow.appendChild(thumb);
+    });
 
-    function getEmoji(name) {
-      const lower = name.toLowerCase();
-      // Exact / contains match from rules
-      for (const [key, emoji] of emojiRules) {
-        if (lower === key || lower.includes(key) || key.includes(lower)) {
-          return emoji;
-        }
-      }
-      // Broad category fallbacks so almost nothing shows only a letter
-      if (/bird|jay|warbler|sparrow|finch|dove|pigeon|crow|raven|robin|owl|eagle|hawk|falcon|duck|swan|goose|chicken|turkey|penguin|parrot|flamingo|peacock|toucan|stork|crane|heron|pelican|albatross|condor|vulture|woodpecker|kingfisher|humming|magpie|cuckoo|quail|pheasant|ostrich|emu|kiwi|cassowary|nightingale|kookaburra|puffin|sandpiper|blue jay/.test(lower)) return "🐦";
-      if (/fish|shark|whale|dolphin|ray|eel|salmon|trout|tuna|cod|piranha|goldfish|clownfish|angelfish|catfish|seahorse|barracuda/.test(lower)) return "🐟";
-      if (/snake|python|cobra|viper|rattlesnake|anaconda/.test(lower)) return "🐍";
-      if (/lizard|gecko|iguana|chameleon|salamander|newt|axolotl|komodo/.test(lower)) return "🦎";
-      if (/bug|insect|beetle|ant|bee|wasp|hornet|fly|mosquito|moth|butterfly|cricket|grasshopper|cicada|dragonfly|cockroach|termite|flea|ladybug|spider|scorpion|centipede|caterpillar|tarantula/.test(lower)) return "🐛";
-      if (/crab|lobster|shrimp|prawn|crayfish|clam|oyster|starfish|octopus|squid|jellyfish/.test(lower)) return "🦀";
-      if (/frog|toad/.test(lower)) return "🐸";
-      if (/turtle|tortoise/.test(lower)) return "🐢";
-      if (/croc|alligator/.test(lower)) return "🐊";
-      // Friendly paw-print fallback instead of a plain letter
-      return "🐾";
-    }
-
-    // Colors for targets
     const targetColors = [
-      "#FF6B6B","#4ECDC4","#FFE66D","#FF9FF3","#54A0FF","#5F27CD","#01A3A4","#FF9F43",
-      "#10ac84","#ee5a24","#0abde3","#c8d6e5","#f368e0","#ff9f43","#48dbfb","#1dd1a1"
+      "#FF6B6B","#4ECDC4","#FFE66D","#FF9FF3","#54A0FF","#5F27CD",
+      "#01A3A4","#FF9F43","#10ac84","#ee5a24","#0abde3","#f368e0"
     ];
-
     const paintColors = ["#FF6B6B","#4ECDC4","#FFE66D","#FF9FF3","#54A0FF","#5F27CD","#01A3A4","#FF9F43","#00ff9f","#ff4757"];
 
-    // Game state
     let score = 0, hits = 0, missed = 0;
     let gameRunning = false;
-    let paintballs = [];
-    let targets = [];
-    let particles = [];
-    let lastTime = 0;
-    let aimAngle = -Math.PI / 2; // straight up
-    let mouseX = 0, mouseY = 0;
-    let cooldown = 0;
-    const COOLDOWN_TIME = 0.38; // seconds between shots - makes it harder
+    let paintballs = [], targets = [], particles = [];
+    let lastTime = 0, aimAngle = -Math.PI / 2, cooldown = 0;
+    const COOLDOWN_TIME = 0.38;
     let gunX, gunY;
-
-    // Announcement / round state
-    // "waiting" | "announcing" | "active" | "celebrating"
     let roundState = "waiting";
-    let pendingAnimal = null; // { name, emoji, color }
-    let announceTimer = 0;
-    let celebrateTimer = 0;
-    let audioCtx = null;
+    let pendingAnimal = null, celebrateTimer = 0, audioCtx = null;
 
     class Target {
       constructor(animalData) {
-        this.applyAnimal(animalData);
-      }
-
-      applyAnimal(animalData) {
         this.name = animalData.name;
-        this.emoji = animalData.emoji;
-        this.color = animalData.color;
-        // Bigger targets so the animal photo is easy to see
-        this.radius = 58 + Math.random() * 14;
+        this.img = imageCache[animalData.name];
+        this.color = targetColors[Math.floor(Math.random() * targetColors.length)];
+        this.radius = 60 + Math.random() * 12;
         this.x = this.radius + Math.random() * (canvas.width - this.radius * 2);
-        this.y = this.radius + 70 + Math.random() * (canvas.height * 0.5);
-        // Quite fast movement so one shot is hard
+        this.y = this.radius + 70 + Math.random() * (canvas.height * 0.48);
         const speed = 4.5 + Math.random() * 3.5;
         const angle = Math.random() * Math.PI * 2;
         this.vx = Math.cos(angle) * speed;
         this.vy = Math.sin(angle) * speed;
-        this.hit = false;
-        this.hitTime = 0;
-        this.scale = 1;
-        this.rotation = 0;
+        this.hit = false; this.hitTime = 0; this.scale = 1; this.rotation = 0;
         this.wobble = Math.random() * Math.PI * 2;
-        this.lifetime = 12 + Math.random() * 8;
-        this.age = 0;
-
-        // Load a real photo of the animal (centered & clipped to circle)
-        this.img = new Image();
-        this.img.crossOrigin = "anonymous";
-        this.imgLoaded = false;
-        this.imgFailed = false;
-        const tag = encodeURIComponent(this.name.replace(/\s+/g, ","));
-        // loremflickr serves real animal photos by keyword for most common animals
-        this.img.src = `https://loremflickr.com/200/200/${tag},animal/all`;
-        this.img.onload = () => { this.imgLoaded = true; };
-        this.img.onerror = () => {
-          // Fallback: try a simpler tag
-          if (!this._triedFallback) {
-            this._triedFallback = true;
-            const simple = encodeURIComponent(this.name.split(" ")[0]);
-            this.img.src = `https://loremflickr.com/200/200/${simple}/all`;
-          } else {
-            this.imgFailed = true;
-          }
-        };
+        this.lifetime = 12 + Math.random() * 8; this.age = 0;
       }
-
       update(dt) {
         if (this.hit) {
           this.hitTime += dt;
@@ -385,20 +198,14 @@
           this.rotation += dt * 14;
           return;
         }
-
         this.age += dt;
         if (this.age > this.lifetime) {
-          missed++;
-          missedEl.textContent = missed;
-          targets = [];
-          startNextRound();
-          return;
+          missed++; missedEl.textContent = missed;
+          targets = []; startNextRound(); return;
         }
-
         this.wobble += dt * 4;
         this.x += this.vx + Math.sin(this.wobble) * 1.4;
         this.y += this.vy + Math.cos(this.wobble * 1.3) * 1.1;
-
         if (this.x < this.radius || this.x > canvas.width - this.radius) {
           this.vx *= -1;
           this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
@@ -407,178 +214,122 @@
           this.vy *= -1;
           this.y = Math.max(this.radius + 55, Math.min(canvas.height * 0.72, this.y));
         }
-
         if (Math.random() < 0.018) {
           this.vx += (Math.random() - 0.5) * 3.5;
           this.vy += (Math.random() - 0.5) * 3.5;
           const sp = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-          if (sp > 8) {
-            this.vx *= 8 / sp;
-            this.vy *= 8 / sp;
-          }
+          if (sp > 8) { this.vx *= 8 / sp; this.vy *= 8 / sp; }
         }
       }
-
       draw() {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation);
         ctx.scale(this.scale, this.scale);
-
         if (!this.hit && this.age > this.lifetime - 2.5) {
           const pulse = 0.5 + 0.5 * Math.sin(this.age * 12);
-          ctx.globalAlpha = 0.4 + pulse * 0.4;
+          ctx.globalAlpha = 0.45 + pulse * 0.4;
         }
-
-        // Shadow
         ctx.beginPath();
-        ctx.arc(3, 5, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,0,0,0.25)";
+        ctx.arc(4, 6, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.28)";
         ctx.fill();
-
-        // Coloured outer ring (target border)
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         ctx.fill();
         ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.stroke();
-
-        // White inner circle as photo background
-        const innerR = this.radius * 0.82;
+        const innerR = this.radius * 0.84;
         ctx.beginPath();
         ctx.arc(0, 0, innerR, 0, Math.PI * 2);
         ctx.fillStyle = "#fff";
         ctx.fill();
-
-        // Draw the animal photo, clipped to a perfect circle and centered
-        if (this.imgLoaded && this.img.naturalWidth > 0) {
+        if (this.img && this.img.complete && this.img.naturalWidth > 0) {
           ctx.save();
           ctx.beginPath();
           ctx.arc(0, 0, innerR - 2, 0, Math.PI * 2);
           ctx.clip();
-
-          // Cover-style centering so the animal fills the circle nicely
-          const imgW = this.img.naturalWidth;
-          const imgH = this.img.naturalHeight;
+          const imgW = this.img.naturalWidth, imgH = this.img.naturalHeight;
           const size = (innerR - 2) * 2;
           const scale = Math.max(size / imgW, size / imgH);
-          const drawW = imgW * scale;
-          const drawH = imgH * scale;
+          const drawW = imgW * scale, drawH = imgH * scale;
           ctx.drawImage(this.img, -drawW / 2, -drawH / 2, drawW, drawH);
           ctx.restore();
-        } else {
-          // While loading or if photo failed → show emoji as temporary picture
-          ctx.font = `${this.radius * 0.9}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", Arial, sans-serif`;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(this.emoji || "🐾", 0, 1);
         }
-
-        // Thin inner border on top of the photo
         ctx.beginPath();
         ctx.arc(0, 0, innerR - 1, 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(255,255,255,0.7)";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgba(255,255,255,0.75)";
+        ctx.lineWidth = 2.5;
         ctx.stroke();
-
         ctx.restore();
         ctx.globalAlpha = 1;
       }
-
       checkHit(px, py, pr) {
         if (this.hit) return false;
-        const dx = this.x - px;
-        const dy = this.y - py;
+        const dx = this.x - px, dy = this.y - py;
         return Math.sqrt(dx * dx + dy * dy) < this.radius + pr * 0.85;
       }
     }
 
     class Paintball {
       constructor(x, y, angle) {
-        this.x = x;
-        this.y = y;
+        this.x = x; this.y = y;
         const speed = 16 + Math.random() * 2;
         this.vx = Math.cos(angle) * speed;
         this.vy = Math.sin(angle) * speed;
-        this.radius = 8;
+        this.radius = 9;
         this.color = paintColors[Math.floor(Math.random() * paintColors.length)];
-        this.alive = true;
-        this.trail = [];
+        this.alive = true; this.trail = [];
       }
-
       update(dt) {
         this.trail.push({ x: this.x, y: this.y });
         if (this.trail.length > 7) this.trail.shift();
-
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += 0.22; // gravity - must lead shots
-
-        if (this.x < -30 || this.x > canvas.width + 30 ||
-            this.y < -30 || this.y > canvas.height + 30) {
+        this.x += this.vx; this.y += this.vy; this.vy += 0.22;
+        if (this.x < -30 || this.x > canvas.width + 30 || this.y < -30 || this.y > canvas.height + 30)
           this.alive = false;
-        }
       }
-
       draw() {
         for (let i = 0; i < this.trail.length; i++) {
           const t = this.trail[i];
           const a = (i + 1) / this.trail.length * 0.5;
           ctx.beginPath();
           ctx.arc(t.x, t.y, this.radius * (0.3 + i * 0.1), 0, Math.PI * 2);
-          ctx.fillStyle = this.color;
-          ctx.globalAlpha = a;
-          ctx.fill();
+          ctx.fillStyle = this.color; ctx.globalAlpha = a; ctx.fill();
         }
         ctx.globalAlpha = 1;
-
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        ctx.strokeStyle = "rgba(255,255,255,0.7)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.fillStyle = this.color; ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineWidth = 2; ctx.stroke();
       }
     }
 
     class Particle {
       constructor(x, y, color) {
-        this.x = x;
-        this.y = y;
+        this.x = x; this.y = y;
         this.vx = (Math.random() - 0.5) * 14;
         this.vy = (Math.random() - 0.5) * 14;
         this.radius = 2 + Math.random() * 5;
-        this.color = color;
-        this.life = 1;
+        this.color = color; this.life = 1;
         this.decay = 0.025 + Math.random() * 0.03;
       }
       update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += 0.25;
-        this.life -= this.decay;
-        this.radius *= 0.97;
+        this.x += this.vx; this.y += this.vy;
+        this.vy += 0.25; this.life -= this.decay; this.radius *= 0.97;
       }
       draw() {
         ctx.globalAlpha = Math.max(0, this.life);
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
+        ctx.fillStyle = this.color; ctx.fill();
         ctx.globalAlpha = 1;
       }
     }
 
     function pickRandomAnimal() {
-      const name = animalNames[Math.floor(Math.random() * animalNames.length)];
-      return {
-        name: name,
-        emoji: getEmoji(name),
-        color: targetColors[Math.floor(Math.random() * targetColors.length)]
-      };
+      return animals[Math.floor(Math.random() * animals.length)];
     }
 
     function showMessage(text, duration = 1600) {
@@ -595,9 +346,7 @@
       }
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.rate = 0.92;
-      u.pitch = 1.1;
-      u.volume = 1;
+      u.rate = 0.92; u.pitch = 1.1; u.volume = 1;
       const voices = window.speechSynthesis.getVoices();
       const preferred = voices.find(v =>
         v.name.includes("Google") || v.name.includes("Samantha") ||
@@ -606,110 +355,79 @@
       if (preferred) u.voice = preferred;
       if (onEnd) {
         u.onend = onEnd;
-        // Safety timeout in case onend doesn't fire
         setTimeout(() => { if (roundState === "announcing") onEnd(); }, 3500);
       }
       window.speechSynthesis.speak(u);
     }
 
-    // Big triumphant fanfare using Web Audio API
     function playFanfare() {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const ctx = audioCtx;
-        const now = ctx.currentTime;
-
-        // Triumphant ascending notes
+        const ctxA = audioCtx;
+        const now = ctxA.currentTime;
         const notes = [
-          { f: 523.25, t: 0.00, d: 0.18 }, // C5
-          { f: 659.25, t: 0.15, d: 0.18 }, // E5
-          { f: 783.99, t: 0.30, d: 0.18 }, // G5
-          { f: 1046.50, t: 0.45, d: 0.45 }, // C6
-          { f: 783.99, t: 0.70, d: 0.15 }, // G5
-          { f: 1046.50, t: 0.85, d: 0.55 }  // C6 long
+          { f: 523.25, t: 0.00, d: 0.18 }, { f: 659.25, t: 0.15, d: 0.18 },
+          { f: 783.99, t: 0.30, d: 0.18 }, { f: 1046.50, t: 0.45, d: 0.45 },
+          { f: 783.99, t: 0.70, d: 0.15 }, { f: 1046.50, t: 0.85, d: 0.55 }
         ];
-
         notes.forEach(n => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "square";
-          osc.frequency.value = n.f;
+          const osc = ctxA.createOscillator();
+          const gain = ctxA.createGain();
+          osc.type = "square"; osc.frequency.value = n.f;
           gain.gain.setValueAtTime(0, now + n.t);
           gain.gain.linearRampToValueAtTime(0.18, now + n.t + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(now + n.t);
-          osc.stop(now + n.t + n.d + 0.05);
+          osc.connect(gain); gain.connect(ctxA.destination);
+          osc.start(now + n.t); osc.stop(now + n.t + n.d + 0.05);
         });
-
-        // Extra sparkle (higher triangle notes)
         [1318.5, 1568, 2093].forEach((f, i) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "triangle";
-          osc.frequency.value = f;
+          const osc = ctxA.createOscillator();
+          const gain = ctxA.createGain();
+          osc.type = "triangle"; osc.frequency.value = f;
           const t = now + 0.5 + i * 0.08;
           gain.gain.setValueAtTime(0, t);
           gain.gain.linearRampToValueAtTime(0.12, t + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(t);
-          osc.stop(t + 0.4);
+          osc.connect(gain); gain.connect(ctxA.destination);
+          osc.start(t); osc.stop(t + 0.4);
         });
-      } catch (e) {
-        console.warn("Fanfare audio failed", e);
-      }
+      } catch (e) {}
     }
 
     function createExplosion(x, y, color) {
       for (let i = 0; i < 28; i++) particles.push(new Particle(x, y, color));
-      // Extra burst of particles for big fanfare feel
       for (let i = 0; i < 12; i++) {
         const p = new Particle(x, y, "#FFE66D");
-        p.vx *= 1.4;
-        p.vy *= 1.4;
+        p.vx *= 1.4; p.vy *= 1.4;
         particles.push(p);
       }
     }
 
     function startNextRound() {
-      targets = [];
-      paintballs = [];
+      targets = []; paintballs = [];
       pendingAnimal = pickRandomAnimal();
       roundState = "announcing";
-      announceTimer = 0;
-
-      const article = /^[aeiou]/i.test(pendingAnimal.name) ? "an" : "a";
-      const phrase = `Try and get the ${pendingAnimal.name}!`;
-      showMessage(`🎤 ${phrase}`, 2800);
+      const phrase = "Try and get the " + pendingAnimal.name + "!";
+      showMessage("🎤 " + phrase, 2800);
       speak(phrase, () => {
-        // After narrator finishes, spawn the animal
         if (roundState !== "announcing") return;
         targets = [new Target(pendingAnimal)];
         roundState = "active";
-        showMessage(`${pendingAnimal.emoji || "🎯"} Here comes the ${pendingAnimal.name}!`, 1200);
+        showMessage("Here comes the " + pendingAnimal.name + "!", 1200);
       });
     }
 
     function onTargetHit(t, paintColor) {
-      t.hit = true;
-      t.hitTime = 0;
-      score += 15;
-      hits++;
-      scoreEl.textContent = score;
-      hitsEl.textContent = hits;
-
+      t.hit = true; t.hitTime = 0;
+      score += 15; hits++;
+      scoreEl.textContent = score; hitsEl.textContent = hits;
       createExplosion(t.x, t.y, paintColor);
       playFanfare();
-
-      const hitPhrase = `I am a ${t.name}. You hit me!`;
-      showMessage(`🎉 ${t.emoji || "🎯"} ${hitPhrase} 🎉`, 2500);
+      const hitPhrase = "I am a " + t.name + ". You hit me!";
+      showMessage("🎉 " + hitPhrase + " 🎉", 2500);
       speak(hitPhrase);
-
       roundState = "celebrating";
-      celebrateTimer = 2.8; // wait for fanfare + speech then next round
+      celebrateTimer = 2.8;
     }
 
     function shoot() {
@@ -720,33 +438,21 @@
       paintballs.push(new Paintball(muzzleX, muzzleY, aimAngle));
     }
 
-    // Input – mouse / touch aim
     function updateAim(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
-      mouseX = (clientX - rect.left) * scaleX;
-      mouseY = (clientY - rect.top) * scaleY;
-
-      gunX = canvas.width / 2;
-      gunY = canvas.height - 25;
-
-      // Aim angle limited to roughly left-up-right (not straight down)
-      let angle = Math.atan2(mouseY - gunY, mouseX - gunX);
-      // Clamp so gun can't point too far down
-      const minA = -Math.PI + 0.25;
-      const maxA = -0.25;
+      const mx = (clientX - rect.left) * scaleX;
+      const my = (clientY - rect.top) * scaleY;
+      gunX = canvas.width / 2; gunY = canvas.height - 25;
+      let angle = Math.atan2(my - gunY, mx - gunX);
+      const minA = -Math.PI + 0.25, maxA = -0.25;
       if (angle > 0) angle = angle > Math.PI / 2 ? minA : maxA;
       aimAngle = Math.max(minA, Math.min(maxA, angle));
     }
 
-    canvas.addEventListener("mousemove", e => {
-      updateAim(e.clientX, e.clientY);
-    });
-    canvas.addEventListener("mousedown", e => {
-      updateAim(e.clientX, e.clientY);
-      shoot();
-    });
+    canvas.addEventListener("mousemove", e => updateAim(e.clientX, e.clientY));
+    canvas.addEventListener("mousedown", e => { updateAim(e.clientX, e.clientY); shoot(); });
     canvas.addEventListener("touchmove", e => {
       e.preventDefault();
       if (e.touches.length) updateAim(e.touches[0].clientX, e.touches[0].clientY);
@@ -758,157 +464,79 @@
         shoot();
       }
     }, { passive: false });
-
     document.body.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
 
-    // Keyboard aim assist (optional)
     const keys = {};
     window.addEventListener("keydown", e => {
       keys[e.key] = true;
-      if (e.key === " " || e.key === "Enter") {
-        e.preventDefault();
-        shoot();
-      }
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); shoot(); }
     });
     window.addEventListener("keyup", e => { keys[e.key] = false; });
 
     function drawGun() {
-      gunX = canvas.width / 2;
-      gunY = canvas.height - 25;
-
+      gunX = canvas.width / 2; gunY = canvas.height - 25;
       ctx.save();
       ctx.translate(gunX, gunY);
-      ctx.rotate(aimAngle + Math.PI / 2); // gun points along aimAngle
-
-      // Gun body
-      ctx.fillStyle = "#2d3436";
-      ctx.fillRect(-14, -8, 28, 50);
-      ctx.fillStyle = "#636e72";
-      ctx.fillRect(-10, -6, 20, 40);
-
-      // Barrel
-      ctx.fillStyle = "#1e272e";
-      ctx.fillRect(-6, -55, 12, 50);
-      ctx.fillStyle = "#576574";
-      ctx.fillRect(-4, -52, 8, 45);
-
-      // Muzzle
-      ctx.beginPath();
-      ctx.arc(0, -55, 9, 0, Math.PI * 2);
-      ctx.fillStyle = "#2d3436";
-      ctx.fill();
-      ctx.strokeStyle = "#00d2ff";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Grip
-      ctx.fillStyle = "#ee5a24";
-      ctx.fillRect(-12, 30, 24, 22);
-
-      // Sight
-      ctx.strokeStyle = "#00ff9f";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(-8, -20);
-      ctx.lineTo(0, -28);
-      ctx.lineTo(8, -20);
-      ctx.stroke();
-
+      ctx.rotate(aimAngle + Math.PI / 2);
+      ctx.fillStyle = "#2d3436"; ctx.fillRect(-14, -8, 28, 50);
+      ctx.fillStyle = "#636e72"; ctx.fillRect(-10, -6, 20, 40);
+      ctx.fillStyle = "#1e272e"; ctx.fillRect(-6, -55, 12, 50);
+      ctx.fillStyle = "#576574"; ctx.fillRect(-4, -52, 8, 45);
+      ctx.beginPath(); ctx.arc(0, -55, 9, 0, Math.PI * 2);
+      ctx.fillStyle = "#2d3436"; ctx.fill();
+      ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = "#ee5a24"; ctx.fillRect(-12, 30, 24, 22);
+      ctx.strokeStyle = "#00ff9f"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(-8, -20); ctx.lineTo(0, -28); ctx.lineTo(8, -20); ctx.stroke();
       ctx.restore();
-
-      // Base platform
       ctx.beginPath();
       ctx.ellipse(gunX, gunY + 18, 45, 14, 0, 0, Math.PI * 2);
-      ctx.fillStyle = "#2d3436";
-      ctx.fill();
-      ctx.strokeStyle = "#00d2ff";
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      ctx.fillStyle = "#2d3436"; ctx.fill();
+      ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 2; ctx.stroke();
     }
 
     function drawCrosshair() {
-      // Small indicator in aim direction
       const hx = gunX + Math.cos(aimAngle) * 90;
       const hy = gunY + Math.sin(aimAngle) * 90;
+      ctx.beginPath(); ctx.arc(hx, hy, 6, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(0,210,255,0.7)"; ctx.lineWidth = 2; ctx.stroke();
       ctx.beginPath();
-      ctx.arc(hx, hy, 6, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(0,210,255,0.7)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(hx - 10, hy);
-      ctx.lineTo(hx + 10, hy);
-      ctx.moveTo(hx, hy - 10);
-      ctx.lineTo(hx, hy + 10);
-      ctx.stroke();
+      ctx.moveTo(hx - 10, hy); ctx.lineTo(hx + 10, hy);
+      ctx.moveTo(hx, hy - 10); ctx.lineTo(hx, hy + 10); ctx.stroke();
     }
 
     function gameLoop(timestamp) {
       const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
       lastTime = timestamp;
-
       if (cooldown > 0) cooldown -= dt;
       ammoFill.style.width = ((1 - cooldown / COOLDOWN_TIME) * 100) + "%";
-
-      // Keyboard fine aim
       if (keys["ArrowLeft"] || keys["a"] || keys["A"]) aimAngle -= 1.8 * dt;
       if (keys["ArrowRight"] || keys["d"] || keys["D"]) aimAngle += 1.8 * dt;
       aimAngle = Math.max(-Math.PI + 0.25, Math.min(-0.25, aimAngle));
-
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Atmosphere
-      const grd = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grd.addColorStop(0, "rgba(0,50,80,0.3)");
-      grd.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Targets
-      for (const t of targets) {
-        t.update(dt);
-        t.draw();
-      }
-
-      // Paintballs + collision
+      for (const t of targets) { t.update(dt); t.draw(); }
       for (let i = paintballs.length - 1; i >= 0; i--) {
         const p = paintballs[i];
-        p.update(dt);
-        p.draw();
-        if (!p.alive) {
-          paintballs.splice(i, 1);
-          continue;
-        }
+        p.update(dt); p.draw();
+        if (!p.alive) { paintballs.splice(i, 1); continue; }
         if (roundState === "active") {
           for (const t of targets) {
             if (t.checkHit(p.x, p.y, p.radius)) {
-              p.alive = false;
-              paintballs.splice(i, 1);
-              onTargetHit(t, p.color);
-              break;
+              p.alive = false; paintballs.splice(i, 1);
+              onTargetHit(t, p.color); break;
             }
           }
         }
       }
-
-      // Celebration timer → next round
       if (roundState === "celebrating") {
         celebrateTimer -= dt;
-        if (celebrateTimer <= 0) {
-          startNextRound();
-        }
+        if (celebrateTimer <= 0) startNextRound();
       }
-
-      // Particles
       for (let i = particles.length - 1; i >= 0; i--) {
-        particles[i].update();
-        particles[i].draw();
+        particles[i].update(); particles[i].draw();
         if (particles[i].life <= 0) particles.splice(i, 1);
       }
-
-      drawGun();
-      drawCrosshair();
-
+      drawGun(); drawCrosshair();
       if (gameRunning) requestAnimationFrame(gameLoop);
     }
 
@@ -917,22 +545,16 @@
       gameRunning = true;
       score = hits = missed = 0;
       scoreEl.textContent = hitsEl.textContent = missedEl.textContent = "0";
-      paintballs = [];
-      particles = [];
-      targets = [];
-      cooldown = 0;
-      roundState = "waiting";
+      paintballs = []; particles = []; targets = [];
+      cooldown = 0; roundState = "waiting";
       lastTime = performance.now();
-      gunX = canvas.width / 2;
-      gunY = canvas.height - 25;
+      gunX = canvas.width / 2; gunY = canvas.height - 25;
       aimAngle = -Math.PI / 2;
-      // Resume audio context on user gesture
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === "suspended") audioCtx.resume();
       } catch (e) {}
       if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
-      // Kick off first announcement
       startNextRound();
       requestAnimationFrame(gameLoop);
     });
