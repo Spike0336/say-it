@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animal Paintball Challenge</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    h1 {
+      margin: 12px 0 4px;
+      font-size: 1.6rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    #hud {
+      display: flex;
+      gap: 28px;
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    #hud span { background: rgba(255,255,255,0.12); padding: 4px 14px; border-radius: 20px; }
+    #game-wrap {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    canvas {
+      display: block;
+      background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 40%, #C8E6C9 70%, #A5D6A7 100%);
+      cursor: crosshair;
+    }
+    #message {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      background: rgba(0,0,0,0.45);
+      padding: 10px 22px;
+      border-radius: 12px;
+      max-width: 90%;
+    }
+    #message.show { opacity: 1; }
+    #start-screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 20, 40, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      text-align: center;
+      padding: 20px;
+    }
+    #start-screen h2 { font-size: 2rem; margin-bottom: 12px; }
+    #start-screen p { max-width: 420px; line-height: 1.5; margin-bottom: 8px; opacity: 0.9; }
+    #startBtn {
+      margin-top: 18px;
+      padding: 14px 36px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    #startBtn:hover:not(:disabled) { transform: scale(1.05); }
+    #startBtn:disabled { cursor: wait; }
+    #preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      max-width: 640px;
+      margin-top: 14px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    #preview img {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    #controls {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      opacity: 0.75;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Animal Paintball Challenge</h1>
+  <div id="hud">
+    <span>Score: <strong id="score">0</strong></span>
+    <span>Hits: <strong id="hits">0</strong></span>
+    <span>Missed: <strong id="missed">0</strong></span>
+  </div>
+  <div id="game-wrap">
+    <canvas id="game" width="900" height="560"></canvas>
+    <div id="message"></div>
+    <div id="start-screen">
+      <h2>Ready to Play?</h2>
+      <p>Listen carefully! A friendly British narrator will tell you which picture is coming next.</p>
+      <p>Move the mouse to aim the paintball gun. Click (or press Space) to shoot.</p>
+      <p>Only one target appears at a time and it moves fast – be quick!</p>
+      <button id="startBtn" disabled>Loading pictures…</button>
+      <div id="preview"></div>
+    </div>
+  </div>
+  <div id="controls">Mouse = aim · Click / Space = shoot · One target at a time</div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const startScreen = document.getElementById('start-screen');
+    const startBtn = document.getElementById('startBtn');
+    const messageEl = document.getElementById('message');
+    const previewRow = document.getElementById('preview');
+    const scoreEl = document.getElementById('score');
+    const hitsEl = document.getElementById('hits');
+    const missedEl = document.getElementById('missed');
+
+    // ── All 88 targets ─────────────────────────────────────────────────
+    const NAMES = [
+      "ant","apple","banana","bath","bathroom","bed","bee","bike","bin","bird",
+      "boat","box","bread","bull","bus","butterfly","camel","car","carpet","cat",
+      "chair","clock","cooker","cow","cupboard","deer","dog","dolphin","door","fish",
+      "floor","fly","fork","fox","fridge","frog","garden","giraffe","helicopter","hippo",
+      "home","horse","house","kettle","kitchen","knife","lamp","light","lion","lizard",
+      "monkey","moth","mug","orange","pig","pillow","plane","plate","rain","shark",
+      "sheep","shirt","shoe","shorts","shower","sink","skunk","snail","snake","sock",
+      "sofa","spider","spoon","stairs","table","tiger","toast","toilet","torch","toy",
+      "tree","turtle","wall","wasp","water","whale","window","worm"
+    ];
+
+    const animals = NAMES.map(n => ({ name: n, file: `animals/${n}.jpeg` }));
+
+    // ── Image preloading ───────────────────────────────────────────────
+    const imageCache = {};
+    let imagesLoadedCount = 0;
+    let imagesReady = false;
+
+    startBtn.disabled = true;
+    startBtn.style.opacity = '0.6';
+
+    function markLoaded() {
+      imagesLoadedCount++;
+      startBtn.textContent = `Loading pictures… ${imagesLoadedCount}/${animals.length}`;
+      if (imagesLoadedCount >= animals.length) {
+        imagesReady = true;
+        startBtn.disabled = false;
+        startBtn.textContent = 'Start Challenge!';
+        startBtn.style.opacity = '1';
+      }
+    }
+
+    animals.forEach(a => {
+      const img = new Image();
+      img.onload = markLoaded;
+      img.onerror = markLoaded;
+      img.src = a.file;
+      imageCache[a.name] = img;
+
+      const thumb = document.createElement('img');
+      thumb.src = a.file;
+      thumb.alt = a.name;
+      previewRow.appendChild(thumb);
+    });
+
+    // ── British female voice ───────────────────────────────────────────
+    let britishVoice = null;
+    function pickBritishFemaleVoice() {
+      const voices = speechSynthesis.getVoices();
+      const preferred = [
+        'Google UK English Female',
+        'Microsoft Susan - English (United Kingdom)',
+        'Microsoft Hazel - English (United Kingdom)',
+        'Karen', 'Moira', 'Fiona', 'Serena'
+      ];
+      for (const name of preferred) {
+        const v = voices.find(v => v.name.includes(name));
+        if (v) { britishVoice = v; return; }
+      }
+      britishVoice = voices.find(v => v.lang === 'en-GB' || v.lang.startsWith('en-GB')) ||
+                     voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female')) ||
+                     voices.find(v => v.lang.startsWith('en')) ||
+                     voices[0];
+    }
+    speechSynthesis.onvoiceschanged = pickBritishFemaleVoice;
+    pickBritishFemaleVoice();
+
+    function speak(text, onEnd) {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-GB';
+      u.rate = 0.92;
+      u.pitch = 1.05;
+      if (britishVoice) u.voice = britishVoice;
+      u.onend = () => { if (onEnd) onEnd(); };
+      u.onerror = () => { if (onEnd) onEnd(); };
+      speechSynthesis.speak(u);
+    }
+
+    // ── Game state ─────────────────────────────────────────────────────
+    const targetColors = [
+      '#FF6B6B','#4ECDC4','#FFE66D','#FF9FF3','#54A0FF','#5F27CD',
+      '#01A3A4','#FF9F43','#10ac84','#ee5a24','#0abde3','#f368e0'
+    ];
+    const paintColors = ['#FF6B6B','#4ECDC4','#FFE66D','#FF9FF3','#54A0FF','#5F27CD','#01A3A4','#FF9F43','#00ff9f','#ff4757'];
+
+    let score = 0, hits = 0, missed = 0;
+    let gameRunning = false;
+    let paintballs = [], targets = [], particles = [];
+    let lastTime = 0, aimAngle = -Math.PI / 2, cooldown = 0;
+    const COOLDOWN_TIME = 0.40;
+    let gunX, gunY;
+    let roundState = 'waiting';
+    let pendingAnimal = null;
+    let celebrateTimer = 0;
+    let spawnDelayTimer = 0;
+    let audioCtx = null;
+
+    // ── Target class ───────────────────────────────────────────────────
+    class Target {
+      constructor(animalData) {
+        this.name = animalData.name;
+        this.img = imageCache[animalData.name];
+        this.radius = 68;
+        this.x = Math.random() < 0.5 ? -this.radius - 20 : canvas.width + this.radius + 20;
+        this.y = 90 + Math.random() * (canvas.height - 260);
+        this.vx = (this.x < 0 ? 1 : -1) * (4.2 + Math.random() * 2.8);
+        this.vy = (Math.random() - 0.5) * 1.8;
+        this.wobble = Math.random() * Math.PI * 2;
+        this.color = targetColors[Math.floor(Math.random() * targetColors.length)];
+        this.hit = false;
+        this.life = 1;
+      }
+
+      update(dt) {
+        if (this.hit) {
+          this.life -= dt * 2.2;
+          return this.life > 0;
+        }
+        this.x += this.vx * dt * 60;
+        this.y += this.vy * dt * 60;
+        this.wobble += dt * 5;
+        this.y += Math.sin(this.wobble) * 0.55;
+
+        if (this.y < this.radius + 10) { this.y = this.radius + 10; this.vy *= -1; }
+        if (this.y > canvas.height - 140) { this.y = canvas.height - 140; this.vy *= -1; }
+
+        if (this.x < -this.radius - 80 || this.x > canvas.width + this.radius + 80) {
+          return false;
+        }
+        return true;
+      }
+
+      draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        if (this.hit) {
+          ctx.globalAlpha = Math.max(0, this.life);
+          ctx.scale(1 + (1 - this.life) * 0.6, 1 + (1 - this.life) * 0.6);
+        }
+
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius + 6, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = 0.35;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 5;
+        ctx.stroke();
+
+        const innerR = this.radius - 6;
+
+        if (this.img && this.img.complete && this.img.naturalWidth > 0) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(0, 0, innerR - 1, 0, Math.PI * 2);
+          ctx.clip();
+          const imgW = this.img.naturalWidth;
+          const imgH = this.img.naturalHeight;
+          const size = (innerR - 1) * 2;
+          const scale = Math.max(size / imgW, size / imgH);
+          const drawW = imgW * scale;
+          const drawH = imgH * scale;
+          ctx.drawImage(this.img, -drawW / 2, -drawH / 2, drawW, drawH);
+          ctx.restore();
+        } else {
+          ctx.fillStyle = '#f0f0f0';
+          ctx.beginPath();
+          ctx.arc(0, 0, innerR - 1, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = this.color;
+          ctx.font = 'bold 28px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(this.name.charAt(0).toUpperCase(), 0, 2);
+        }
+
+        ctx.restore();
+      }
+
+      contains(px, py) {
+        const dx = px - this.x, dy = py - this.y;
+        return dx * dx + dy * dy <= this.radius * this.radius;
+      }
+    }
+
+    // ── Paintball ──────────────────────────────────────────────────────
+    class Paintball {
+      constructor(x, y, angle) {
+        this.x = x; this.y = y;
+        this.vx = Math.cos(angle) * 16;
+        this.vy = Math.sin(angle) * 16;
+        this.radius = 7;
+        this.color = paintColors[Math.floor(Math.random() * paintColors.length)];
+        this.alive = true;
+      }
+      update(dt) {
+        this.x += this.vx * dt * 60;
+        this.y += this.vy * dt * 60;
+        this.vy += 0.18 * dt * 60;
+        if (this.x < -20 || this.x > canvas.width + 20 || this.y > canvas.height + 20) this.alive = false;
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+
+    function spawnParticles(x, y, color) {
+      for (let i = 0; i < 28; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const sp = 2 + Math.random() * 6;
+        particles.push({
+          x, y,
+          vx: Math.cos(a) * sp,
+          vy: Math.sin(a) * sp,
+          life: 0.6 + Math.random() * 0.5,
+          maxLife: 1,
+          color,
+          size: 3 + Math.random() * 5
+        });
+      }
+    }
+
+    function playFanfare() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.18, now + i * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + i * 0.12);
+          osc.stop(now + i * 0.12 + 0.45);
+        });
+      } catch (e) {}
+    }
+
+    function showMessage(text, ms) {
+      messageEl.textContent = text;
+      messageEl.classList.add('show');
+      clearTimeout(showMessage._t);
+      showMessage._t = setTimeout(() => messageEl.classList.remove('show'), ms);
+    }
+
+    function pickRandomAnimal() {
+      return animals[Math.floor(Math.random() * animals.length)];
+    }
+
+    function updateHud() {
+      scoreEl.textContent = score;
+      hitsEl.textContent = hits;
+      missedEl.textContent = missed;
+    }
+
+    function startNextRound() {
+      targets = [];
+      paintballs = [];
+      pendingAnimal = pickRandomAnimal();
+      roundState = 'announcing';
+      spawnDelayTimer = 0;
+
+      const img = imageCache[pendingAnimal.name];
+      if (img && img.decode) img.decode().catch(() => {});
+
+      const phrase = 'Try and get the ' + pendingAnimal.name + '!';
+      showMessage('🎤 ' + phrase, 3800);
+      speak(phrase, () => {
+        if (roundState !== 'announcing') return;
+        // Long pause after speech so the picture has time to be fully ready
+        roundState = 'waiting_to_spawn';
+        spawnDelayTimer = 1.8;
+        showMessage('Get ready…', 1600);
+      });
+    }
+
+    function onHit(target) {
+      target.hit = true;
+      hits++;
+      score += 10;
+      updateHud();
+      spawnParticles(target.x, target.y, target.color);
+      playFanfare();
+
+      const line = 'I am a ' + target.name + '. You hit me!';
+      showMessage('🎉 ' + line, 2800);
+      speak(line);
+
+      roundState = 'celebrating';
+      celebrateTimer = 3.4;
+    }
+
+    function getGunPos() {
+      gunX = canvas.width / 2;
+      gunY = canvas.height - 28;
+    }
+
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+      getGunPos();
+      aimAngle = Math.atan2(my - gunY, mx - gunX);
+      if (aimAngle > 0.15) aimAngle = 0.15;
+      if (aimAngle < -Math.PI + 0.15) aimAngle = -Math.PI + 0.15;
+    });
+
+    function tryShoot() {
+      if (!gameRunning || cooldown > 0 || roundState !== 'active') return;
+      getGunPos();
+      const barrelLen = 48;
+      const bx = gunX + Math.cos(aimAngle) * barrelLen;
+      const by = gunY + Math.sin(aimAngle) * barrelLen;
+      paintballs.push(new Paintball(bx, by, aimAngle));
+      cooldown = COOLDOWN_TIME;
+    }
+
+    canvas.addEventListener('click', tryShoot);
+    window.addEventListener('keydown', e => {
+      if (e.code === 'Space') { e.preventDefault(); tryShoot(); }
+    });
+
+    startBtn.addEventListener('click', () => {
+      if (!imagesReady) return;
+      startScreen.style.display = 'none';
+      gameRunning = true;
+      score = hits = missed = 0;
+      updateHud();
+      try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+      startNextRound();
+      requestAnimationFrame(loop);
+    });
+
+    function drawGun(ctx) {
+      getGunPos();
+      ctx.save();
+      ctx.translate(gunX, gunY);
+      ctx.rotate(aimAngle);
+      ctx.fillStyle = '#333';
+      ctx.fillRect(-8, -12, 55, 24);
+      ctx.fillStyle = '#222';
+      ctx.fillRect(40, -6, 22, 12);
+      ctx.fillStyle = '#555';
+      ctx.fillRect(-18, 4, 16, 22);
+      ctx.fillStyle = '#FF6B6B';
+      ctx.beginPath();
+      ctx.arc(62, 0, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function loop(timestamp) {
+      if (!gameRunning) return;
+      const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+      lastTime = timestamp;
+
+      if (cooldown > 0) cooldown -= dt;
+
+      if (roundState === 'waiting_to_spawn') {
+        spawnDelayTimer -= dt;
+        if (spawnDelayTimer <= 0) {
+          targets = [new Target(pendingAnimal)];
+          roundState = 'active';
+          showMessage('Here comes the ' + pendingAnimal.name + '!', 1500);
+        }
+      }
+
+      if (roundState === 'celebrating') {
+        celebrateTimer -= dt;
+        if (celebrateTimer <= 0) startNextRound();
+      }
+
+      paintballs.forEach(p => p.update(dt));
+      paintballs = paintballs.filter(p => p.alive);
+
+      for (let i = targets.length - 1; i >= 0; i--) {
+        const t = targets[i];
+        const stillAlive = t.update(dt);
+        if (!stillAlive) {
+          if (!t.hit && roundState === 'active') {
+            missed++;
+            updateHud();
+            showMessage('Oh no! The ' + t.name + ' got away!', 1800);
+            roundState = 'celebrating';
+            celebrateTimer = 2.4;
+          }
+          targets.splice(i, 1);
+          continue;
+        }
+        if (!t.hit) {
+          for (const p of paintballs) {
+            if (t.contains(p.x, p.y)) {
+              p.alive = false;
+              onHit(t);
+              break;
+            }
+          }
+        }
+      }
+
+      particles.forEach(pt => {
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.vy += 0.12;
+        pt.life -= dt;
+      });
+      particles = particles.filter(pt => pt.life > 0);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(76, 175, 80, 0.25)';
+      ctx.fillRect(0, canvas.height - 90, canvas.width, 90);
+
+      targets.forEach(t => t.draw(ctx));
+      paintballs.forEach(p => p.draw(ctx));
+
+      particles.forEach(pt => {
+        ctx.globalAlpha = pt.life / pt.maxLife;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size * (pt.life / pt.maxLife), 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+
+      drawGun(ctx);
+      requestAnimationFrame(loop);
+    }
+  </script>
+</body>
+</html>
