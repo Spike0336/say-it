@@ -1,16 +1,33 @@
 // =====================================================
 // Cute Catcher - Local cartoon images edition
-// One character at a time • Local images • Slow display
+// One character at a time • Local images • Slow display for reliable rendering
 // =====================================================
 
-// All characters from the provided images
+// All characters from the provided cute cartoon images
 const CHARACTERS = [
-  "ant", "bee", "bike", "bird", "boat", "bread", "bus", "car", "cat",
-  "chair", "cow", "dog", "dolphin", "fish", "fly", "fork", "fox", "frog",
-  "helicopter", "hippo", "horse", "kettle", "knife", "mug", "pig", "plane",
-  "plate", "rain", "shark", "shirt", "shoe", "shorts", "skunk", "snail",
-  "sock", "spider", "spoon", "toast", "tree", "wasp", "water", "whale"
+  "ant", "apple", "banana", "bath", "bathroom", "bed", "bee", "bike", "bin",
+  "bird", "boat", "box", "bread", "bull", "bus", "butterfly", "camel", "car",
+  "carpet", "cat", "chair", "clock", "cooker", "cow", "cupboard", "deer",
+  "dog", "dolphin", "door", "fish", "floor", "fly", "fork", "fox", "fridge",
+  "frog", "garden", "giraffe", "helicopter", "hippo", "home", "horse", "house",
+  "kettle", "kitchen", "knife", "lamp", "light", "lion", "lizard", "monkey",
+  "moth", "mug", "orange", "pig", "pillow", "plane", "plate", "rain", "shark",
+  "sheep", "shirt", "shoe", "shorts", "shower", "sink", "skunk", "snail",
+  "snake", "sock", "sofa", "spider", "spoon", "stairs", "table", "tiger",
+  "toast", "toilet", "torch", "toy", "tree", "turtle", "wall", "wasp",
+  "water", "whale", "window", "worm"
 ];
+
+// Preload all images so they are ready when characters appear
+const imageCache = {};
+function preloadImages() {
+  CHARACTERS.forEach(name => {
+    const img = new Image();
+    img.src = `images/${name}.jpeg`;
+    imageCache[name] = img;
+  });
+}
+preloadImages();
 
 // ========== GAME STATE ==========
 let score = 0;
@@ -84,7 +101,8 @@ function startGame() {
 
   lastSpawn = performance.now();
   requestAnimationFrame(gameLoop);
-  setTimeout(() => spawnCharacter(), 800);
+  // Give a moment for the first image to be ready after preloading
+  setTimeout(() => spawnCharacter(), 1200);
 }
 
 function restartGame() {
@@ -167,8 +185,9 @@ function updateNetPosition() {
 function gameLoop(timestamp) {
   if (!isPlaying || isPaused) return;
 
-  // Slow spawn rate so images have time to appear and be seen
-  const gap = Math.max(1400, 2400 - level * 60);
+  // Even slower spawn rate so images have plenty of time to fully render and be enjoyed
+  // Base gap starts high and only gently decreases with level
+  const gap = Math.max(2200, 3400 - level * 80);
 
   if (!currentCharacter && timestamp - lastSpawn > gap) {
     spawnCharacter();
@@ -194,16 +213,18 @@ function spawnCharacter() {
   el.style.width = size + "px";
   el.style.height = size + "px";
 
-  // Local image
+  // Local image (pre-loaded for reliable fast display)
   const img = document.createElement("img");
-  img.src = `images/${name}.jpeg`;
+  // Use the already-preloaded image source so it appears instantly from browser cache
+  img.src = imageCache[name] ? imageCache[name].src : `images/${name}.jpeg`;
   img.alt = name;
   img.draggable = false;
   img.loading = "eager";
+  img.decoding = "async";
   img.onerror = function() {
     el.innerHTML = "";
     el.textContent = name;
-    el.style.fontSize = "1rem";
+    el.style.fontSize = "1.1rem";
     el.style.fontWeight = "bold";
     el.style.color = "#3e2723";
     el.style.background = "#fff9c4";
@@ -219,8 +240,9 @@ function spawnCharacter() {
   el.style.top = (hole.y - size / 2 - 18) + "px";
   playArea.appendChild(el);
 
-  // Longer display time so the cute pictures can fully render and be enjoyed
-  const stayTime = Math.max(1800, 2800 - level * 50) + Math.random() * 400;
+  // Much longer display time so the pictures fully render and children have time to see and catch them
+  // Starts around 3.5–4 seconds and stays generous even at higher levels
+  const stayTime = Math.max(2600, 3800 - level * 60) + Math.random() * 500;
 
   const character = { name, el, hole, size, caught: false, hideTimer: null };
 
@@ -293,23 +315,24 @@ function catchCharacter(character) {
 }
 
 function getArticle(name) {
-  // Words that don't take "a"
+  // Uncountable / mass nouns – no article
   const noArticle = new Set(["water", "rain", "toast", "bread"]);
   if (noArticle.has(name)) return "";
-  // Words that start with a vowel sound
-  const vowelStart = new Set(["ant", "apple"]);
+  // Vowel sounds need "an"
+  const vowelStart = new Set(["ant", "apple", "orange"]);
   if (vowelStart.has(name) || /^[aeiou]/i.test(name)) return "an ";
   return "a ";
 }
 
 function getDisplayName(name) {
-  // Friendlier names for speech and celebration
+  // Special display forms for natural speech
   const special = {
     water: "water",
     rain: "rain",
     toast: "toast",
     bread: "bread",
-    shorts: "pair of shorts"
+    shorts: "pair of shorts",
+    stairs: "pair of stairs"
   };
   return special[name] || name;
 }

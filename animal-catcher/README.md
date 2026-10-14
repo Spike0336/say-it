@@ -1,8 +1,8 @@
 # 🦋 Cute Catcher
 
-**A fun children's game where real character photos pop out of holes in the ground!**
+**A fun children's game where adorable cartoon characters pop out of holes in the ground!**
 
-Only one character appears at a time and they disappear quickly – so catching them feels exciting. When you catch one you get a big celebration with confetti, a fanfare, and the character proudly says:
+Only one character appears at a time and they disappear quickly – so catching them feels exciting. When you catch one you get a big celebration with confetti, a fanfare, and a friendly British voice says:
 
 *"I'm a frog. You caught me!"*
 
@@ -10,17 +10,18 @@ Only one character appears at a time and they disappear quickly – so catching 
 
 ## ✨ Features
 
-- **240+ different cute characters** – farm cute characters, wild cute characters, birds, sea creatures, insects and more
-- **Real character photos** from Wikimedia Commons (clear pictures of lions, frogs, elephants, etc.)
-- **One character at a time** – pops out of a hole and disappears quickly
-- **Faster pace** – stays visible for a shorter time as you level up
+- **88 different cute cartoon characters** – animals, food, household objects, vehicles and more
+- **Beautiful hand-drawn style images** – clear, colourful and friendly for children
+- **One character at a time** – pops out of a hole
+- **Generous display time** so the pictures fully render and children can see them clearly
+- Pace gently increases as you level up
 - **Big celebration** on every catch: confetti explosion + triumphant fanfare + voice
-- **Voice announcements** – clear phrases like “I’m a frog. You caught me!”
+- **British female narrator** with correct grammar (“I’m an ant…”, “I’m water…”, etc.)
 - **Big friendly net** – move with mouse or finger, click/tap to catch
 - **Touch-friendly** – works great on tablets and phones
-- **Score, unique cute characters, levels** – difficulty gently increases
+- **Score, unique characters, levels** – difficulty gently increases
 - **No installs, no accounts** – just open and play
-- **100% offline** after first load (pure HTML/CSS/JS)
+- **100% offline** (pure HTML/CSS/JS + local images)
 
 ---
 
@@ -28,9 +29,9 @@ Only one character appears at a time and they disappear quickly – so catching 
 
 1. Click **Start Catching!**
 2. Watch the holes – cute characters pop up quickly then dive back down
-3. Move the green net over an character and click / tap (or just tap the character)
+3. Move the green net over a character and click / tap (or just tap the character)
 4. Enjoy the big confetti celebration and listen to the character announce itself
-5. Catch as many as you can and try to discover lots of different cute characters
+5. Catch as many as you can and try to discover lots of different characters
 
 ---
 
@@ -39,68 +40,45 @@ Only one character appears at a time and they disappear quickly – so catching 
 ### Option 1 – Just open it
 Double-click `index.html` or open it in any modern browser (Chrome, Firefox, Edge, Safari).
 
-### Option 2 – Local server (recommended for best speech support)
+### Option 2 – Local server (recommended)
 ```bash
-# If you have Python
-python -m http.server 8000
+# Python
+python3 -m http.server 8000
 
-# Or with Node
+# or Node
 npx serve .
 ```
 Then open http://localhost:8000
 
----
-
-## 📤 Putting it on GitHub
-
-1. Create a new repository on GitHub (for example `character-catcher`)
-2. Upload all the files in this folder:
-   - `index.html`
-   - `style.css`
-   - `script.js`
-   - `README.md`
-3. (Optional) Enable **GitHub Pages**:
-   - Go to the repo → Settings → Pages
-   - Source: Deploy from a branch → `main` / root
-   - Your game will be live at `https://yourusername.github.io/character-catcher/`
-
-That’s it! Kids can play it anywhere.
+### Option 3 – GitHub Pages
+1. Create a new repository on GitHub
+2. Upload all the files (including the `images/` folder)
+3. Go to **Settings → Pages**
+4. Select the main branch and click Save
+5. Your game will be live at `https://yourusername.github.io/repository-name/`
 
 ---
 
-## 🛠️ Project Structure
+## 📁 Project Structure
 
 ```
-character-catcher/
-├── index.html      # Main page
-├── style.css       # All the colorful styling & animations
-├── script.js       # Game logic + 220+ cute characters + voice
-└── README.md       # This file
+animal-catcher/
+├── index.html          # Main game page
+├── style.css           # All styling and animations
+├── script.js           # Game logic, voice, confetti
+├── images/             # 88 cute cartoon character pictures
+├── README.md
+└── LICENSE
 ```
 
 ---
 
-## 🎤 Voice Notes
+## 🗣️ Voice
 
-- Works in Chrome, Edge, Safari and most modern browsers
-- Uses the Web Speech API (no internet needed after page load)
-- You can turn the voice on/off with the button at the bottom
-- Some browsers need a user click before they allow speech
+The game uses the browser’s built-in Speech Synthesis and prefers a **British English female** voice when available.
 
 ---
 
-## 🎨 Customization Ideas
+## 📄 Licence
 
-Want to make it your own?
-- Add more cute characters in the `ANIMALS` array in `script.js`
-- Change colors in `style.css`
-- Add character facts or sounds
-- Add a “collection book” of all cute characters you’ve caught
-
----
-
-## 📄 License
-
-MIT License – feel free to use, share, modify and put it in your own projects or classrooms.
-
-Made with ❤️ for curious kids who love cute characters.
+MIT – free to use, modify and share.
