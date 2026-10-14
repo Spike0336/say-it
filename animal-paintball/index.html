@@ -150,10 +150,32 @@
     ];
 
     const imageCache = {};
+    let imagesReady = false;
+    let imagesLoadedCount = 0;
+
+    // Disable start until all pictures are fully loaded
+    startBtn.disabled = true;
+    startBtn.textContent = "Loading animals…";
+    startBtn.style.opacity = "0.6";
+
+    function markImageLoaded() {
+      imagesLoadedCount++;
+      startBtn.textContent = "Loading animals… " + imagesLoadedCount + "/" + animals.length;
+      if (imagesLoadedCount >= animals.length) {
+        imagesReady = true;
+        startBtn.disabled = false;
+        startBtn.textContent = "Start Challenge!";
+        startBtn.style.opacity = "1";
+      }
+    }
+
     animals.forEach(a => {
       const img = new Image();
+      img.onload = markImageLoaded;
+      img.onerror = markImageLoaded; // still count so game can start
       img.src = a.file;
       imageCache[a.name] = img;
+
       const thumb = document.createElement('img');
       thumb.src = a.file;
       thumb.alt = a.name;
@@ -174,6 +196,7 @@
     let gunX, gunY;
     let roundState = "waiting";
     let pendingAnimal = null, celebrateTimer = 0, audioCtx = null;
+    let spawnDelayTimer = 0; // extra wait so the picture is fully ready
 
     class Target {
       constructor(animalData) {
@@ -253,10 +276,22 @@
           ctx.clip();
           const imgW = this.img.naturalWidth, imgH = this.img.naturalHeight;
           const size = (innerR - 2) * 2;
+          // Cover-style: fill the circle completely, image stays centered
           const scale = Math.max(size / imgW, size / imgH);
           const drawW = imgW * scale, drawH = imgH * scale;
           ctx.drawImage(this.img, -drawW / 2, -drawH / 2, drawW, drawH);
           ctx.restore();
+        } else {
+          // Soft loading placeholder while image finishes
+          ctx.fillStyle = "#eee";
+          ctx.beginPath();
+          ctx.arc(0, 0, innerR - 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = this.color;
+          ctx.font = "bold 22px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(this.name.charAt(0).toUpperCase(), 0, 2);
         }
         ctx.beginPath();
         ctx.arc(0, 0, innerR - 1, 0, Math.PI * 2);
@@ -407,13 +442,22 @@
       targets = []; paintballs = [];
       pendingAnimal = pickRandomAnimal();
       roundState = "announcing";
+      spawnDelayTimer = 0;
+
+      // Make sure this animal's image is fully decoded before we show it
+      const img = imageCache[pendingAnimal.name];
+      if (img && img.decode) {
+        img.decode().catch(() => {});
+      }
+
       const phrase = "Try and get the " + pendingAnimal.name + "!";
-      showMessage("🎤 " + phrase, 2800);
+      showMessage("🎤 " + phrase, 3200);
       speak(phrase, () => {
         if (roundState !== "announcing") return;
-        targets = [new Target(pendingAnimal)];
-        roundState = "active";
-        showMessage("Here comes the " + pendingAnimal.name + "!", 1200);
+        // Extra pause after the narrator finishes so the picture has time to render
+        roundState = "waiting_to_spawn";
+        spawnDelayTimer = 1.2; // 1.2 second delay before the target appears
+        showMessage("Get ready…", 1100);
       });
     }
 
@@ -528,6 +572,16 @@
           }
         }
       }
+      if (roundState === "waiting_to_spawn") {
+        spawnDelayTimer -= dt;
+        if (spawnDelayTimer <= 0) {
+          // Image should be fully ready by now
+          targets = [new Target(pendingAnimal)];
+          roundState = "active";
+          showMessage("Here comes the " + pendingAnimal.name + "!", 1400);
+        }
+      }
+
       if (roundState === "celebrating") {
         celebrateTimer -= dt;
         if (celebrateTimer <= 0) startNextRound();
@@ -541,6 +595,7 @@
     }
 
     startBtn.addEventListener("click", () => {
+      if (!imagesReady) return;
       startScreen.style.display = "none";
       gameRunning = true;
       score = hits = missed = 0;
