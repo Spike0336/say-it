@@ -1,1 +1,312 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Frog Games</title>
+<style>
+:root{--bg:#e6f6ff;--fg:#1d3b2a;--card:#fff;--hi:#d6336c;--btn:#ff8a3d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10243a;--fg:#e8f5e9;--card:#1d3550;--hi:#ff7aa8;--btn:#ff9a55}}
+:root[data-theme="dark"]{--bg:#10243a;--fg:#e8f5e9;--card:#1d3550;--hi:#ff7aa8;--btn:#ff9a55}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Comic Sans MS","Chalkboard SE","Trebuchet MS",system-ui,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent;user-select:none}
+[hidden]{display:none!important}
+#app{max-width:560px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+section{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+#home{align-items:center;text-align:center}
+h1{font-size:clamp(2rem,9vw,3.2rem);margin:8px 0;color:#2e9a3a}
+svg{width:100%;height:auto;display:block;border-radius:20px;overflow:hidden}
+.card{background:var(--card);border-radius:24px;padding:6px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+button{font:inherit;cursor:pointer}
+#play{font-size:2rem;font-weight:800;padding:16px 44px;border:0;border-radius:40px;background:var(--btn);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.25)}
+.bar{display:flex;justify-content:space-between}
+.bar button{font-size:1.8rem;width:64px;height:64px;border-radius:50%;border:0;background:var(--card);box-shadow:0 3px 8px rgba(0,0,0,.2)}
+#cap{font-size:clamp(1.8rem,8vw,2.8rem);font-weight:800;text-align:center;min-height:3.4rem;line-height:1.15}
+#cap b{color:var(--hi)}
+#choices{display:grid;gap:12px}
+.choice{border:6px solid transparent;border-radius:28px;padding:4px;background:var(--card);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.choice.ok{border-color:#35b44a}
+.choice.no{animation:shake .4s}
+.frog{cursor:pointer}
+.hid{opacity:0;pointer-events:none}
+.pop{animation:pop .6s cubic-bezier(.3,1.6,.5,1)}
+.hint{animation:wob 1s ease-in-out infinite}
+.pop,.hint,.a,.sub{transform-box:fill-box;transform-origin:50% 100%}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes wob{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg) scale(1.06)}}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+/* frog action animations */
+@keyframes trav{from{transform:translateX(calc(var(--d)*-1))}to{transform:translateX(var(--d))}}
+@keyframes up{from{transform:translateY(30px)}to{transform:translateY(-70px)}}
+@keyframes hopb{to{transform:translateY(-12px)}}
+@keyframes sway{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+@keyframes jump{0%,100%{transform:translateY(0) scaleY(.85)}50%{transform:translateY(-70px) scaleY(1.1)}}
+@keyframes breath{to{transform:scale(1.05)}}
+@keyframes dance{from{transform:rotate(-12deg)}to{transform:rotate(12deg) translateY(-10px)}}
+@keyframes squat{50%{transform:scaleY(.75)}}
+@keyframes chomp{to{transform:scale(1.1,.9)}}
+@keyframes sip{0%,100%{transform:rotate(0)}50%{transform:rotate(-9deg)}}
+@keyframes kick{0%,50%,100%{transform:rotate(0)}15%{transform:rotate(-14deg)}30%{transform:rotate(8deg)}}
+.a-run{--d:105px;animation:trav 1.8s linear infinite alternate}
+.a-walk{--d:70px;animation:trav 7s linear infinite alternate}
+.a-swim{--d:35px;animation:trav 3s ease-in-out infinite alternate}
+.a-climb{animation:up 3s linear infinite}
+.a-run .sub{animation:hopb .25s ease-in-out infinite alternate}
+.a-walk .sub,.a-climb .sub{animation:sway .55s ease-in-out infinite alternate}
+.a-swim .sub{animation:hopb .7s ease-in-out infinite alternate}
+.a-hop .sub{animation:jump .9s ease-in-out infinite}
+.a-sit .sub,.a-sleep .sub{animation:breath 1.8s ease-in-out infinite alternate}
+.a-dance .sub{animation:dance .5s ease-in-out infinite alternate}
+.a-squat .sub{animation:squat 1.2s ease-in-out infinite}
+.a-chomp .sub{animation:chomp .45s ease-in-out infinite alternate}
+.a-sip .sub{animation:sip 1.6s ease-in-out infinite}
+.a-kick .sub{animation:kick 1.8s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes swing{from{transform:rotate(-16deg)}to{transform:rotate(16deg)}}
+@keyframes flt{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-30px);opacity:0}}
+@keyframes slide{to{transform:translateX(14px)}}
+@keyframes lift{to{transform:translateY(-16px)}}
+@keyframes ball{0%{transform:translate(0,0)}50%{transform:translate(55px,-40px)}100%{transform:translate(105px,0)}}
+@keyframes scroll{to{transform:translateX(-80px)}}
+.p-spin{animation:spin 1s linear infinite}
+.p-swing{animation:swing .6s ease-in-out infinite alternate}
+.p-float{animation:flt 2s ease-out infinite}
+.p-slide{animation:slide .25s ease-in-out infinite alternate}
+.p-lift{animation:lift 1.2s ease-in-out infinite alternate}
+.p-ball{animation:ball 1.8s ease-in infinite}
+.p-scroll{animation:scroll .8s linear infinite}
+.star{position:fixed;font-size:2.2rem;pointer-events:none;animation:fly 1.3s ease-out forwards;z-index:9}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(360deg);opacity:0}}
+@media(min-width:700px){#choices{grid-template-columns:1fr 1fr}#app{max-width:760px}}
+@media(prefers-reduced-motion:reduce){.a,.sub,.p-spin,.p-swing,.p-float,.p-slide,.p-lift,.p-ball,.p-scroll{animation-duration:6s!important}}
+
+.tabs{display:flex;gap:8px;position:sticky;top:0;z-index:5;background:var(--bg);padding:4px 0 8px}
+.tabs button{flex:1;font-size:clamp(1rem,4.2vw,1.35rem);font-weight:800;padding:12px 6px;border:0;border-radius:18px;background:var(--card);color:var(--fg);box-shadow:0 3px 8px rgba(0,0,0,.2)}
+.tabs button[aria-selected=true]{background:var(--btn);color:#fff}
+</style></head>
+<body>
+<div id="app">
+<nav class="tabs" role="tablist"><button role="tab" id="tabA" aria-selected="true">📍 Where is Frog?</button><button role="tab" id="tabB" aria-selected="false">🏃 What is Frog Doing?</button></nav>
+<div id="gA">
+<section id="home"><h1>Where is Frog?</h1><svg id="hf" viewBox="0 0 300 220"></svg><button id="play">▶ Play</button></section>
+<section id="game" hidden>
+<div class="bar"><button id="homeb" aria-label="Home">🏠</button><button id="again" aria-label="Say it again">🔊</button><button id="skip" aria-label="Next">⏭️</button></div>
+<div id="stage" class="card"></div>
+<div id="choices" hidden></div>
+<div id="cap"></div>
+</section>
+</div>
+<div id="gB" hidden>
+<section id="home"><h1>What is Frog Doing?</h1><svg id="hf" viewBox="0 0 300 220"></svg><button id="play">▶ Play</button></section>
+<section id="game" hidden>
+<div class="bar"><button id="homeb" aria-label="Home">🏠</button><button id="again" aria-label="Say it again">🔊</button><button id="skip" aria-label="Next">⏭️</button></div>
+<div id="stage" class="card"></div>
+<div id="choices" hidden></div>
+<div id="cap"></div>
+</section>
+</div>
+</div>
+<script>
+(function(root){
+const $=s=>root.querySelector(s);
+const FR=(x,y,s,c)=>`<g transform="translate(${x} ${y}) scale(${s})"><g class="${c}"><ellipse cx="-22" cy="-1" rx="11" ry="5" fill="#3d9a42"/><ellipse cx="22" cy="-1" rx="11" ry="5" fill="#3d9a42"/><ellipse cy="-20" rx="25" ry="20" fill="#4caf50"/><ellipse cy="-13" rx="15" ry="11" fill="#b5e48c"/><circle cx="-13" cy="-40" r="10" fill="#4caf50"/><circle cx="13" cy="-40" r="10" fill="#4caf50"/><circle cx="-13" cy="-41" r="7" fill="#fff"/><circle cx="13" cy="-41" r="7" fill="#fff"/><circle cx="-13" cy="-40" r="3.5" fill="#111"/><circle cx="13" cy="-40" r="3.5" fill="#111"/><path d="M-11 -27Q0 -19 11 -27" stroke="#1b5e20" stroke-width="2.5" fill="none" stroke-linecap="round"/></g></g>`;
+const ST='stroke="#7a4a1c" stroke-width="2"';
+const BOXB=`<rect x="108" y="108" width="84" height="62" fill="#6b4423"/>`;
+const BOXF=`<rect x="108" y="108" width="84" height="62" fill="#c98f4e" ${ST}/><rect x="108" y="108" width="84" height="10" fill="#b57a38"/>`;
+const BOX=BOXF;
+const BOXIN=`<rect x="108" y="130" width="84" height="40" fill="#c98f4e" ${ST}/><rect x="108" y="130" width="84" height="8" fill="#b57a38"/>`;
+const TABLE=`<rect x="75" y="100" width="150" height="14" rx="4" fill="#a1672f"/><rect x="85" y="114" width="12" height="57" fill="#8a5624"/><rect x="203" y="114" width="12" height="57" fill="#8a5624"/>`;
+const CHAIR=`<rect x="118" y="78" width="9" height="50" fill="#d9534f"/><rect x="118" y="122" width="64" height="10" rx="3" fill="#d9534f"/><rect x="120" y="132" width="8" height="38" fill="#b03a37"/><rect x="172" y="132" width="8" height="38" fill="#b03a37"/>`;
+const TREE=x=>`<rect x="${x-15}" y="95" width="30" height="76" rx="5" fill="#8d5a2b"/><circle cx="${x}" cy="66" r="42" fill="#2e7d32"/><circle cx="${x-28}" cy="88" r="26" fill="#388e3c"/><circle cx="${x+28}" cy="88" r="26" fill="#388e3c"/>`;
+const POND=`<ellipse cx="150" cy="192" rx="100" ry="24" fill="#4aa8e0"/>`;
+let FENCE='';for(let x=10;x<300;x+=32)FENCE+=`<rect x="${x}" y="118" width="20" height="54" rx="4" fill="#f4e2b8" stroke="#b9975b" stroke-width="2"/>`;
+FENCE+=`<rect x="0" y="130" width="300" height="7" fill="#d9b97a"/><rect x="0" y="150" width="300" height="7" fill="#d9b97a"/>`;
+// [word, rest, scene builder]
+const T=[
+['on top of','the box',f=>BOX+f(150,108)],
+['inside','the box',f=>BOXB+f(150,164,.95)+BOXIN],
+['next to','the box',f=>BOX+f(235,172)],
+['under','the table',f=>TABLE+f(150,171,.8)],
+['on','the table',f=>TABLE+f(150,100)],
+['above','the table',f=>TABLE+f(150,62)],
+['beside','the table',f=>TABLE+f(38,172)],
+['underneath','the chair',f=>CHAIR+f(150,171,.6)],
+['on','the chair',f=>CHAIR+f(150,122,.7)],
+['behind','the tree',f=>f(165,172)+TREE(150)],
+['in front of','the tree',f=>TREE(150)+f(150,190,1.1)],
+['between','the trees',f=>TREE(55)+TREE(245)+f(150,175)],
+['up in','the tree',f=>TREE(120)+`<rect x="135" y="112" width="100" height="8" rx="4" fill="#8d5a2b"/>`+f(212,112,.65)],
+['in','the pond',f=>POND+f(150,192,.9)+`<ellipse cx="150" cy="198" rx="52" ry="12" fill="#4aa8e0" opacity=".85"/>`],
+['over','the fence',f=>FENCE+f(150,92)]
+];
+const BG=`<rect width="300" height="220" fill="#9fd8ff"/><circle cx="262" cy="36" r="20" fill="#ffd54a"/><ellipse cx="60" cy="40" rx="30" ry="12" fill="#fff" opacity=".9"/><rect y="168" width="300" height="52" fill="#7bc96f"/>`;
+const scene=(it,hide)=>`<svg viewBox="0 0 300 220">${BG}${it[2]((x,y,s=1)=>FR(x,y,s,hide?'frog hid':'frog'))}</svg>`;
+const phrase=it=>it[0]+' '+it[1];
+const capOf=it=>`<b>${it[0]}</b> ${it[1]}`;
+
+// audio
+let ac;const A=()=>ac||(ac=new (window.AudioContext||window.webkitAudioContext)());
+function tone(f,t,d,ty='sine',v=.25,f2){try{const a=A(),o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.setValueAtTime(f,a.currentTime+t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,a.currentTime+t+d);g.gain.setValueAtTime(v,a.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t+d);o.connect(g);g.connect(a.destination);o.start(a.currentTime+t);o.stop(a.currentTime+t+d+.05)}catch(e){}}
+const ribbit=()=>{tone(180,0,.12,'square',.2,320);tone(200,.16,.14,'square',.2,360)};
+const boing=()=>tone(220,0,.3,'sine',.3,700);
+const fanfare=()=>[523,659,784,1047,784,1047].forEach((n,i)=>tone(n,i*.14,.25,'triangle',.3));
+function burst(){for(let i=0;i<14;i++){const s=document.createElement('span');s.className='star';s.textContent=['⭐','🌟','✨','🐸'][i%4];s.style.left='50%';s.style.top='40%';s.style.setProperty('--dx',(Math.random()*500-250)+'px');s.style.setProperty('--dy',(Math.random()*400-250)+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),1400)}}
+
+// British male narrator
+let voice=null;
+function pick(){try{const v=speechSynthesis.getVoices().filter(x=>/^en[-_]GB/i.test(x.lang));const m=/daniel|george|ryan|oliver|arthur|thomas|male/i,f=/female|kate|serena|susan|hazel|libby|sonia|martha|stephanie|fiona/i;voice=v.find(x=>m.test(x.name)&&!f.test(x.name))||v.find(x=>!f.test(x.name))||v[0]||null}catch(e){}}
+try{speechSynthesis.onvoiceschanged=pick}catch(e){}
+function say(t){last=t;return new Promise(r=>{try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';if(voice)u.voice=voice;u.pitch=voice?.9:.6;u.rate=.8;let d=0;const fin=()=>{if(!d){d=1;r()}};u.onend=fin;u.onerror=fin;speechSynthesis.speak(u);setTimeout(fin,2500+t.length*130)}catch(e){r()}})}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+// game
+let order=[],n=0,tok=0,mode='',revealed=false,cur=null,last='';
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const next=()=>{if(n%T.length===0)order=shuffle(T.map((_,i)=>i));return T[order[n++%T.length]]};
+
+async function teach(){
+  const my=++tok;cur=next();mode='teach';revealed=false;
+  $('#choices').hidden=true;$('#stage').hidden=false;
+  $('#stage').innerHTML=scene(cur,true);$('#cap').textContent='Where is frog? 🐸';
+  await say('Where is frog?');if(my!==tok)return;
+  await wait(600);if(my!==tok)return;
+  const fg=$('#stage .frog');fg.classList.remove('hid');fg.classList.add('pop');revealed=true;boing();
+  $('#cap').innerHTML=capOf(cur);
+  await say('Frog is '+phrase(cur)+'!');if(my!==tok)return;
+  fg.classList.remove('pop');fg.classList.add('hint');
+  await say('Tap the frog!');
+}
+async function done(){
+  if(mode!=='teach'||!revealed)return;mode='';
+  const fg=$('#stage .frog');fg.classList.remove('hint');
+  ribbit();burst();await say('Ribbit! Well done!');quiz();
+}
+async function quiz(){
+  const my=++tok;mode='quiz';
+  let d;do{d=T[Math.floor(Math.random()*T.length)]}while(d===cur);
+  const it=cur,opts=shuffle([it,d]);
+  $('#stage').hidden=true;const ch=$('#choices');ch.hidden=false;
+  ch.innerHTML=opts.map((o,i)=>`<button class="choice" data-i="${i}">${scene(o,false)}</button>`).join('');
+  $('#cap').innerHTML=capOf(it);
+  ch.querySelectorAll('.choice').forEach(b=>b.onclick=async()=>{
+    if(mode!=='quiz')return;const o=opts[+b.dataset.i];
+    if(o===it){mode='';b.classList.add('ok');fanfare();burst();await say('Yes! Frog is '+phrase(it)+'. Well done!');teach()}
+    else{b.classList.remove('no');void b.offsetWidth;b.classList.add('no');tok++;await say('Oh! That frog is '+phrase(o)+'. Can you find the frog who is '+phrase(it)+'?')}
+  });
+  await say('Can you find the frog who is '+phrase(it)+'?');
+}
+$('#stage').onclick=e=>{if(e.target.closest('.frog'))done()};
+$('#again').onclick=()=>{if(last)say(last)};
+$('#skip').onclick=()=>{mode==='quiz'?teach():quiz()};
+$('#homeb').onclick=()=>{tok++;mode='';try{speechSynthesis.cancel()}catch(e){}$('#game').hidden=true;$('#home').hidden=false};
+$('#play').onclick=()=>{A().resume&&A().resume();pick();$('#home').hidden=true;$('#game').hidden=false;n=0;teach()};
+$('#hf').innerHTML=BG+TREE(70)+FR(190,172,1.5,'frog hint');
+
+})(document.getElementById('gA'));
+</script>
+<script>
+(function(root){
+const $=s=>root.querySelector(s);
+const FR=(x,y,s,a,o,c)=>{o=o||{};return `<g transform="translate(${x} ${y}) scale(${s})"><g class="${c}"><g class="a a-${a}"><g class="sub"><ellipse cx="-22" cy="-1" rx="11" ry="5" fill="#3d9a42"/><ellipse cx="22" cy="-1" rx="11" ry="5" fill="#3d9a42"/><ellipse cy="-20" rx="25" ry="20" fill="#4caf50"/><ellipse cy="-13" rx="15" ry="11" fill="#b5e48c"/><circle cx="-13" cy="-40" r="10" fill="#4caf50"/><circle cx="13" cy="-40" r="10" fill="#4caf50"/><circle cx="-13" cy="-41" r="7" fill="#fff"/><circle cx="13" cy="-41" r="7" fill="#fff"/>${o.sleep?'<path d="M-18 -41Q-13 -36 -8 -41M8 -41Q13 -36 18 -41" stroke="#111" stroke-width="2.5" fill="none"/>':'<circle cx="-13" cy="-40" r="3.5" fill="#111"/><circle cx="13" cy="-40" r="3.5" fill="#111"/>'}${o.open?'<ellipse cy="-24" rx="9" ry="6" fill="#7b1e1e"/>':'<path d="M-11 -27Q0 -19 11 -27" stroke="#1b5e20" stroke-width="2.5" fill="none" stroke-linecap="round"/>'}${o.x||''}</g></g></g></g>`};
+const NOTE=(x,y,t)=>`<text class="p-float" x="${x}" y="${y}" font-size="30" fill="#7b2cbf" style="animation-delay:${t}s">♪</text>`;
+const WATER=`<rect y="165" width="300" height="55" fill="#4aa8e0" opacity=".78"/><path d="M0 172q15-8 30 0t30 0 30 0 30 0 30 0 30 0 30 0 30 0 30 0 30 0" stroke="#fff" stroke-width="3" fill="none" opacity=".8"/>`;
+const LOG=`<rect x="95" y="150" width="110" height="24" rx="12" fill="#8d5a2b"/><circle cx="200" cy="162" r="10" fill="#b57a38"/>`;
+const BED=`<rect x="70" y="148" width="160" height="26" rx="6" fill="#5c6bc0"/><ellipse cx="95" cy="145" rx="26" ry="9" fill="#fff"/>`;
+const SPD=`<path d="M20 130h40M8 150h44M30 110h30" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`;
+const EASEL=`<path d="M205 140l-8 40M265 140l8 40" stroke="#8a5624" stroke-width="5"/><rect x="195" y="70" width="80" height="70" fill="#fff" stroke="#8a5624" stroke-width="4"/><circle cx="215" cy="95" r="10" fill="#f44336"/><circle cx="246" cy="104" r="12" fill="#2196f3"/><circle cx="224" cy="122" r="9" fill="#ffc107"/>`;
+const WH=x=>`<g class="p-spin" style="transform-origin:${x}px 160px"><circle cx="${x}" cy="160" r="22" fill="none" stroke="#333" stroke-width="5"/><path d="M${x} 138v44M${x-22} 160h44" stroke="#333" stroke-width="2"/></g>`;
+let ROAD='';for(let i=0;i<8;i++)ROAD+=`M${i*80-80} 196h36`;
+// [word, rest, scene builder]
+const T=[
+['swimming','',f=>f(150,176,1,'swim')+WATER],
+['climbing','',f=>`<rect x="125" y="0" width="50" height="170" fill="#8d5a2b"/><rect x="175" y="40" width="40" height="8" fill="#8d5a2b"/>`+f(150,170,1,'climb')],
+['running','',f=>SPD+f(150,172,1,'run')],
+['walking','',f=>`<path d="M0 190h300" stroke="#c9a46a" stroke-width="14" opacity=".6"/>`+f(150,176,1,'walk')],
+['sitting','',f=>LOG+f(150,152,1,'sit')],
+['jumping','',f=>f(150,172,1,'hop')],
+['sleeping','',f=>BED+f(130,150,.9,'sleep',{sleep:1})+`<text class="p-float" x="175" y="115" font-size="26" fill="#fff" font-weight="bold">Z z z</text>`],
+['eating','an apple',f=>f(115,172,1,'chomp',{open:1})+`<text x="148" y="166" font-size="44">🍎</text>`],
+['dancing','',f=>f(150,172,1,'dance',{open:1})+NOTE(65,120,0)+NOTE(225,110,1)],
+['exercising','',f=>`<g class="p-lift"><path d="M135 165l-10-72M165 165l10-72" stroke="#4caf50" stroke-width="9" stroke-linecap="round"/><rect x="100" y="86" width="100" height="7" fill="#555"/><rect x="92" y="72" width="12" height="35" rx="3" fill="#333"/><rect x="196" y="72" width="12" height="35" rx="3" fill="#333"/></g>`+f(150,172,1,'squat')],
+['reading','a book',f=>f(150,172,1,'sit')+`<rect x="116" y="135" width="68" height="36" rx="3" fill="#fff" stroke="#888" stroke-width="2"/><path d="M150 135v36M122 146h22M122 154h22M156 146h22M156 154h22" stroke="#aaa" stroke-width="2"/>`],
+['painting','a picture',f=>EASEL+f(120,172,1,'sit')+`<g class="p-swing" style="transform-origin:150px 150px"><line x1="150" y1="150" x2="190" y2="108" stroke="#a1672f" stroke-width="5"/><circle cx="192" cy="106" r="6" fill="#e91e63"/></g>`],
+['riding','a bike',f=>`<path d="${ROAD}" stroke="#fff" stroke-width="5" class="p-scroll" opacity=".8"/>`+WH(110)+WH(190)+`<path d="M110 160l30-32 50 32M140 128h-10M172 118l18 42" stroke="#e53935" stroke-width="5" fill="none"/>`+f(146,128,.7,'sit',{open:1})],
+['singing','',f=>f(150,172,1,'chomp',{open:1})+NOTE(70,125,0)+NOTE(215,115,.7)+NOTE(100,95,1.3)],
+['drinking','some milk',f=>f(120,172,1,'sip')+`<text x="148" y="168" font-size="40">🥛</text>`],
+['kicking','a ball',f=>f(100,172,1,'kick')+`<g class="p-ball"><circle cx="158" cy="162" r="10" fill="#fff" stroke="#333" stroke-width="2"/><circle cx="158" cy="162" r="4" fill="#333"/></g>`],
+['flying','a kite',f=>f(90,172,1,'sit')+`<g class="p-swing" style="transform-origin:112px 140px"><path d="M112 140L225 55" stroke="#fff" stroke-width="2"/><polygon points="225,22 252,55 225,90 198,55" fill="#ff5252"/><path d="M225 90q-8 14 0 24t0 22" stroke="#ffd54a" stroke-width="3" fill="none"/></g>`],
+['brushing','his teeth',f=>f(150,172,1,'sit',{open:1})+`<g class="p-slide"><rect x="154" y="143" width="48" height="6" rx="3" fill="#2196f3"/><rect x="150" y="139" width="10" height="6" fill="#fff"/></g><circle class="p-float" cx="198" cy="132" r="5" fill="#fff"/><circle class="p-float" cx="212" cy="120" r="4" fill="#fff" style="animation-delay:.8s"/>`],
+['digging','a hole',f=>`<ellipse cx="225" cy="170" rx="40" ry="14" fill="#8d5a2b"/>`+f(115,172,1,'squat')+`<g class="p-swing" style="transform-origin:150px 150px"><line x1="150" y1="150" x2="182" y2="192" stroke="#a1672f" stroke-width="5"/><path d="M175 188h18l-4 16h-10z" fill="#888"/></g>`],
+['waving','',f=>f(150,172,1,'sit',{x:`<g class="p-swing" style="transform-box:fill-box;transform-origin:50% 100%"><ellipse cx="34" cy="-32" rx="8" ry="17" fill="#4caf50" transform="rotate(25 34 -32)"/></g>`})]
+];
+const BG=`<rect width="300" height="220" fill="#9fd8ff"/><circle cx="262" cy="36" r="20" fill="#ffd54a"/><ellipse cx="60" cy="40" rx="30" ry="12" fill="#fff" opacity=".9"/><rect y="168" width="300" height="52" fill="#7bc96f"/>`;
+const scene=(it,hide)=>`<svg viewBox="0 0 300 220">${BG}${it[2]((x,y,s,a,o)=>FR(x,y,s,a,o,hide?'frog hid':'frog'))}</svg>`;
+const phrase=it=>(it[0]+' '+it[1]).trim();
+const capOf=it=>`<b>${it[0]}</b> ${it[1]}`;
+
+let ac;const A=()=>ac||(ac=new (window.AudioContext||window.webkitAudioContext)());
+function tone(f,t,d,ty,v,f2){try{ty=ty||'sine';v=v||.25;const a=A(),o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.setValueAtTime(f,a.currentTime+t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,a.currentTime+t+d);g.gain.setValueAtTime(v,a.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t+d);o.connect(g);g.connect(a.destination);o.start(a.currentTime+t);o.stop(a.currentTime+t+d+.05)}catch(e){}}
+const ribbit=()=>{tone(180,0,.12,'square',.2,320);tone(200,.16,.14,'square',.2,360)};
+const boing=()=>tone(220,0,.3,'sine',.3,700);
+const fanfare=()=>[523,659,784,1047,784,1047].forEach((n,i)=>tone(n,i*.14,.25,'triangle',.3));
+function burst(){for(let i=0;i<14;i++){const s=document.createElement('span');s.className='star';s.textContent=['⭐','🌟','✨','🐸'][i%4];s.style.left='50%';s.style.top='40%';s.style.setProperty('--dx',(Math.random()*500-250)+'px');s.style.setProperty('--dy',(Math.random()*400-250)+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),1400)}}
+
+// British male narrator
+let voice=null,last='';
+function pick(){try{const v=speechSynthesis.getVoices().filter(x=>/^en[-_]GB/i.test(x.lang));const m=/daniel|george|ryan|oliver|arthur|thomas|male/i,f=/female|kate|serena|susan|hazel|libby|sonia|martha|stephanie|fiona/i;voice=v.find(x=>m.test(x.name)&&!f.test(x.name))||v.find(x=>!f.test(x.name))||v[0]||null}catch(e){}}
+try{speechSynthesis.onvoiceschanged=pick}catch(e){}
+function say(t){last=t;return new Promise(r=>{try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';if(voice)u.voice=voice;u.pitch=voice?.9:.6;u.rate=.8;let d=0;const fin=()=>{if(!d){d=1;r()}};u.onend=fin;u.onerror=fin;speechSynthesis.speak(u);setTimeout(fin,2500+t.length*130)}catch(e){r()}})}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+let order=[],n=0,tok=0,mode='',revealed=false,cur=null;
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const next=()=>{if(n%T.length===0)order=shuffle(T.map((_,i)=>i));return T[order[n++%T.length]]};
+
+async function teach(){
+  const my=++tok;cur=next();mode='teach';revealed=false;
+  $('#choices').hidden=true;$('#stage').hidden=false;
+  $('#stage').innerHTML=scene(cur,true);$('#cap').textContent='What is frog doing? 🐸';
+  await say('What is frog doing?');if(my!==tok)return;
+  await wait(600);if(my!==tok)return;
+  const fg=$('#stage .frog');fg.classList.remove('hid');fg.classList.add('pop');revealed=true;boing();
+  $('#cap').innerHTML=capOf(cur);
+  await say('Frog is '+phrase(cur)+'!');if(my!==tok)return;
+  fg.classList.remove('pop');fg.classList.add('hint');
+  await say('Tap the frog!');
+}
+async function done(){
+  if(mode!=='teach'||!revealed)return;mode='';
+  $('#stage .frog').classList.remove('hint');
+  ribbit();burst();await say('Ribbit! Well done!');quiz();
+}
+async function quiz(){
+  const my=++tok;mode='quiz';
+  let d;do{d=T[Math.floor(Math.random()*T.length)]}while(d===cur);
+  const it=cur,opts=shuffle([it,d]);
+  $('#stage').hidden=true;const ch=$('#choices');ch.hidden=false;
+  ch.innerHTML=opts.map((o,i)=>`<button class="choice" data-i="${i}">${scene(o,false)}</button>`).join('');
+  $('#cap').innerHTML=capOf(it);
+  ch.querySelectorAll('.choice').forEach(b=>b.onclick=async()=>{
+    if(mode!=='quiz')return;const o=opts[+b.dataset.i];
+    if(o===it){mode='';b.classList.add('ok');fanfare();burst();await say('Yes! Frog is '+phrase(it)+'. Well done!');teach()}
+    else{b.classList.remove('no');void b.offsetWidth;b.classList.add('no');tok++;await say('Oh! That frog is '+phrase(o)+'. Can you find the frog who is '+phrase(it)+'?')}
+  });
+  await say('Can you find the frog who is '+phrase(it)+'?');
+}
+$('#stage').onclick=e=>{if(e.target.closest('.frog'))done()};
+$('#again').onclick=()=>{if(last)say(last)};
+$('#skip').onclick=()=>{mode==='quiz'?teach():quiz()};
+$('#homeb').onclick=()=>{tok++;mode='';try{speechSynthesis.cancel()}catch(e){}$('#game').hidden=true;$('#home').hidden=false};
+$('#play').onclick=()=>{try{A().resume()}catch(e){}pick();$('#home').hidden=true;$('#game').hidden=false;n=0;teach()};
+$('#hf').innerHTML=BG+FR(150,172,1.4,'hop',{},'frog');
+
+})(document.getElementById('gB'));
+</script>
+<script>
+(function(){
+const P={A:document.getElementById('gA'),B:document.getElementById('gB')},T={A:document.getElementById('tabA'),B:document.getElementById('tabB')};
+function show(k){for(const x in P){const on=x===k;if(!on&&!P[x].hidden)P[x].querySelector('#homeb').click();P[x].hidden=!on;T[x].setAttribute('aria-selected',on)}}
+T.A.onclick=()=>show('A');T.B.onclick=()=>show('B');
+})();
+</script>
+</body></html>
 
