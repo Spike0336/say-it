@@ -1,0 +1,6 @@
+{
+  "name": "Animal Friends - Toddler Sound & Animation Safari",
+  "description": "An interactive animal sound and animation game for toddlers and young children featuring 16 animated animals that talk, open their mouths, and make real animal sounds.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
