@@ -191,7 +191,7 @@ const RAW=`🐶 dog|doggy|puppy
 const ITEMS=RAW.split('\n').map(l=>{const i=l.indexOf(' ');const f=l.slice(i+1).split('|');return{e:l.slice(0,i),n:f[0],f}});
 const $=id=>document.getElementById(id);
 const bubble=$('bubble'),face=bubble.querySelector('span'),mic=$('mic'),cv=$('cv'),cx=cv.getContext('2d');
-let playing=false,busy=false,speaking=false,cur=null,wrong=0,bag=[],timers=[],voice=null,rec=null,recOn=false;
+let ignoreUntil=0,handled=-1,noMic=false,playing=false,busy=false,speaking=false,cur=null,wrong=0,bag=[],timers=[],voice=null,rec=null,recOn=false;
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 
 /* ---------- narrator ---------- */
@@ -206,7 +206,7 @@ function say(t){return new Promise(res=>{
  if(!('speechSynthesis' in window)){res();return}
  speechSynthesis.cancel();
  const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';if(voice)u.voice=voice;u.rate=.88;u.pitch=1.15;
- speaking=true;let d=false;const end=()=>{if(d)return;d=true;speaking=false;res()};
+ speaking=true;let d=false;const end=()=>{if(d)return;d=true;speaking=false;ignoreUntil=Date.now()+700;res()};
  u.onend=end;u.onerror=end;setTimeout(end,9000);speechSynthesis.speak(u)})}
 
 /* ---------- sounds ---------- */
@@ -250,15 +250,17 @@ const norm=s=>' '+s.toLowerCase().replace(/[^a-z ]/g,' ').replace(/\s+/g,' ')+' 
 function matches(text){const t=norm(text);return cur.f.some(w=>t.includes(' '+w+' ')||t.includes(' '+w+'s '))}
 function startRec(){
  if(!SR||recOn)return;
- if(!rec){rec=new SR();rec.lang='en-GB';rec.continuous=false;rec.interimResults=true;rec.maxAlternatives=4;
-  rec.onstart=()=>{recOn=true;mic.classList.add('on')};
-  rec.onend=()=>{recOn=false;mic.classList.remove('on');if(playing)setTimeout(startRec,250)};
-  rec.onerror=e=>{recOn=false;mic.classList.remove('on');if(e.error==='not-allowed'||e.error==='service-not-allowed')playing=playing&&false||playing};
+ if(!rec){rec=new SR();rec.lang='en-GB';rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=4;
+  rec.onstart=()=>{recOn=true;handled=-1;mic.classList.add('on')};
+  rec.onend=()=>{recOn=false;if(playing&&!noMic)setTimeout(startRec,900)};
+  rec.onerror=e=>{recOn=false;if(e.error==='not-allowed'||e.error==='service-not-allowed'){noMic=true;mic.classList.remove('on')}};
   rec.onresult=e=>{
-   if(speaking||busy||!cur)return;
-   const r=e.results[e.results.length-1];
+   const idx=e.results.length-1;
+   if(speaking||busy||!cur||Date.now()<ignoreUntil){handled=idx;return}
+   if(idx<=handled)return;
+   const r=e.results[idx];
    let ok=false;for(let i=0;i<r.length;i++)if(matches(r[i].transcript))ok=true;
-   if(ok)success();else if(r.isFinal)fail()}}
+   if(ok)success();else if(r.isFinal){handled=idx;fail()}}}
  try{rec.start()}catch(_){}}
 mic.onclick=()=>{A();startRec()};
 
@@ -305,7 +307,7 @@ function success(){
  setTimeout(()=>say(praise[Math.random()*praise.length|0]+" It's a "+cur.n+"!").then(()=>setTimeout(()=>{bubble.getAnimations().forEach(a=>a.cancel());bubble.style.top='';round()},900)),1700)}
 bubble.onclick=()=>{A();
  if(busy||!cur)return;
- if(!SR){success();return}
+ if(!SR||noMic){success();return}
  say("It's a "+cur.n+". Can you say "+cur.n+"?")};
 
 $('go').onclick=()=>{A();$('start').style.display='none';playing=true;
@@ -315,4 +317,3 @@ $('go').onclick=()=>{A();$('start').style.display='none';playing=true;
 </script>
 </body>
 </html>
-
