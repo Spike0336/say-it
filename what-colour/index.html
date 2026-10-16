@@ -1,177 +1,150 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<title>What Colour?</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What Colour?</title>
 <style>
-:root{--bg:#fff7e0;--card:#fff;--ink:#2b2b3a;--accent:#ff5d8f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#22203a;--card:#34325a;--ink:#fff}}
-:root[data-theme="dark"]{--bg:#22203a;--card:#34325a;--ink:#fff}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Baloo 2","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;text-align:center;min-height:100vh;overflow-x:hidden}
-h1{margin:14px 0 4px;font-size:2rem;letter-spacing:1px}
-h1 span:nth-child(1){color:#e53935}h1 span:nth-child(2){color:#fb8c00}h1 span:nth-child(3){color:#fdd835}h1 span:nth-child(4){color:#43a047}h1 span:nth-child(5){color:#1e88e5}h1 span:nth-child(6){color:#8e24aa}
-#score{font-size:1.4rem;min-height:2rem}
-#card{background:var(--card);margin:10px auto;max-width:420px;width:92%;border-radius:32px;padding:18px 10px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
-#pic{font-size:min(46vw,190px);line-height:1.1;transition:transform .3s;user-select:none}
-#pic.pop{animation:pop .5s}
-#pic.shake{animation:shake .4s}
-@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
-#q{font-size:1.6rem;margin:4px 0}
-#msg{font-size:1.5rem;min-height:2.2rem;font-weight:bold}
-button{font:inherit;border:0;cursor:pointer;border-radius:999px}
-#mic{font-size:1.6rem;padding:16px 34px;background:var(--accent);color:#fff;box-shadow:0 6px 0 #c23a6a;margin:8px}
-#mic.on{background:#43a047;box-shadow:0 6px 0 #2e7d32;animation:pulse 1s infinite}
-@keyframes pulse{50%{transform:scale(1.07)}}
-#next,#hear{font-size:1.2rem;padding:10px 22px;margin:4px;background:#1e88e5;color:#fff}
-#next{display:none}
-#fallback{display:none;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px}
-#fallback button{width:56px;height:56px;border:4px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.conf{position:fixed;top:-60px;font-size:2rem;pointer-events:none;animation:fall linear forwards;z-index:9}
-@keyframes fall{to{transform:translateY(115vh) rotate(540deg)}}
-#big{position:fixed;inset:0;display:none;align-items:center;justify-content:center;font-size:min(16vw,90px);font-weight:900;color:#fff;text-shadow:0 4px 0 #c23a6a,0 0 24px #ffd600;z-index:8;pointer-events:none;animation:pop .6s}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#fff4c2;--card:#ffffff;--ink:#3b2a6b;--btn:#7c4dff;--btn2:#ff7aa8;--btn3:#2bb673}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a2250;--card:#3a3170;--ink:#fff4c2}}
+:root[data-theme="dark"]{--bg:#2a2250;--card:#3a3170;--ink:#fff4c2}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Comic Sans MS","Trebuchet MS",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px;overflow:hidden;user-select:none}
+#stage{flex:1;display:flex;align-items:center;justify-content:center;width:100%;max-width:700px}
+#card{background:var(--card);border-radius:40px;box-shadow:0 8px 0 rgba(0,0,0,.15);width:min(86vw,52vh);aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:min(48vw,30vh);line-height:1}
+#card.pop{animation:pop .5s}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+#card.dance{animation:dance .7s infinite}
+@keyframes dance{0%,100%{transform:rotate(-6deg) scale(1.05)}50%{transform:rotate(6deg) scale(1.15)}}
+#bar{display:flex;gap:16px;justify-content:center;width:100%;padding:10px 0 14px}
+.big{border:0;border-radius:36px;color:#fff;font-size:min(14vw,9vh);width:min(28vw,18vh);height:min(28vw,18vh);cursor:pointer;box-shadow:0 8px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center}
+.big:active{transform:translateY(6px);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+#mic{background:var(--btn);width:min(36vw,22vh);height:min(36vw,22vh);font-size:min(18vw,11vh)}
+#mic.on{background:#ff3d71;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+#again{background:var(--btn3)}#skip{background:var(--btn2)}
+#sw{display:none;flex-wrap:wrap;gap:12px;justify-content:center;padding:4px 0}
+#sw button{width:min(17vw,11vh);height:min(17vw,11vh);border-radius:50%;border:4px solid #fff;box-shadow:0 4px 0 rgba(0,0,0,.2);cursor:pointer}
+#start{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:5;padding-top:env(safe-area-inset-top,0px)}
+#start .big{width:min(60vw,36vh);height:min(60vw,36vh);background:var(--btn3);font-size:min(30vw,18vh);border-radius:50%}
+#start h1{font-size:min(12vw,8vh);margin:0}
+#conf{position:fixed;inset:0;pointer-events:none;z-index:4}
 </style>
 </head>
 <body>
-<h1><span>W</span><span>h</span><span>a</span><span>t</span> <span>C</span><span>olour?</span></h1>
-<div id="score">⭐ 0</div>
-<div id="card">
-  <div id="pic">🍎</div>
-  <div id="q">What colour is it?</div>
-  <div id="msg">Tap the button and say it!</div>
+<div id="start"><h1>🌈 What Colour?</h1><button class="big" id="go" aria-label="Play">▶️</button></div>
+<canvas id="conf"></canvas>
+<div id="stage"><div id="card"></div></div>
+<div id="sw"></div>
+<div id="bar">
+  <button class="big" id="again" aria-label="Hear again">🔊</button>
+  <button class="big" id="mic" aria-label="Talk">🎤</button>
+  <button class="big" id="skip" aria-label="Next">➡️</button>
 </div>
-<button id="mic">🎤 Say the colour</button><br>
-<button id="hear">🔊 Say it again</button>
-<button id="next">Next ➡️</button>
-<div id="fallback"></div>
-<div id="big">🎉 WELL DONE! 🎉</div>
-
 <script>
-var COLOURS={red:"#e53935",orange:"#fb8c00",yellow:"#fdd835",green:"#43a047",blue:"#1e88e5",purple:"#8e24aa",pink:"#f48fb1",brown:"#795548",black:"#212121",white:"#ffffff",grey:"#9e9e9e"};
-var WORDS={red:["red"],orange:["orange"],yellow:["yellow"],green:["green"],blue:["blue"],purple:["purple","violet"],pink:["pink"],brown:["brown"],black:["black"],white:["white"],grey:["grey","gray"]};
-var ITEMS=[
-["🍎","red"],["🍓","red"],["🚒","red"],["🍒","red"],["🌹","red"],
-["🍊","orange"],["🥕","orange"],["🎃","orange"],["🦊","orange"],
-["🍌","yellow"],["⭐","yellow"],["🌻","yellow"],["🐤","yellow"],["🍋","yellow"],
-["🐸","green"],["🥦","green"],["🌳","green"],["🥒","green"],["🐢","green"],
-["🐳","blue"],["🦋","blue"],["💧","blue"],["🧢","blue"],
-["🍇","purple"],["🍆","purple"],["👾","purple"],["🔮","purple"],
-["🐷","pink"],["🌸","pink"],["🦩","pink"],["🎀","pink"],
-["🐻","brown"],["🍫","brown"],["🥔","brown"],["🪵","brown"],
-["🐈‍⬛","black"],["🎱","black"],
-["☁️","white"],["⛄","white"],["🥚","white"],
-["🐘","grey"],["🐭","grey"],["🪨","grey"]
-];
-var $=function(i){return document.getElementById(i)};
-var order=[],cur=null,score=0,tries=0,done=false,listening=false,rec=null;
+const ITEMS=[["🍎","red"],["🍓","red"],["🚒","red"],["🍌","yellow"],["🐥","yellow"],["🌻","yellow"],["🐸","green"],["🥦","green"],["🌳","green"],["🐳","blue"],["🫐","blue"],["🚙","blue"],["🍊","orange"],["🥕","orange"],["🎃","orange"],["🍇","purple"],["🍆","purple"],["🐷","pink"],["🌸","pink"],["🎀","pink"],["🐻","brown"],["🍫","brown"],["🥔","brown"],["☁️","white"],["⛄","white"],["🥚","white"],["🕷️","black"],["🐈‍⬛","black"],["🎩","black"],["🕶️","black"]];
+const HEX={red:"#e53935",yellow:"#fdd835",green:"#43a047",blue:"#1e88e5",orange:"#fb8c00",purple:"#8e24aa",pink:"#f48fb1",brown:"#795548",white:"#ffffff",black:"#212121"};
+const SYN={purple:["purple","violet"],pink:["pink"],white:["white","wait"],black:["black","block","back"],brown:["brown","brow"],blue:["blue","blew"],red:["red","read"],green:["green"],yellow:["yellow"],orange:["orange"]};
+const PRAISE=["Well done!","Brilliant!","Hooray!","Super!","Clever you!","Fantastic!"];
+const $=id=>document.getElementById(id);
+let order=[],idx=0,cur=null,voice=null,rec=null,listening=false,busy=false,tries=0,askTimer=null,AC=null;
 
-function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
-function say(t){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.rate=.9;u.pitch=1.2;speechSynthesis.speak(u)}catch(e){}}
-
-function nextItem(){
-  if(!order.length)order=shuffle(ITEMS.slice());
-  cur=order.pop();tries=0;done=false;
-  var p=$("pic");p.textContent=cur[0];p.className="";void p.offsetWidth;p.className="pop";
-  $("msg").textContent="Tap the button and say it!";
-  $("next").style.display="none";$("mic").style.display="";
-  say("What colour is it?");
+function pickVoice(){
+  const vs=speechSynthesis.getVoices();
+  const gb=vs.filter(v=>/en[-_]GB/i.test(v.lang));
+  const fem=/female|serena|kate|martha|hazel|libby|sonia|susan|fiona|stephanie|amy|emma|olivia|google uk english female/i;
+  voice=gb.find(v=>fem.test(v.name))||gb.find(v=>!/male|daniel|oliver|arthur|george|ryan/i.test(v.name))||gb[0]||vs.find(v=>/^en/i.test(v.lang))||null;
 }
-
-/* Fanfare */
-var ac=null;
-function tone(f,t,d,type,v){var o=ac.createOscillator(),g=ac.createGain();o.type=type||"sawtooth";o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v||.18,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d+.05)}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function say(t,done){
+  if(!("speechSynthesis" in window)){done&&setTimeout(done,800);return}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang="en-GB";if(voice)u.voice=voice;u.rate=.85;u.pitch=1.25;
+  let fin=false;const f=()=>{if(!fin){fin=true;done&&done()}};
+  u.onend=f;u.onerror=f;setTimeout(f,6000);
+  speechSynthesis.speak(u);
+}
 function fanfare(){
   try{
-    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
-    var t=ac.currentTime+.05;
-    var seq=[[523,.12],[523,.12],[523,.12],[659,.3],[587,.14],[659,.14],[784,.7]];
-    var x=t;seq.forEach(function(n){tone(n[0],x,n[1]+.1,"sawtooth",.16);tone(n[0]/2,x,n[1]+.1,"square",.08);x+=n[1]+.04});
-    [523,659,784,1047].forEach(function(f){tone(f,x+.05,1.2,"triangle",.14)});
-    for(var i=0;i<8;i++)tone(1200+i*220,x+.3+i*.07,.2,"sine",.08);
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const n=[[523,0],[659,.12],[784,.24],[1047,.4],[784,.6],[1047,.72],[1319,.9]];
+    n.forEach(([f,t])=>{
+      ["square","triangle"].forEach((type,i)=>{
+        const o=AC.createOscillator(),g=AC.createGain();
+        o.type=type;o.frequency.value=f;
+        const s=AC.currentTime+t;
+        g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(i?.25:.08,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+.5);
+        o.connect(g).connect(AC.destination);o.start(s);o.stop(s+.55);
+      });
+    });
   }catch(e){}
-  confetti();
-  var b=$("big");b.style.display="flex";b.style.animation="none";void b.offsetWidth;b.style.animation="pop .6s";
-  setTimeout(function(){b.style.display="none"},2600);
 }
 function confetti(){
-  var E=["🎉","⭐","🎊","✨","🌈","💖","🎈","🌟"];
-  for(var i=0;i<70;i++){
-    var s=document.createElement("div");s.className="conf";
-    s.textContent=E[i%E.length];s.style.left=Math.random()*100+"vw";
-    s.style.animationDuration=(2+Math.random()*2.5)+"s";s.style.animationDelay=(Math.random()*.8)+"s";
-    document.body.appendChild(s);setTimeout(function(el){el.remove()},5500,s);
+  const c=$("conf"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const P=Array.from({length:140},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:(Math.random()-.5)*4,vy:3+Math.random()*6,r:6+Math.random()*8,c:Object.values(HEX)[Math.floor(Math.random()*8)]}));
+  let t=0;(function f(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;x.fillStyle=p.c;x.fillRect(p.x,p.y,p.r,p.r)});if(++t<110)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})();
+}
+function show(){
+  cur=ITEMS[order[idx]];tries=0;busy=false;
+  const card=$("card");card.className="";card.textContent=cur[0];void card.offsetWidth;card.className="pop";
+  ask();
+}
+function ask(){
+  stopRec();clearTimeout(askTimer);
+  say("What colour is it?",()=>{if(!busy)startRec()});
+}
+function stopRec(){listening=false;$("mic").classList.remove("on");try{rec&&rec.abort()}catch(e){}}
+function startRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){$("sw").style.display="flex";return}
+  stopRec();
+  rec=new SR();rec.lang="en-GB";rec.maxAlternatives=6;rec.interimResults=true;rec.continuous=false;
+  listening=true;$("mic").classList.add("on");
+  rec.onresult=e=>{
+    const words=[];
+    for(let i=e.resultIndex;i<e.results.length;i++)for(let j=0;j<e.results[i].length;j++)words.push(e.results[i][j].transcript.toLowerCase());
+    const txt=words.join(" ");
+    if(SYN[cur[1]].some(w=>new RegExp("\\b"+w+"\\b").test(txt)))correct();
+  };
+  rec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){listening=false;$("mic").classList.remove("on");$("sw").style.display="flex"}};
+  rec.onend=()=>{
+    $("mic").classList.remove("on");
+    if(!listening||busy)return;
+    tries++;
+    // gentle, cheerful re-ask — never a failure message
+    if(tries%3===0){ask()}else{setTimeout(()=>{if(listening&&!busy)startRec()},250)}
+  };
+  try{rec.start()}catch(e){}
+}
+function correct(){
+  if(busy)return;busy=true;stopRec();
+  const card=$("card");card.className="dance";
+  fanfare();confetti();
+  setTimeout(()=>say(PRAISE[Math.floor(Math.random()*PRAISE.length)]+" It's "+cur[1]+"!",()=>setTimeout(next,700)),900);
+}
+function next(){
+  idx++;
+  if(idx>=order.length){
+    $("card").className="dance";$("card").textContent="🏆";fanfare();confetti();
+    say("You did it! All finished!",()=>setTimeout(()=>{shuffle();idx=0;show()},1500));
+    return;
   }
+  show();
 }
+function shuffle(){order=ITEMS.map((_,i)=>i);for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}}
+// fallback colour swatches (shown only if the microphone isn't available)
+Object.keys(HEX).forEach(k=>{const b=document.createElement("button");b.style.background=HEX[k];b.setAttribute("aria-label",k);b.onclick=()=>{if(k===cur[1])correct();else say("Have another look!")};$("sw").appendChild(b)});
 
-function judge(text){
-  if(done)return false;
-  var s=" "+text.toLowerCase().replace(/[^a-z ]/g," ")+" ";
-  var good=WORDS[cur[1]].some(function(w){return s.indexOf(" "+w+" ")>-1});
-  if(good){win();return true}
-  return false;
-}
-function win(){
-  done=true;score++;$("score").textContent="⭐ "+score;
-  $("msg").textContent="Yes! It's "+cur[1]+"! 🎉";
-  fanfare();say("Well done! It is "+cur[1]+"!");
-  $("mic").style.display="none";$("next").style.display="inline-block";
-}
-function wrong(heard){
-  tries++;var p=$("pic");p.className="";void p.offsetWidth;p.className="shake";
-  if(tries>=3){
-    done=true;$("msg").innerHTML="It's <span style='color:"+(cur[1]=="white"?"#999":COLOURS[cur[1]])+"'>"+cur[1]+"</span>!";
-    say("It is "+cur[1]);$("mic").style.display="none";$("next").style.display="inline-block";
-  }else{
-    $("msg").textContent="Good try! Have another go 😊";say("Good try! Have another go!");
-  }
-}
-
-/* Microphone */
-var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-function listen(){
-  if(done||listening)return;
-  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}
-  try{speechSynthesis.cancel()}catch(e){}
-  if(!SR){$("msg").textContent="No microphone here – tap a colour!";return}
-  rec=new SR();rec.lang="en-GB";rec.interimResults=true;rec.maxAlternatives=3;rec.continuous=false;
-  var got=false,final=false;
-  rec.onstart=function(){listening=true;$("mic").classList.add("on");$("mic").textContent="👂 Listening...";$("msg").textContent="I'm listening!"};
-  rec.onresult=function(e){
-    var r=e.results[e.results.length-1];
-    for(var i=0;i<r.length;i++){if(judge(r[i].transcript)){got=true;try{rec.stop()}catch(x){}return}}
-    if(r.isFinal)final=true;
-  };
-  rec.onerror=function(e){
-    if(e.error=="not-allowed"||e.error=="service-not-allowed"){$("msg").textContent="Please allow the microphone – or tap a colour!";$("fallback").style.display="flex"}
-    else if(e.error=="no-speech"){$("msg").textContent="I didn't hear you. Try again!"}
-  };
-  rec.onend=function(){
-    listening=false;$("mic").classList.remove("on");$("mic").textContent="🎤 Say the colour";
-    if(!got&&final&&!done)wrong();
-  };
-  try{rec.start()}catch(e){listening=false}
-}
-
-/* Tap fallback */
-(function(){
-  var f=$("fallback");
-  Object.keys(COLOURS).forEach(function(c){
-    var b=document.createElement("button");b.style.background=COLOURS[c];b.setAttribute("aria-label",c);
-    b.onclick=function(){if(done)return;if(c==cur[1])win();else wrong()};
-    f.appendChild(b);
-  });
-  if(!SR)f.style.display="flex";
-})();
-
-$("mic").onclick=listen;
-$("next").onclick=nextItem;
-$("hear").onclick=function(){say("What colour is it?")};
-$("pic").onclick=function(){say("What colour is it?")};
-nextItem();
+$("go").onclick=()=>{
+  $("start").style.display="none";
+  try{AC=new (window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}
+  speechSynthesis.cancel();pickVoice();shuffle();idx=0;show();
+};
+$("again").onclick=ask;
+$("mic").onclick=()=>{if(busy)return;speechSynthesis.cancel();listening?(stopRec()):startRec()};
+$("skip").onclick=()=>{speechSynthesis.cancel();stopRec();next()};
 </script>
 </body>
 </html>
-
