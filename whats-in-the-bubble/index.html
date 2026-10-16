@@ -35,7 +35,9 @@ canvas{position:fixed;inset:0;pointer-events:none;z-index:8}
 #panel .card{background:#fff;color:#222;border-radius:24px;padding:24px 20px;width:min(88vw,420px);display:flex;flex-direction:column;align-items:center;gap:18px}
 #panel .row{display:flex;align-items:center;gap:12px;width:100%;font-size:40px}
 #speed{flex:1;height:34px;accent-color:#3ec46d}
-#shut{border:0;border-radius:50%;width:64px;height:64px;background:#3ec46d;color:#fff;font-size:34px}
+#shut{display:none}
+#speedbar{position:fixed;left:10px;top:calc(10px + env(safe-area-inset-top,0px));width:min(62vw,300px);display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:32px;background:rgba(255,255,255,.8);box-shadow:0 3px 10px rgba(0,0,0,.25);font-size:30px;z-index:20}
+#speedbar input{flex:1;min-width:0;height:34px;margin:0;accent-color:#3ec46d;touch-action:pan-y}
 </style>
 </head>
 <body>
@@ -47,8 +49,7 @@ canvas{position:fixed;inset:0;pointer-events:none;z-index:8}
 </div>
 <button id="mic" aria-label="microphone">🎤</button>
 <canvas id="cv"></canvas>
-<button id="gear" aria-label="settings (hold)">⚙️</button>
-<div id="panel"><div class="card"><div class="row"><span>🐢</span><input id="speed" type="range" min="0" max="10" step="1" value="2"><span>🐇</span></div><button id="shut" aria-label="close">✔</button></div></div>
+<div id="speedbar"><span>🐢</span><input id="speed" type="range" min="0" max="10" step="1" value="2" aria-label="bubble speed"><span>🐇</span></div>
 <div id="start"><div class="big">🫧🧚‍♀️🫧</div><button id="go" aria-label="play">▶</button></div>
 
 <script>
@@ -328,15 +329,12 @@ bubble.onclick=()=>{A();
 
 /* speed setting: slider 0 (slowest, 28s) to 10 (fastest, 8s) */
 let FALL=24;
-const sp=$('speed'),gear=$('gear'),panel=$('panel');
+const sp=$('speed');
 function setFall(v){FALL=28-2*v;document.documentElement.style.setProperty('--fall',FALL+'s')}
 try{const s=localStorage.getItem('bubbleSpeed');if(s!==null)sp.value=s}catch(_){}
 setFall(+sp.value);
 sp.oninput=()=>{setFall(+sp.value);try{localStorage.setItem('bubbleSpeed',sp.value)}catch(_){}};
-let hold;
-gear.onpointerdown=()=>{hold=setTimeout(()=>{panel.style.display='flex'},700)};
-['pointerup','pointerleave','pointercancel'].forEach(ev=>gear.addEventListener(ev,()=>clearTimeout(hold)));
-$('shut').onclick=()=>{panel.style.display='none'};
+sp.onchange=()=>{if(playing&&!busy)round()};
 
 $('go').onclick=()=>{A();$('start').style.display='none';playing=true;
  if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance('');speechSynthesis.speak(u)}
