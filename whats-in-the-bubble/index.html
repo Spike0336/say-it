@@ -198,6 +198,14 @@ const RAW=`🐶 dog|doggy|puppy
 🦸 superhero`;
 const ITEMS=RAW.split('\n').map(l=>{const i=l.indexOf(' ');const f=l.slice(i+1).split('|');return{e:l.slice(0,i),n:f[0],f}});
 const $=id=>document.getElementById(id);
+/* grammar: a / an / the / plural / uncountable */
+const PL=['grapes','cherries','chips','glasses'],UN=['bread','cheese','chocolate','popcorn'],THE=['sun','moon'],NOT_AN=['unicorn'];
+function is(it){const n=it.n;
+ if(PL.includes(n))return "they're "+n;
+ if(UN.includes(n)||n==='father christmas')return "it's "+n;
+ if(THE.includes(n))return "it's the "+n;
+ return "it's "+(/^[aeiou]/.test(n)&&!NOT_AN.includes(n)?"an ":"a ")+n}
+const cap=s=>s[0].toUpperCase()+s.slice(1);
 const bubble=$('bubble'),face=bubble.querySelector('span'),mic=$('mic'),cv=$('cv'),cx=cv.getContext('2d');
 let ignoreUntil=0,handled=-1,noMic=false,playing=false,busy=false,speaking=false,cur=null,wrong=0,bag=[],timers=[],voice=null,rec=null,recOn=false;
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -289,7 +297,7 @@ function round(){
 bubble.addEventListener('animationend',e=>{
  if(e.animationName!=='fall'||busy)return;
  busy=true;clear();gentle();bubble.className='pop';
- say("Oh, it's a "+cur.n+"! Let's try another one.").then(()=>setTimeout(round,500))});
+ say("Oh, "+is(cur)+"! Let's try another one.").then(()=>setTimeout(round,500))});
 function fail(){
  if(busy||speaking)return;
  wrong++;gentle();
@@ -302,9 +310,9 @@ function fail(){
   bubble.style.transition='none';
   bubble.animate([{top:pos+'px'},{top:(innerHeight-40)+'px'}],{duration:rem*1000,easing:'linear',fill:'forwards'}).onfinish=()=>{
    if(busy)return;busy=true;clear();gentle();bubble.className='pop';
-   say("Oh, it's a "+cur.n+"! Let's try another one.").then(()=>setTimeout(()=>{bubble.getAnimations().forEach(a=>a.cancel());bubble.style.top='';round()},500))};
+   say("Oh, "+is(cur)+"! Let's try another one.").then(()=>setTimeout(()=>{bubble.getAnimations().forEach(a=>a.cancel());bubble.style.top='';round()},500))};
  },500);
- if(wrong>=3){wrong=0;say("Try again! It's a "+cur.n+". Can you say "+cur.n+"?")}else say('Try again!')}
+ if(wrong>=3){wrong=0;say("Try again! "+cap(is(cur))+". Can you say "+cur.n+"?")}else say('Try again!')}
 function success(){
  if(busy)return;busy=true;clear();speechSynthesis.cancel();speaking=false;
  const r=bubble.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
@@ -312,11 +320,11 @@ function success(){
  popSound();bubble.classList.add('pop');
  setTimeout(()=>{fanfare();cheer();confetti(x,y);confetti(innerWidth*.2,innerHeight*.3);confetti(innerWidth*.8,innerHeight*.3)},180);
  const praise=['Well done!','Brilliant!','Hooray, you did it!','Super clever!','Yippee, that is right!'];
- setTimeout(()=>say(praise[Math.random()*praise.length|0]+" It's a "+cur.n+"!").then(()=>setTimeout(()=>{bubble.getAnimations().forEach(a=>a.cancel());bubble.style.top='';round()},900)),1700)}
+ setTimeout(()=>say(praise[Math.random()*praise.length|0]+" "+cap(is(cur))+"!").then(()=>setTimeout(()=>{bubble.getAnimations().forEach(a=>a.cancel());bubble.style.top='';round()},900)),1700)}
 bubble.onclick=()=>{A();
  if(busy||!cur)return;
  if(!SR||noMic){success();return}
- say("It's a "+cur.n+". Can you say "+cur.n+"?")};
+ say(cap(is(cur))+". Can you say "+cur.n+"?")};
 
 /* speed setting: slider 0 (slowest, 28s) to 10 (fastest, 8s) */
 let FALL=24;
