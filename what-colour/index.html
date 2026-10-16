@@ -63,7 +63,7 @@ function say(t,done){
   const u=new SpeechSynthesisUtterance(t);
   u.lang="en-GB";if(voice)u.voice=voice;u.rate=.85;u.pitch=1.25;
   let fin=false;const f=()=>{if(!fin){fin=true;done&&done()}};
-  u.onend=f;u.onerror=f;setTimeout(f,6000);
+  u.onend=f;u.onerror=f;setTimeout(f,Math.max(2800,t.length*140+1200));
   speechSynthesis.speak(u);
 }
 function fanfare(){
@@ -95,7 +95,7 @@ function ask(){
   stopRec();clearTimeout(askTimer);
   say("What colour is it?",()=>{if(!busy)startRec()});
 }
-function stopRec(){listening=false;$("mic").classList.remove("on");try{rec&&rec.abort()}catch(e){}}
+function stopRec(){listening=false;$("mic").classList.remove("on");if(rec){const r=rec;rec=null;r.onresult=r.onerror=r.onend=null;try{r.abort()}catch(e){}}}
 function startRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){$("sw").style.display="flex";return}
@@ -116,7 +116,7 @@ function startRec(){
     // gentle, cheerful re-ask — never a failure message
     if(tries%3===0){ask()}else{setTimeout(()=>{if(listening&&!busy)startRec()},250)}
   };
-  try{rec.start()}catch(e){}
+  try{rec.start()}catch(e){setTimeout(()=>{if(listening&&!busy)startRec()},400)}
 }
 function correct(){
   if(busy)return;busy=true;stopRec();
