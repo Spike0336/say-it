@@ -17,7 +17,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:linear-gradient(var(--
  border:3px solid rgba(255,255,255,.85);box-shadow:inset 0 0 25px rgba(255,255,255,.7),0 6px 20px rgba(0,60,120,.25);cursor:pointer}
 #bubble span{font-size:min(24vw,125px);line-height:1;animation:bob 2s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-6px) rotate(4deg)}}
-#bubble.fall{animation:fall 24s linear forwards}
+#bubble.fall{animation:fall var(--fall,24s) linear forwards}
 @keyframes fall{from{top:-260px}to{top:calc(100dvh - 40px)}}
 #bubble.pop{animation:pop .35s ease-out forwards}
 @keyframes pop{to{transform:scale(1.6);opacity:0}}
@@ -30,6 +30,12 @@ html,body{height:100%;margin:0;overflow:hidden;background:linear-gradient(var(--
 #start .big{font-size:min(30vw,170px)}
 #go{width:min(40vw,190px);aspect-ratio:1;border-radius:50%;border:0;background:#3ec46d;color:#fff;font-size:min(20vw,95px);box-shadow:0 8px 0 #2a9a52,0 12px 24px rgba(0,0,0,.3);animation:pulse 1.6s infinite}
 canvas{position:fixed;inset:0;pointer-events:none;z-index:8}
+#gear{position:fixed;left:10px;top:calc(10px + env(safe-area-inset-top,0px));width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.5);font-size:24px;opacity:.45;z-index:20;touch-action:none}
+#panel{display:none;position:fixed;inset:0;z-index:30;background:rgba(0,40,80,.55);align-items:center;justify-content:center}
+#panel .card{background:#fff;color:#222;border-radius:24px;padding:24px 20px;width:min(88vw,420px);display:flex;flex-direction:column;align-items:center;gap:18px}
+#panel .row{display:flex;align-items:center;gap:12px;width:100%;font-size:40px}
+#speed{flex:1;height:34px;accent-color:#3ec46d}
+#shut{border:0;border-radius:50%;width:64px;height:64px;background:#3ec46d;color:#fff;font-size:34px}
 </style>
 </head>
 <body>
@@ -41,6 +47,8 @@ canvas{position:fixed;inset:0;pointer-events:none;z-index:8}
 </div>
 <button id="mic" aria-label="microphone">🎤</button>
 <canvas id="cv"></canvas>
+<button id="gear" aria-label="settings (hold)">⚙️</button>
+<div id="panel"><div class="card"><div class="row"><span>🐢</span><input id="speed" type="range" min="0" max="10" step="1" value="2"><span>🐇</span></div><button id="shut" aria-label="close">✔</button></div></div>
 <div id="start"><div class="big">🫧🧚‍♀️🫧</div><button id="go" aria-label="play">▶</button></div>
 
 <script>
@@ -289,7 +297,7 @@ function fail(){
  const pos=bubble.getBoundingClientRect().top;bubble.style.top=pos+'px';
  bubble.classList.remove('fall');bubble.style.animation='wob .5s ease';
  setTimeout(()=>{bubble.style.animation='';bubble.style.top='';
-  const rem=Math.max(4,24*(1-pos/(innerHeight+260)));
+  const rem=Math.max(4,FALL*(1-pos/(innerHeight+260)));
   bubble.style.animation='';bubble.style.top=pos+'px';
   bubble.style.transition='none';
   bubble.animate([{top:pos+'px'},{top:(innerHeight-40)+'px'}],{duration:rem*1000,easing:'linear',fill:'forwards'}).onfinish=()=>{
@@ -309,6 +317,18 @@ bubble.onclick=()=>{A();
  if(busy||!cur)return;
  if(!SR||noMic){success();return}
  say("It's a "+cur.n+". Can you say "+cur.n+"?")};
+
+/* speed setting: slider 0 (slowest, 28s) to 10 (fastest, 8s) */
+let FALL=24;
+const sp=$('speed'),gear=$('gear'),panel=$('panel');
+function setFall(v){FALL=28-2*v;document.documentElement.style.setProperty('--fall',FALL+'s')}
+try{const s=localStorage.getItem('bubbleSpeed');if(s!==null)sp.value=s}catch(_){}
+setFall(+sp.value);
+sp.oninput=()=>{setFall(+sp.value);try{localStorage.setItem('bubbleSpeed',sp.value)}catch(_){}};
+let hold;
+gear.onpointerdown=()=>{hold=setTimeout(()=>{panel.style.display='flex'},700)};
+['pointerup','pointerleave','pointercancel'].forEach(ev=>gear.addEventListener(ev,()=>clearTimeout(hold)));
+$('shut').onclick=()=>{panel.style.display='none'};
 
 $('go').onclick=()=>{A();$('start').style.display='none';playing=true;
  if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance('');speechSynthesis.speak(u)}
