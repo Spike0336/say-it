@@ -256,7 +256,14 @@ function fanfare(){const a=A(),t0=a.currentTime;
    const fl=a.createBiquadFilter();fl.type='lowpass';fl.frequency.value=2200;
    g.gain.setValueAtTime(0,t0+s);g.gain.linearRampToValueAtTime(.12,t0+s+.03);g.gain.setValueAtTime(.12,t0+s+d*.8);g.gain.exponentialRampToValueAtTime(.001,t0+s+d+.15);
    o.connect(fl);fl.connect(g);g.connect(a.destination);o.start(t0+s);o.stop(t0+s+d+.2)})})}
-function cheer(){const a=A(),t=a.currentTime,len=3.2;
+function cheer(){ /* applause: lots of individual hand claps, swelling then fading */
+ for(let i=0;i<130;i++){
+  const w=.05+Math.random()*2.9;
+  const env=w<.6?w/.6:(w>2.1?(3-w)/.9:1);
+  const vol=.08+.3*env*Math.random();
+  noise(.045,1200+Math.random()*2200,1.1,vol,'bandpass',w);
+  noise(.035,600+Math.random()*500,2,vol*.7,'bandpass',w)}}
+function cheerCrowd(){const a=A(),t=a.currentTime,len=3.2;
  const n=a.sampleRate*len,b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);
  for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
  const s=a.createBufferSource();s.buffer=b;
