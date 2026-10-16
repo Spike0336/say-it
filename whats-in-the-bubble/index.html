@@ -200,11 +200,111 @@ const RAW=`🐶 dog|doggy|puppy
 🤖 robot
 🧜 mermaid
 🤡 clown
-🦸 superhero`;
+🦸 superhero
+🦌 deer
+🐺 wolf
+🦏 rhino|rhinoceros
+🦛 hippo|hippopotamus
+🐂 bull
+🐓 rooster|cockerel
+🐤 chick
+🦅 eagle
+🦩 flamingo
+🦚 peacock
+🦥 sloth
+🦦 otter
+🦨 skunk
+🐡 pufferfish
+🦑 squid
+🦞 lobster
+🦐 prawn|shrimp
+🐛 caterpillar
+🦭 seal
+🦙 llama
+🐀 rat
+🐉 dragon
+🦖 dinosaur
+🐚 shell|seashell
+🦃 turkey
+🍑 peach
+🥭 mango
+🥝 kiwi
+🍈 melon
+🥥 coconut
+🥑 avocado
+🌶️ chilli
+🥒 cucumber
+🥬 lettuce
+🧅 onion
+🌭 hot dog
+🥪 sandwich
+🌮 taco
+🍝 spaghetti|pasta
+🥞 pancakes
+🥐 croissant
+🍭 lollipop
+🧁 cupcake
+🥧 pie
+🍬 sweets|sweet|candy
+🥛 milk
+🍯 honey
+🚓 police car
+🚕 taxi
+🏍️ motorbike|motorcycle
+🛴 scooter
+🛹 skateboard
+🚤 speedboat
+⛵ sailing boat|sailboat
+🛒 shopping trolley|trolley
+🛁 bath
+🧼 soap
+🧹 broom
+🧺 basket
+🔦 torch
+🕯️ candle
+💡 light bulb|lightbulb
+📺 television|tv
+📱 phone|mobile phone|mobile
+💻 laptop|computer
+⌚ watch
+🎒 school bag|bag|backpack|rucksack
+👗 dress
+👕 t shirt|shirt|tshirt
+👖 jeans|trousers
+🧣 scarf
+🧤 gloves
+🥾 boot
+🧢 cap
+🕶️ sunglasses
+🎤 microphone
+🎺 trumpet
+🎻 violin
+🎨 paint|paints
+✂️ scissors
+📏 ruler
+🧩 jigsaw|puzzle
+🎲 dice
+🏆 trophy
+🏀 basketball
+🎾 tennis ball|tennis
+🏰 castle
+⛺ tent
+🌋 volcano
+⛰️ mountain
+🔥 fire
+❄️ snowflake
+🌷 tulip
+🌹 rose
+🌵 cactus
+🌴 palm tree
+🎄 christmas tree
+🎃 pumpkin
+🔨 hammer
+🎆 fireworks`;
 const ITEMS=RAW.split('\n').map(l=>{const i=l.indexOf(' ');const f=l.slice(i+1).split('|');return{e:l.slice(0,i),n:f[0],f}});
 const $=id=>document.getElementById(id);
 /* grammar: a / an / the / plural / uncountable */
-const PL=['grapes','cherries','chips','glasses'],UN=['bread','cheese','chocolate','popcorn'],THE=['sun','moon'],NOT_AN=['unicorn'];
+const PL=['grapes','cherries','chips','glasses','pancakes','sweets','scissors','sunglasses','jeans','gloves','fireworks'],UN=['bread','cheese','chocolate','popcorn','lettuce','spaghetti','milk','honey','paint','fire','soap'],THE=['sun','moon'],NOT_AN=['unicorn'];
 function is(it){const n=it.n;
  if(PL.includes(n))return "they're "+n;
  if(UN.includes(n)||n==='father christmas')return "it's "+n;
